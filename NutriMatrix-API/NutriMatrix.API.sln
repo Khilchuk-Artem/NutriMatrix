@@ -3,9 +3,31 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34525.116
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{3E0BF15B-2B12-4C8B-9C5F-98818A12FB89}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildingBlocks", "BuildingBlocks", "{F42DFEE7-D389-49A7-B7F1-E1075C29EFE8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{0F8AAF20-FD03-4B67-969A-7CCD9E59AF60}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingBlocks", "BuildingBlocks\BuildingBlocks.csproj", "{05357584-CC32-40AD-9E43-97402FD5F1ED}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05357584-CC32-40AD-9E43-97402FD5F1ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05357584-CC32-40AD-9E43-97402FD5F1ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05357584-CC32-40AD-9E43-97402FD5F1ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05357584-CC32-40AD-9E43-97402FD5F1ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0F8AAF20-FD03-4B67-969A-7CCD9E59AF60} = {F42DFEE7-D389-49A7-B7F1-E1075C29EFE8}
+		{05357584-CC32-40AD-9E43-97402FD5F1ED} = {F42DFEE7-D389-49A7-B7F1-E1075C29EFE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D88A143A-ECBD-4459-9D34-38D25B38BADB}
