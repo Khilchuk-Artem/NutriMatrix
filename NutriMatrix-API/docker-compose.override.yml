@@ -1,0 +1,29 @@
+version: '3.4'
+
+services:
+  auth.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "8080"
+      - "8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+    depends_on:
+      - authdb
+
+  authdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: authdb
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Supersecuredbpassword123"
+      MSSQL_DBNAME: "authdb"
+    volumes:
+      - sql_data:/var/opt/mssql
+    restart: always
