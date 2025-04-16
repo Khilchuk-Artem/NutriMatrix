@@ -11,11 +11,9 @@ namespace Auth.API.Controllers
     public class AuthController : Controller
     {
         private readonly IAuthService _authService;
-        private readonly IEmailService _emailService;
-        public AuthController(IAuthService authService, IEmailService emailService)
+        public AuthController(IAuthService authService)
         {
             _authService = authService;
-            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -43,9 +41,9 @@ namespace Auth.API.Controllers
         {
             var result = await _authService.ConfirmEmail(dto);
 
-            if (result) return Ok("Email confirmed successfully");
+            if (!result) return BadRequest("Couldn't confirm email"); 
 
-            return BadRequest("Couldn't confirm email");
+            return Ok("Email confirmed successfully");
         }
 
         [HttpPost("request-reset-password")]
@@ -53,9 +51,9 @@ namespace Auth.API.Controllers
         {
             var result = await _authService.RequestPasswordReset(email);
 
-            if (result) return Ok("Password reset sent successfully");
+            if (!result) return BadRequest("Couldn't send password reset request");
 
-            return BadRequest("Couldn't send password reset request");
+            return Ok("Password reset sent successfully");
         }
 
         [HttpPost("reset-password")]
@@ -63,9 +61,18 @@ namespace Auth.API.Controllers
         {
             var result = await _authService.ResetPassword(dto);
 
-            if (result) return Ok("Password reset successfully");
+            if (!result) return BadRequest("Couldn't reset password"); 
 
-            return BadRequest("Couldn't reset password");
+            return Ok("Password reset successfully");
+        }
+
+        public async Task<IActionResult> LoginViaGoogle(string idToken)
+        {
+            var result = await _authService.GoogleLogin(idToken);
+
+            if (result == null) return BadRequest("Oops, something went wrong");
+
+            return Ok(result);
         }
     }
 }

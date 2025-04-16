@@ -1,5 +1,6 @@
 ﻿using Auth.API.Models.DTO;
 using Auth.API.Services.EmailService;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -146,6 +147,24 @@ namespace Auth.API.Services.AuthService
             var result = await _userManager.ResetPasswordAsync(user, dto.Token, dto.NewPassword);
 
             return result.Succeeded;
+        }
+
+        public async Task<string> GoogleLogin(string idToken)
+        {
+            var validPayload = await GoogleJsonWebSignature.ValidateAsync(idToken);
+            var email = validPayload.Email;
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded) return null;
+            }
+
+            var token = await CreateJWTToken(user, new() { "User" });
+
+            return token;
         }
     }
 }

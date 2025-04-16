@@ -1,4 +1,4 @@
-﻿using Auth.API.Models.Configs;
+﻿using Auth.API.Models.Settings;
 using Microsoft.Extensions.Options;
 using System.Net.Mail;
 using System.Net;

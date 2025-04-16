@@ -1,4 +1,4 @@
-﻿namespace Auth.API.Models.Configs
+﻿namespace Auth.API.Models.Settings
 {
     public class EmailSettings
     {

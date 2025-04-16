@@ -1,6 +1,5 @@
-
 using Auth.API.Data;
-using Auth.API.Models.Configs;
+using Auth.API.Models.Settings;
 using Auth.API.Services.AuthService;
 using Auth.API.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,19 +29,6 @@ namespace Auth.API
             builder.Services.Configure<EmailSettings>(
                 builder.Configuration.GetSection("EmailSettings"));
 
-            /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
-            {
-                AuthenticationType = "Jwt",
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                ValidAudience = builder.Configuration["Jwt:Audience"],
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
-            });*/
-
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -55,6 +41,8 @@ namespace Auth.API
                 .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Auth.API")
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddDefaultTokenProviders();
+
+
 
             builder.Services.Configure<IdentityOptions>(options =>
             {
