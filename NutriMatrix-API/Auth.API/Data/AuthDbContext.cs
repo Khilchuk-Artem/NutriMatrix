@@ -20,7 +20,7 @@ namespace Auth.API.Data
                     Name="Admin",
                     NormalizedName="Admin".ToUpper(),
                     Id="9d75c886-0a61-40a1-8740-aaf027b8572f",
-                    ConcurrencyStamp="9d75c886-0a61-40a1-8740-aaf027b8572f"
+                    ConcurrencyStamp="9d75c886-0a61-40a1-8740-aaf027b8572f",
                 },
                 new IdentityRole()
                 {

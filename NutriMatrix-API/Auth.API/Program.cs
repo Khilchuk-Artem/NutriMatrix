@@ -1,6 +1,8 @@
 
 using Auth.API.Data;
+using Auth.API.Models.Configs;
 using Auth.API.Services.AuthService;
+using Auth.API.Services.EmailService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,6 +27,9 @@ namespace Auth.API
                 options.UseSqlServer(connection);
             });
 
+            builder.Services.Configure<EmailSettings>(
+                builder.Configuration.GetSection("EmailSettings"));
+
             /*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
             {
@@ -42,6 +47,7 @@ namespace Auth.API
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             builder.Services
                 .AddIdentityCore<IdentityUser>()
@@ -58,6 +64,7 @@ namespace Auth.API
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 6;
                 options.Password.RequiredUniqueChars = 1;
+                options.SignIn.RequireConfirmedAccount = true;
             });
 
             var app = builder.Build();

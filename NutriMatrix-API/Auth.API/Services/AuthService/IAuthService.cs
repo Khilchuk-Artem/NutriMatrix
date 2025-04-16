@@ -7,5 +7,8 @@ namespace Auth.API.Services.AuthService
     {
         public Task<IdentityResult> Register(RegisterUserDTO dto);
         public Task<LoginResponseDTO> Login(LoginUserDTO dto);
+        public Task<bool> ConfirmEmail(RequestConfirmEmailDTO dto);
+        public Task<bool> RequestPasswordReset(string email);
+        public Task<bool> ResetPassword(ResetPasswordDTO dto);
     }
 }
