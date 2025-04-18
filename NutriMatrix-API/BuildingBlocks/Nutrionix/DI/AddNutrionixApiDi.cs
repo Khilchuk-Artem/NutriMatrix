@@ -17,7 +17,7 @@ namespace BuildingBlocks.Nutrionix.DI
             services.AddTransient<NutritionApiAuthHandler>();
 
             services
-                .AddRefitClient<INutritionApi>()
+                .AddRefitClient<INutrionixApi>()
                 .ConfigureHttpClient(c =>
                 {
                     c.BaseAddress = new Uri("https://trackapi.nutritionix.com");

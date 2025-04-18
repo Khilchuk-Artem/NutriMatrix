@@ -66,6 +66,7 @@ namespace Auth.API.Controllers
             return Ok("Password reset successfully");
         }
 
+        [HttpPost("login/google")]
         public async Task<IActionResult> LoginViaGoogle(string idToken)
         {
             var result = await _authService.GoogleLogin(idToken);

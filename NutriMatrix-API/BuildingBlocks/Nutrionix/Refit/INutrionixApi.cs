@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Refit
 {
-    public interface INutritionApi
+    public class NutritionQueryRequest
+    {
+        public string Query { get; set; }
+    }
+    public interface INutrionixApi
     {
         [Post("/v2/natural/nutrients")]
-        Task<List<Food>> GetNutritionFromNaturalInput([Body] string query);
+        Task<List<Food>> GetNutritionFromNaturalInput([Body] NutritionQueryRequest request);
     }
 }

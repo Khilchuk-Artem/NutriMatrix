@@ -3,15 +3,14 @@ version: '3.4'
 services:
   authdb:
     image: authdb
-    
+
   auth.api:
     image: ${DOCKER_REGISTRY-}authapi
     build:
       context: .
-      dockerfile: Auth.API/Dockerfile
+      dockerfile: Services/Auth/Auth.API/Dockerfile
     depends_on:
-      - authdb
-
+        - authdb
 
 volumes:
   sql_data:

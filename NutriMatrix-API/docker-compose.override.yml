@@ -1,6 +1,18 @@
 version: '3.4'
 
 services:
+  authdb:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: authdb
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "Supersecuredbpassword123"
+      MSSQL_DBNAME: "authdb"
+    volumes:
+      - sql_data:/var/opt/mssql
+    restart: always
   auth.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -14,16 +26,3 @@ services:
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
     depends_on:
       - authdb
-
-  authdb:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: authdb
-    ports:
-      - "1433:1433"
-    environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Supersecuredbpassword123"
-      MSSQL_DBNAME: "authdb"
-    volumes:
-      - sql_data:/var/opt/mssql
-    restart: always
