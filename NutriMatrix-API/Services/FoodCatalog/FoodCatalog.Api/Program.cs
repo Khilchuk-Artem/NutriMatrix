@@ -6,7 +6,7 @@ using Redis.OM.Contracts;
 using Redis.OM;
 using FoodCatalog.Api.Models.Redis;
 using FoodCatalog.Api.Data.Interceptors;
-using FoodCatalog.Api.Data.DbContext;
+using FoodCatalog.Api.Data.Context;
 namespace FoodCatalog.Api
 {
     public class Program

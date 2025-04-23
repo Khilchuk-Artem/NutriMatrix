@@ -1,6 +1,6 @@
 ﻿using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
-using FoodCatalog.Api.Data.DbContext;
+using FoodCatalog.Api.Data.Context;
 using FoodCatalog.Api.Models.Domain;
 using Microsoft.EntityFrameworkCore;
 

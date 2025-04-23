@@ -1,5 +1,7 @@
 ﻿using BuildingBlocks.Nutrionix.Models;
+using FoodCatalog.Api.Data.SeedData;
 using FoodCatalog.Api.Models.Domain;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace FoodCatalog.Api.Data.Context
@@ -20,7 +22,7 @@ namespace FoodCatalog.Api.Data.Context
         {
             base.OnModelCreating(builder);
 
-            //to-do: add nutrients seeding via csvhelper package
+            builder.Entity<Nutrient>().HasData(SeedDataHelpers.LoadNutrients());
         }
     }
 }
