@@ -13,9 +13,14 @@ namespace BuildingBlocks.Nutrionix.Refit
     {
         public string Query { get; set; }
     }
+    public class NutritionixResponse
+    {
+        [JsonPropertyName("foods")]
+        public List<NiFood> Foods { get; set; }
+    }
     public interface INutrionixApi
     {
         [Post("/v2/natural/nutrients")]
-        Task<List<Food>> GetNutritionFromNaturalInput([Body] NutritionQueryRequest request);
+        Task<NutritionixResponse> GetNutritionFromNaturalInput([Body] NutritionQueryRequest request);
     }
 }

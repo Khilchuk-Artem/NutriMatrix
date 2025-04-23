@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Models
 {
-    public class Food
+    public class NiFood
     {
         [JsonPropertyName("food_name")]
         public string FoodName { get; set; }
@@ -58,7 +58,7 @@ namespace BuildingBlocks.Nutrionix.Models
         public double NfP { get; set; }
 
         [JsonPropertyName("full_nutrients")]
-        public List<Nutrient> FullNutrients { get; set; }
+        public List<NiNutrient> FullNutrients { get; set; }
 
         [JsonPropertyName("nix_brand_name")]
         public string? NixBrandName { get; set; }
@@ -79,7 +79,7 @@ namespace BuildingBlocks.Nutrionix.Models
         public DateTime ConsumedAt { get; set; }
 
         [JsonPropertyName("metadata")]
-        public Metadata Metadata { get; set; }
+        public NiMetadata Metadata { get; set; }
 
         [JsonPropertyName("source")]
         public int Source { get; set; }
@@ -88,10 +88,10 @@ namespace BuildingBlocks.Nutrionix.Models
         public int NdbNo { get; set; }
 
         [JsonPropertyName("tags")]
-        public Tags Tags { get; set; }
+        public NiTags Tags { get; set; }
 
         [JsonPropertyName("alt_measures")]
-        public List<AltMeasure> AltMeasures { get; set; }
+        public List<NiAltMeasure> AltMeasures { get; set; }
 
         [JsonPropertyName("lat")]
         public double? Lat { get; set; }
@@ -103,7 +103,7 @@ namespace BuildingBlocks.Nutrionix.Models
         public int MealType { get; set; }
 
         [JsonPropertyName("photo")]
-        public Photo Photo { get; set; }
+        public NiPhoto Photo { get; set; }
 
         [JsonPropertyName("sub_recipe")]
         public object? SubRecipe { get; set; }

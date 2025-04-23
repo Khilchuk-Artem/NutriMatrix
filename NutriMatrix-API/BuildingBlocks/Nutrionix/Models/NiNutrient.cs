@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Models
 {
-    public class Nutrient
+    public class NiNutrient
     {
         [JsonPropertyName("attr_id")]
         public int AttrId { get; set; }

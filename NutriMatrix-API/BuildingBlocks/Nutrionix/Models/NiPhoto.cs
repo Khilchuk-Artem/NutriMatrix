@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Models
 {
-    public class Photo
+    public class NiPhoto
     {
         [JsonPropertyName("thumb")]
         public string Thumb { get; set; }

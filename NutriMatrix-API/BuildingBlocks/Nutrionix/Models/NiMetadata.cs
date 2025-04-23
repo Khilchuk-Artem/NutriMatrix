@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Models
 {
-    public class Metadata
+    public class NiMetadata
     {
         [JsonPropertyName("is_raw_food")]
         public bool IsRawFood { get; set; }

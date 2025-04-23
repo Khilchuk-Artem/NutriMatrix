@@ -1,6 +1,12 @@
 
 using BuildingBlocks.Nutrionix.Refit;
 using BuildingBlocks.Nutrionix.DI;
+using Microsoft.EntityFrameworkCore;
+using Redis.OM.Contracts;
+using Redis.OM;
+using FoodCatalog.Api.Models.Redis;
+using FoodCatalog.Api.Data.Interceptors;
+using FoodCatalog.Api.Data.DbContext;
 namespace FoodCatalog.Api
 {
     public class Program
@@ -9,17 +15,31 @@ namespace FoodCatalog.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddNutrionixApi();
 
+            builder.Services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(builder.Configuration.GetConnectionString("Redis")));
+            builder.Services.AddRedisEntityCollection<FoodRedis>();
+            builder.Services.AddSingleton<FoodRedisSyncInterceptor>();
+
+            builder.Services.AddDbContext<FoodCatalogDbContext>(options =>
+                {
+                    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+
+                    options.AddInterceptors(builder.Services.BuildServiceProvider().GetRequiredService<FoodRedisSyncInterceptor>());
+                });
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<FoodCatalogDbContext>();
+                db.Database.Migrate();
+            }
+
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

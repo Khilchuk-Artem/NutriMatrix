@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Models
 {
-    public class AltMeasure
+    public class NiAltMeasure
     {
         [JsonPropertyName("serving_weight")]
         public double ServingWeight { get; set; }

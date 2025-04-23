@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BuildingBlocks.Nutrionix.Models
 {
-    public class Tags
+    public class NiTags
     {
         [JsonPropertyName("item")]
         public string Item { get; set; }
