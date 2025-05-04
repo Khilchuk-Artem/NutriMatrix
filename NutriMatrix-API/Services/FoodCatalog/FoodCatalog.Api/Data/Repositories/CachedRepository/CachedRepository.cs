@@ -5,6 +5,7 @@ using FoodCatalog.Api.Models.Domain;
 using Microsoft.EntityFrameworkCore.Storage;
 using FoodCatalog.Api.Models.Redis;
 using Redis.OM.Searching;
+using Redis.OM;
 
 namespace FoodCatalog.Api.Data.Repositories.CachedRepository
 {
@@ -53,7 +54,7 @@ namespace FoodCatalog.Api.Data.Repositories.CachedRepository
             return _collection
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToListAsync<T>();
         }
 
         public Task<List<T>> GetAll(Specification<T> specification, int pageNumber = 1, int pageSize = 5)

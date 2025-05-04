@@ -3,9 +3,12 @@ version: '3.4'
 services:
   authdb:
     image: authdb
-
   foodcatalogdb:
     image: foodcatalogdb
+  foodcatalogredis:
+    image: foodcatalogredis
+  foodrecordsdb:
+    image: foodrecordsdb
 
   auth.api:
     image: ${DOCKER_REGISTRY-}authapi
@@ -23,7 +26,16 @@ services:
     depends_on:
         - foodcatalogdb
         - foodcatalogredis 
+  foodrecords.api:
+    image: ${DOCKER_REGISTRY-}foodrecordsapi
+    build:
+      context: .
+      dockerfile: Services/FoodRecords/FoodRecords.Api/Dockerfile
+    depends_on:
+      - foodrecordsdb
+
 volumes:
   sql_data:
   postgres_foodcatalog:
   redis_data:
+  postgres_foodrecords:

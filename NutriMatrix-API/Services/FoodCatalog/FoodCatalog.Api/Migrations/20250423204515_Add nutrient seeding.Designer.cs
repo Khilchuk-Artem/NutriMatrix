@@ -410,21 +410,21 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("5ca3812b-d177-4a3e-8948-e45e1b5f2619"),
                             IsDeleted = false,
                             Name = "Carotene, alpha",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("78979ca6-2f2e-449d-901f-03dc233b48d4"),
                             IsDeleted = false,
                             Name = "Carotene, beta",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("09b254c2-6196-4d4a-bfb2-3acd9f5fd9f8"),
                             IsDeleted = false,
                             Name = "Vitamin D3 (cholecalciferol)",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -438,7 +438,7 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("32cdc623-d7be-4f06-ab89-f071585d8c1c"),
                             IsDeleted = false,
                             Name = "Cryptoxanthin, beta",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -466,7 +466,7 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("eec306a8-2f88-4d65-8c9b-51cd9dcd2d06"),
                             IsDeleted = false,
                             Name = "Vitamin D2 (ergocalciferol)",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -823,35 +823,35 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("145d0bbc-b6b9-4d6b-acd2-de7a5b382f58"),
                             IsDeleted = false,
                             Name = "Fluoride, F",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("8c3aca94-7a61-4cad-b97b-87f7ce9b7c26"),
                             IsDeleted = false,
                             Name = "Folate, total",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("bcdb9b56-8b3e-42ad-815e-2b7ee52ebc27"),
                             IsDeleted = false,
                             Name = "Folic acid",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("95ce08d0-d496-4f58-a704-9cc8ae00bae6"),
                             IsDeleted = false,
                             Name = "Folate, DFE",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("c9b361bc-228e-475e-8188-3a4314802351"),
                             IsDeleted = false,
                             Name = "Folate, food",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -928,14 +928,14 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("91347054-d516-4cfb-a876-e0293703f636"),
                             IsDeleted = false,
                             Name = "Lutein + zeaxanthin",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("1143c769-af9d-4183-8907-c46df3d408a6"),
                             IsDeleted = false,
                             Name = "Lycopene",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -970,7 +970,7 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("e5b847c7-2bff-46e6-8b2d-147b76bcf043"),
                             IsDeleted = false,
                             Name = "Menaquinone-4",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -998,7 +998,7 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("cbfa7cdf-e781-4a8a-8b93-1fca326d7ea6"),
                             IsDeleted = false,
                             Name = "Vitamin B-12, added",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -1082,7 +1082,7 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("0e47721a-14b9-4174-a73d-5515cfbd00c6"),
                             IsDeleted = false,
                             Name = "Retinol",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -1096,7 +1096,7 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("1a000942-9789-4ed0-8f68-84c168dc716b"),
                             IsDeleted = false,
                             Name = "Selenium, Se",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -1215,14 +1215,14 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("6b597ae6-0dd2-4c15-91c7-d96be4767274"),
                             IsDeleted = false,
                             Name = "Vitamin A, RAE",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("cd365c75-7129-4748-8af0-a8cbd505a0ec"),
                             IsDeleted = false,
                             Name = "Vitamin B-12",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
@@ -1243,21 +1243,21 @@ namespace FoodCatalog.Api.Migrations
                             Id = new Guid("aa2f287c-cc85-4e96-8c6a-e1ca4e5ba4e6"),
                             IsDeleted = false,
                             Name = "Vitamin D (D2 + D3)",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("c79dfa14-77c6-483f-a7f0-26e442b9df28"),
                             IsDeleted = false,
                             Name = "Vitamin K (phylloquinone)",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {
                             Id = new Guid("d4d13698-7c99-4560-972f-8df8d1bf50b8"),
                             IsDeleted = false,
                             Name = "Dihydrophylloquinone",
-                            Unit = "Âµg"
+                            Unit = "µg"
                         },
                         new
                         {

@@ -7,6 +7,8 @@ using Redis.OM;
 using FoodCatalog.Api.Models.Redis;
 using FoodCatalog.Api.Data.Interceptors;
 using FoodCatalog.Api.Data.Context;
+using FoodCatalog.Grpc;
+using FoodCatalog.Api.Services.NutrientsGrpc;
 namespace FoodCatalog.Api
 {
     public class Program
@@ -20,9 +22,11 @@ namespace FoodCatalog.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddNutrionixApi();
+            builder.Services.AddGrpc();
 
-            builder.Services.AddSingleton<IRedisConnectionProvider>(new RedisConnectionProvider(builder.Configuration.GetConnectionString("Redis")));
+            builder.Services.AddSingleton<RedisConnectionProvider>(new RedisConnectionProvider(builder.Configuration.GetConnectionString("Redis")));
             builder.Services.AddRedisEntityCollection<FoodRedis>();
+            builder.Services.AddRedisEntityCollection<MeasureRedis>();
             builder.Services.AddSingleton<FoodRedisSyncInterceptor>();
 
             builder.Services.AddDbContext<FoodCatalogDbContext>(options =>
@@ -39,6 +43,8 @@ namespace FoodCatalog.Api
                 var db = scope.ServiceProvider.GetRequiredService<FoodCatalogDbContext>();
                 db.Database.Migrate();
             }
+
+            app.MapGrpcService<FoodGrpcService>();
 
             if (app.Environment.IsDevelopment())
             {

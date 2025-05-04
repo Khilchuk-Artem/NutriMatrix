@@ -1,0 +1,32 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "FoodCatalog.Grpc";
+
+package foodcatalog;
+
+service FoodService {
+  rpc GetMeasureInfo (GetMeasureRequest) returns (FoodMeasureInfoResponse);
+  rpc GetMeasureInfoByName(GetMeasureByNamesRequest) returns (FoodMeasureInfoResponse);
+}
+
+message GetMeasureRequest {
+  string measureId = 1;
+}
+message GetMeasureByNamesRequest {
+  string foodName = 1;
+  string measureName = 2;
+}
+
+message NutrientAmountDto {
+  string id = 1;
+  string name = 2;
+  float amount = 3;
+}
+
+message FoodMeasureInfoResponse {
+  string id = 1;
+  string foodName = 2;
+  string measureName = 3;
+  float weightInG = 4;
+  repeated NutrientAmountDto nutrientsIn100G = 5;
+}

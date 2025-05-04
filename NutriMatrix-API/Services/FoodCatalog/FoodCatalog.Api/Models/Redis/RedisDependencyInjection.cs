@@ -11,6 +11,9 @@ namespace FoodCatalog.Api.Models.Redis
             services.AddScoped(sp =>
             {
                 var connProvider = sp.GetRequiredService<IRedisConnectionProvider>();
+
+                connProvider.Connection.CreateIndex(typeof(T));
+
                 return connProvider.RedisCollection<T>();
             });
 

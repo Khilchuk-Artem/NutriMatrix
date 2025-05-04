@@ -12,7 +12,6 @@ namespace FoodCatalog.Api.Models.Redis
         public string Name { get; set; }
         public string Photo { get; set; }
 
-        public IEnumerable<Measure> Measures { get; set; }
         public IEnumerable<FoodNutrientIn100g> FoodNutrients { get; set; }
     }
 }

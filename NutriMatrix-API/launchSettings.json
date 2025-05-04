@@ -5,7 +5,8 @@
       "commandVersion": "1.0",
       "serviceActions": {
         "auth.api": "StartDebugging",
-        "foodcatalog.api": "StartDebugging"
+        "foodcatalog.api": "StartDebugging",
+        "foodrecords.api": "StartDebugging"
       }
     }
   }

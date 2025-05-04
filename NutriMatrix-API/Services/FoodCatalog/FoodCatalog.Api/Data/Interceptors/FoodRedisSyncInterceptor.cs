@@ -32,28 +32,34 @@ namespace FoodCatalog.Api.Data.Interceptors
 
             if (addedFoods.Any())
             {
-                var redisCollection = _redisProvider.RedisCollection<FoodRedis>();
+                var foodRedisCollection = _redisProvider.RedisCollection<FoodRedis>();
+                var measureRedisCollection = _redisProvider.RedisCollection<MeasureRedis>();
 
                 foreach (var food in addedFoods)
                 {
-                    var existingFoodRedis = await redisCollection.FirstOrDefaultAsync(e => e.Id == food.Id);
-
-                    var foodRedis = existingFoodRedis ?? new FoodRedis { Id = food.Id };
+                    var foodRedis = await foodRedisCollection.FirstOrDefaultAsync(e => e.Id == food.Id)
+                                      ?? new FoodRedis { Id = food.Id };
 
                     foodRedis.Name = food.Name ?? foodRedis.Name;
                     foodRedis.Photo = food.Photo ?? foodRedis.Photo;
+                    foodRedis.FoodNutrients = food.FoodNutrients;
 
-                    if (food.Measures != null && food.Measures.Any())
+                    await foodRedisCollection.InsertAsync(foodRedis);
+
+                    if (food.Measures != null)
                     {
-                        foodRedis.Measures = food.Measures;
-                    }
+                        foreach (var measure in food.Measures)
+                        {
+                            var measureRedis = await measureRedisCollection.FirstOrDefaultAsync(m => m.Id == measure.Id)
+                                                 ?? new MeasureRedis { Id = measure.Id };
 
-                    if (food.FoodNutrients != null && food.FoodNutrients.Any())
-                    {
-                        foodRedis.FoodNutrients = food.FoodNutrients;
-                    }
+                            measureRedis.Name = measure.Name;
+                            measureRedis.WeightInGrams = measure.WeightInGrams;
+                            measureRedis.FoodId = food.Id;
 
-                    await redisCollection.InsertAsync(foodRedis);
+                            await measureRedisCollection.InsertAsync(measureRedis);
+                        }
+                    }
                 }
             }
 
