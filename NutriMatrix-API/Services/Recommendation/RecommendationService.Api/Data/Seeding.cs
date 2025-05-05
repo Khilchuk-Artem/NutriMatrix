@@ -5,8 +5,10 @@ using RecommendationService.Api.Models.Redis;
 using System.Formats.Asn1;
 using System.Globalization;
 using System.IO;
+using System.Numerics;
 using System.Text.Json;
-
+using Redis.OM;
+using Vector = Redis.OM.Vector;
 namespace RecommendationService.Api.Data
 {
     public class IngredientClean
@@ -101,10 +103,10 @@ namespace RecommendationService.Api.Data
                 Servings = info.servings ?? 0f,
                 Category = info.primary_category_name,
                 IngredientIds = null,
-                NutrientAmounts = nutData.TryGetValue(info.recipe_id, out var dict)
-                                         ? dict
+                NutrientAmounts = nutData.TryGetValue(info.recipe_id, out var dict2)
+                                         ? dict2
                                          : new Dictionary<int, float>()
-            }).ToList();
+            }).Where(r=>r.NutrientAmounts.Count==161).ToList();
         }
         static List<RecipeInfoRow> LoadInfo(string path)
         {

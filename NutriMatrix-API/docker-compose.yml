@@ -1,41 +1,55 @@
 version: '3.4'
 
 services:
-  authdb:
-    image: authdb
-  foodcatalogdb:
-    image: foodcatalogdb
+  #authdb:
+  #  image: authdb
+  #foodcatalogdb:
+  #  image: foodcatalogdb
   foodcatalogredis:
     image: foodcatalogredis
-  foodrecordsdb:
-    image: foodrecordsdb
+  qdrant:
+    image: qdrant
+  #foodrecordsdb:
+  #  image: foodrecordsdb
 
-  auth.api:
-    image: ${DOCKER_REGISTRY-}authapi
+  #auth.api:
+  #  image: ${DOCKER_REGISTRY-}authapi
+  #  build:
+  #    context: .
+  #    dockerfile: Services/Auth/Auth.API/Dockerfile
+  #  depends_on:
+  #      - authdb
+
+  #foodcatalog.api:
+  #  image: ${DOCKER_REGISTRY-}foodcatalogapi
+  #  build:
+  #    context: .
+  #    dockerfile: Services/FoodCatalog/FoodCatalog.Api/Dockerfile
+  #  depends_on:
+  #      - foodcatalogdb
+  #      - foodcatalogredis 
+  #foodrecords.api:
+  #  image: ${DOCKER_REGISTRY-}foodrecordsapi
+  #  build:
+  #    context: .
+  #    dockerfile: Services/FoodRecords/FoodRecords.Api/Dockerfile
+  #  depends_on:
+  #    - foodrecordsdb
+
+  recommendationservice.api:
+    image: ${DOCKER_REGISTRY-}recommendationserviceapi
     build:
       context: .
-      dockerfile: Services/Auth/Auth.API/Dockerfile
+      dockerfile: Services/Recommendation/RecommendationService.Api/Dockerfile
     depends_on:
-        - authdb
-
-  foodcatalog.api:
-    image: ${DOCKER_REGISTRY-}foodcatalogapi
-    build:
-      context: .
-      dockerfile: Services/FoodCatalog/FoodCatalog.Api/Dockerfile
-    depends_on:
-        - foodcatalogdb
         - foodcatalogredis 
-  foodrecords.api:
-    image: ${DOCKER_REGISTRY-}foodrecordsapi
-    build:
-      context: .
-      dockerfile: Services/FoodRecords/FoodRecords.Api/Dockerfile
-    depends_on:
-      - foodrecordsdb
+        - qdrant
 
 volumes:
   sql_data:
   postgres_foodcatalog:
   redis_data:
   postgres_foodrecords:
+  qdrant_data:
+
+

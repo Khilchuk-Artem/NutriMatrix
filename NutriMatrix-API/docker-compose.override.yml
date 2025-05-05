@@ -1,43 +1,45 @@
 version: '3.4'
 
 services:
-  authdb:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: authdb
-    ports:
-      - "1433:1433"
-    environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "Supersecuredbpassword123"
-      MSSQL_DBNAME: "authdb"
-    volumes:
-      - sql_data:/var/opt/mssql
-    restart: unless-stopped
+  # authdb:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   container_name: authdb
+  #   ports:
+  #     - "1433:1433"
+  #   environment:
+  #     ACCEPT_EULA: "Y"
+  #     SA_PASSWORD: "Supersecuredbpassword123"
+  #     MSSQL_DBNAME: "authdb"
+  #   volumes:
+  #     - sql_data:/var/opt/mssql
+  #   restart: unless-stopped
 
-  foodcatalogdb:
-    image: postgres
-    container_name: catalogdb
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=FoodCatalogDb
-    restart: unless-stopped
-    ports:
-        - "1334:5432"
-    volumes:
-      - postgres_foodcatalog:/var/lib/postgresql/data/
-  foodrecordsdb:
-    image: postgres
-    container_name: recordsdb
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=FoodRecordsDb
-    restart: unless-stopped
-    ports:
-        - "1335:5432"
-    volumes:
-      - postgres_foodrecords:/var/lib/postgresql/data/ 
+  # foodcatalogdb:
+  #   image: postgres
+  #   container_name: catalogdb
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=FoodCatalogDb
+  #   restart: unless-stopped
+  #   ports:
+  #       - "1334:5432"
+  #   volumes:
+  #     - postgres_foodcatalog:/var/lib/postgresql/data/
+
+  # foodrecordsdb:
+  #   image: postgres
+  #   container_name: recordsdb
+  #   environment:
+  #     - POSTGRES_USER=postgres
+  #     - POSTGRES_PASSWORD=postgres
+  #     - POSTGRES_DB=FoodRecordsDb
+  #   restart: unless-stopped
+  #   ports:
+  #       - "1335:5432"
+  #   volumes:
+  #     - postgres_foodrecords:/var/lib/postgresql/data/
+
   foodcatalogredis:
     image: redis/redis-stack:latest
     container_name: redis-stack
@@ -48,7 +50,55 @@ services:
     volumes:
        - redis_data:/data
 
-  auth.api:
+  # auth.api:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_HTTP_PORTS=8080
+  #     - ASPNETCORE_HTTPS_PORTS=8081
+  #   ports:
+  #     - "8080"
+  #     - "8081"
+  #   volumes:
+  #     - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+  #     - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  #   depends_on:
+  #     - authdb
+
+  # foodcatalog.api:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_HTTP_PORTS=8080
+  #     - ASPNETCORE_HTTPS_PORTS=8081
+  #   ports:
+  #     - "8080"
+  #     - "8081"
+  #   volumes:
+  #     - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+  #     - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  # foodrecords.api:
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - ASPNETCORE_HTTP_PORTS=8080
+  #     - ASPNETCORE_HTTPS_PORTS=8081
+  #   ports:
+  #     - "8080"
+  #     - "8081"
+  #   volumes:
+  #     - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+  #     - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+  qdrant:
+    image: qdrant/qdrant:v1.1.0
+    ports:
+      - "6333:6333"
+      - "6334:6334" 
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT_LOG_LEVEL=info
+    restart: unless-stopped
+
+  recommendationservice.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
@@ -60,27 +110,5 @@ services:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
     depends_on:
-      - authdb
-  foodcatalog.api:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
-    ports:
-      - "8080"
-      - "8081"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
-
-  foodrecords.api:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=8080
-      - ASPNETCORE_HTTPS_PORTS=8081
-    ports:
-      - "8080"
-      - "8081"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+        - foodcatalogredis
+        - qdrant

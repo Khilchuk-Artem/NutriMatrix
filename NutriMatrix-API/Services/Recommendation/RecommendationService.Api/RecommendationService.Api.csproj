@@ -8,6 +8,7 @@
     <UserSecretsId>c25b26dd-827c-448b-8089-7cac2b16ab3d</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
+    <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 	<ItemGroup>
 		<Protobuf Include="..\..\FoodCatalog\FoodCatalog.Api\Protos\nutrients.proto" GrpcServices="Client">
@@ -28,7 +29,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="Redis.OM" Version="0.8.0" />
+    <PackageReference Include="Qdrant.Client" Version="1.14.0" />
+    <PackageReference Include="Redis.OM" Version="1.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.31" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>

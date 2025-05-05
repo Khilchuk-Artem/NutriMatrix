@@ -1,4 +1,6 @@
-﻿using Redis.OM.Modeling;
+﻿using Redis.OM;
+using Redis.OM.Modeling;
+using Redis.OM.Modeling.Vectors;
 using System.Collections;
 
 namespace RecommendationService.Api.Models.Redis
@@ -23,7 +25,6 @@ namespace RecommendationService.Api.Models.Redis
 
         [Indexed(CascadeDepth = 1)]
         public IEnumerable<Guid> IngredientIds { get; set; }
-
         public IDictionary<int, float> NutrientAmounts { get; set; }
     }
 }

@@ -1,9 +1,11 @@
 
 using FoodCatalog.Grpc;
+using Qdrant.Client;
 using RecommendationService.Api.Data;
 using RecommendationService.Api.Models.Dto;
 using RecommendationService.Api.Models.Redis;
 using RecommendationService.Api.Services.NutrientsAnalysisService;
+using RecommendationService.Api.Services.Qdrant;
 using RecommendationService.Api.Services.RecommendationService;
 using Redis.OM;
 
@@ -30,6 +32,12 @@ namespace RecommendationService.Api
 
             builder.Services.AddScoped<INutrientsAnalysisService, NutrientsAnalysisService>();
             builder.Services.AddScoped<IRecipeRecommendationService, RecipeRecommendationService>();
+            builder.Services.AddScoped<IQdrantService, QdrantService>();
+
+            builder.Services.AddSingleton<QdrantClient>(_ =>
+            {
+                return new QdrantClient("qdrant", 6334);
+            });
 
             builder.Services.AddGrpcClient<FoodService.FoodServiceClient>(options =>
             {
