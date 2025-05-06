@@ -29,7 +29,6 @@ namespace RecommendationService.Api.Services.RecommendationService
             Stopwatch sw = new Stopwatch();
 
             sw.Start();
-
             //step 1: trim down selection by applying filters
             var recipeSpecifications = new List<IQueryable<RecipeShortcutRedis>>();
             foreach(var req in dto.RecipeRequests)
@@ -65,7 +64,7 @@ namespace RecommendationService.Api.Services.RecommendationService
             //take k nearest neighboors for each candidate
             var k = 200;
             var candidatesList = new List<List<RecipeShortcutRedis>>();
-
+            
             for(int i = 0; i < recipeSpecifications.Count; i++)
             {
                 var reference = _recipesCollection.Where(r=>r.Id== 46989).ToList();
@@ -73,40 +72,26 @@ namespace RecommendationService.Api.Services.RecommendationService
                 var vector = reference[0].NutrientAmounts.Keys
                     .Select(k => expectations[i].TryGetValue(k, out var value) ? value : 0f)
                     .ToList();
+                var pastIds = candidatesList.SelectMany(innerList => innerList).Select(r=>(int)r.Id);
 
-                var candidateIds = await _qdrant.FindKNearestNeighborsAsync(25, vector);
+                var candidateIds = await _qdrant.FindKNearestNeighborsAsync(300, vector, pastIds);
+
+
                 var candidates = new List<RecipeShortcutRedis>();
 
-                foreach(var a in candidateIds)
+                foreach (var a in candidateIds)
                 {
                     var candidate = await _recipesCollection.FirstAsync(r => r.Id == a);
 
                     candidates.Add(candidate);
                 }
-                //var candidates = _recipesCollection.Where(r => candidateIds.Contains((int)r.Id)).ToList();
-
-                //var rawCandidates =recipeSpecifications[i].ToList();
-
-                /*rawCandidates = rawCandidates.Where(r => r.NutrientAmounts.Keys.Count!=0).ToList();
-
-                var candidates = rawCandidates
-                    .OrderBy(r =>
-                        Math.Sqrt(expectations[i].Keys
-                            .Sum(k =>
-                                (expectations[i][k] - r.NutrientAmounts[k]) * (expectations[i][k] - r.NutrientAmounts[k])/(expectations[i][k]* expectations[i][k])
-                            )
-                        )
-                    )
-                    .Take(k)
-                    .ToList();*/
-
 
                 candidatesList.Add(candidates);
             }
 
             var bestCombo = FindBestRecipeCombo(float.MaxValue, new Stack<Tuple<RecipeShortcutRedis, int>>(), new Stack<Tuple<RecipeShortcutRedis, int>>(), candidatesList, dto.NutritionalGoals);
-
             sw.Stop();
+
 
             return new RecommendationResponseDto()
             {
@@ -129,16 +114,14 @@ namespace RecommendationService.Api.Services.RecommendationService
             List<List<RecipeShortcutRedis>> candidatesList,
             Dictionary<int, float> expectations)
         {
-            if(currentCombo.Count == candidatesList.Count)
-            {
-
-                var distance = (float)Math.Sqrt(expectations.Keys
+            var currentDistance = (float)Math.Sqrt(expectations.Keys
                     .Sum(k =>
                     {
-                        return (expectations[k] - currentCombo.Sum(rc =>  rc.Item1.NutrientAmounts[k]*rc.Item2/ rc.Item1.Servings))* (expectations[k] - currentCombo.Sum(rc => rc.Item1.NutrientAmounts[k] * rc.Item2 / rc.Item1.Servings));
+                        return (expectations[k] - currentCombo.Sum(rc => rc.Item1.NutrientAmounts[k] * rc.Item2 / rc.Item1.Servings)) * (expectations[k] - currentCombo.Sum(rc => rc.Item1.NutrientAmounts[k] * rc.Item2 / rc.Item1.Servings));
                     }));
-
-                return new Tuple<float, Stack<Tuple<RecipeShortcutRedis, int>>>(distance, new Stack<Tuple<RecipeShortcutRedis, int>>(currentCombo.Reverse()));
+            if (currentCombo.Count == candidatesList.Count|| currentDistance>bestDistance)
+            {
+                return new Tuple<float, Stack<Tuple<RecipeShortcutRedis, int>>>(currentDistance, new Stack<Tuple<RecipeShortcutRedis, int>>(currentCombo.Reverse()));
             }
 
             var routes = new Stack<RecipeShortcutRedis>(candidatesList[currentCombo.Count]);

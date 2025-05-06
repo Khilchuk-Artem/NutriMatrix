@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.Collections;
 using Qdrant.Client;
 using Qdrant.Client.Grpc;
+using System.Net.NetworkInformation;
 using static Qdrant.Client.Grpc.Conditions;
 
 namespace RecommendationService.Api.Services.Qdrant
@@ -49,16 +50,26 @@ namespace RecommendationService.Api.Services.Qdrant
         public async Task<List<int>> FindKNearestNeighborsAsync(
             int k,
             IEnumerable<float> rawSearchVector,
+            IEnumerable<int>? excludeIds = null,
             string? category = null,
             List<string>? includeIngredientIds = null,
             List<string>? excludeIngredientIds = null)
         {
             Filter filterOptions = null;
 
+
             if (category != null)
             {
                 var tmp = MatchKeyword("category", category);
                 filterOptions = tmp;
+            }
+            if (excludeIds != null)
+            {
+                foreach (var id in excludeIds)
+                {
+                    if (filterOptions == null) filterOptions = !MatchKeyword("id", id.ToString());
+                    else filterOptions &= !MatchKeyword("id", id.ToString());
+                }
             }
             if (includeIngredientIds != null)
             {
