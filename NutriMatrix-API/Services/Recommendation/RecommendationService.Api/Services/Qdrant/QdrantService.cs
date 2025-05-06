@@ -18,7 +18,7 @@ namespace RecommendationService.Api.Services.Qdrant
             await _qudrantClient.CreateCollectionAsync(_collectionName, new VectorParams
             {
                 Size = 161,
-                Distance = Distance.Dot,
+                Distance = Distance.Cosine,
                 HnswConfig = new HnswConfigDiff
                 {
                     M = 16,

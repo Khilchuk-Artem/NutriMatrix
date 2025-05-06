@@ -29,11 +29,11 @@ namespace RecommendationService.Api.Controllers
         }
 
         [HttpGet("GetWeatherForecast")]
-        public async Task<IActionResult> GetAsync()
+        public async Task<IActionResult> GetAsync(int id)
         {
-            var res = await _collection.ToListAsync();
+            //var res = await _collection.ToListAsync();
 
-            return Ok(res.Take(20).ToList());
+            return Ok(_collection.Where(r=>r.Id==id).ToList());
         }
         [HttpGet("Seed")]
         public async Task<IActionResult> SeedAsync()
