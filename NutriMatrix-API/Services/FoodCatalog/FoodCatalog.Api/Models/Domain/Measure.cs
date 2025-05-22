@@ -2,10 +2,10 @@
 {
     public class Measure:IEntity
     {
-        public Guid Id { get; set; }
+        public long Id { get; set; }
         public string Name { get; set; }
-        public int WeightInGrams { get; set; }
-        public Guid FoodId { get; set; }
+        public float WeightInGrams { get; set; }
+        public long FoodId { get; set; }
         public bool IsDeleted { get; set; }
 
         public Food Food { get; set; }

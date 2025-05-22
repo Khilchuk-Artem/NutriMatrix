@@ -4,8 +4,8 @@ namespace RecommendationService.Api.Models
 {
     public class NutrientAmount : IEntity
     {
-        public Guid Id { get; set; }
-        public Guid RecipeId { get; set; }
+        public long Id { get; set; }
+        public long RecipeId { get; set; }
         public int NutrientId { get; set; }
         public float Amount { get; set; }
 

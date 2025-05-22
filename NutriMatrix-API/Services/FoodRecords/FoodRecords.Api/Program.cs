@@ -1,6 +1,8 @@
 
 using FoodCatalog.Grpc;
 using FoodRecords.Api.Data;
+using FoodRecords.Api.Data.Repositories;
+using FoodRecords.Api.Services.FoodRecords;
 using Microsoft.EntityFrameworkCore;
 
 namespace FoodRecords.Api
@@ -17,13 +19,14 @@ namespace FoodRecords.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<IFoodRecordService, FoodRecordService>();
             builder.Services.AddDbContext<FoodRecordsDbContext>(options =>
             {
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            builder.Services.AddGrpcClient<FoodService.FoodServiceClient>(options =>
+            /*builder.Services.AddGrpcClient<FoodService.FoodServiceClient>(options =>
             {
                 options.Address = new Uri(builder.Configuration["GrpcSettings:FoodServiceUri"]!);
             })
@@ -36,7 +39,7 @@ namespace FoodRecords.Api
                 };
 
                 return handler;
-            });
+            });*/
 
 
             var app = builder.Build();
@@ -54,7 +57,12 @@ namespace FoodRecords.Api
                 db.Database.Migrate();
             }
 
-
+            app.UseCors(options =>
+            {
+                options.AllowAnyHeader();
+                options.AllowAnyOrigin();
+                options.AllowAnyMethod();
+            });
             app.UseHttpsRedirection();
 
             app.UseAuthorization();

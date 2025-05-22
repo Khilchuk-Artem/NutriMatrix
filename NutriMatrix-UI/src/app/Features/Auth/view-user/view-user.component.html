@@ -1,0 +1,51 @@
+<div class="mt-20 max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
+  <h1 class="text-4xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-6 tracking-tight">
+    Profile of {{ user?.name || 'Unknown User' }}
+  </h1>
+
+  <section class="mb-10">
+    <h2 class="text-2xl font-semibold mb-3 text-[#2D2D2D]">User Details</h2>
+    <p><strong>User ID:</strong> {{ user?.userId }}</p>
+    <p><strong>Roles:</strong> {{ (user?.roles ?? []).join(', ') }}</p>
+  </section>
+  <div class="mt-6 flex mb-6">
+    <a
+      href="/app/me/edit"
+      class="px-6 py-2 bg-[#D4A017] text-white rounded hover:bg-[#b78e12] transition"
+      type="button"
+    >
+      Edit Profile
+    </a>
+  </div>
+  <section>
+    <h2 class="text-2xl font-semibold mb-3 text-[#2D2D2D]">Nutrients To Track</h2>
+
+    <table class="w-full border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30">
+      <thead>
+      <tr>
+        <th class="p-4 text-left font-medium border-b border-gray-200">Nutrient</th>
+        <th class="p-4 text-left font-medium border-b border-gray-200">Target Amount</th>
+        <th class="p-4 text-left font-medium border-b border-gray-200">Active</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let nutrient of user?.nutrientsToTrack" class="hover:bg-[#E0F7F1]/30 transition-colors duration-300">
+        <td class="p-4 border-b border-gray-200">{{ getNutrientLabel(nutrient.nutrientId) }}</td>
+        <td class="p-4 border-b border-gray-200">{{ nutrient.targetAmount }}</td>
+        <td class="p-4 border-b border-gray-200">
+            <span
+              class="font-semibold"
+              [class.text-green-600]="nutrient.isActive"
+              [class.text-red-600]="!nutrient.isActive"
+            >
+              {{ nutrient.isActive ? 'Yes' : 'No' }}
+            </span>
+        </td>
+      </tr>
+      <tr *ngIf="(user?.nutrientsToTrack??[]).length === 0">
+        <td colspan="3" class="p-4 text-center text-gray-400">No nutrients to track</td>
+      </tr>
+      </tbody>
+    </table>
+  </section>
+</div>

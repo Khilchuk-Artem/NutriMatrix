@@ -1,0 +1,161 @@
+<div class="flex min-h-screen bg-gray-50">
+  <aside
+    class="side-nav w-80 bg-white/95 sidebar-pattern py-10 px-8 h-[calc(100vh-5rem)] sticky top-20"
+  >
+    <div
+      class="logo-small text-2xl font-['Playfair_Display'] font-semibold text-[#6A9D8C] mb-10"
+    >
+      <img src="assets/TrackTopus_Nutrimatrix-logo.png" class="w-50 mx-auto" alt="">
+    </div>
+    <nav class="nav-list space-y-4" role="navigation">
+      <a
+        routerLink="/app/dashboard"
+        routerLinkActive="active"
+        class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+      >
+        Diary
+      </a>
+
+      <div class="item">
+        <button
+          class="flex justify-between w-full text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+          (click)="toggleSubmenu('diary')"
+          [attr.aria-expanded]="submenuOpen['diary']"
+          type="button"
+        >
+          Diary
+          <svg
+            class="h-5 w-5 stroke-[#D4A017]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            [class.rotate-180]="submenuOpen['diary']"
+            style="transition: transform 0.3s;"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
+        </button>
+        <div
+          class="subitems ml-4 mt-2 space-y-2"
+          [class.hidden]="!submenuOpen['diary']"
+        >
+          <a
+            routerLink="/app/diary/subitem1"
+            routerLinkActive="active-subitem"
+            class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
+          >
+            Subitem1
+          </a>
+          <a
+            routerLink="/app/diary/subitem2"
+            routerLinkActive="active-subitem"
+            class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
+          >
+            Subitem2
+          </a>
+        </div>
+      </div>
+
+      <div class="item">
+        <button
+          class="flex justify-between w-full text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+          (click)="toggleSubmenu('trends')"
+          [attr.aria-expanded]="submenuOpen['trends']"
+          type="button"
+        >
+          Trends
+          <svg
+            class="h-5 w-5 stroke-[#D4A017]"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            [class.rotate-180]="submenuOpen['trends']"
+            style="transition: transform 0.3s;"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+            />
+          </svg>
+        </button>
+        <div
+          class="subitems ml-4 mt-2 space-y-2"
+          [class.hidden]="!submenuOpen['trends']"
+        >
+          <a
+            routerLink="/app/trends/charts"
+            routerLinkActive="active-subitem"
+            class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
+          >
+            Charts
+          </a>
+          <a
+            routerLink="/app/trends/nutrition-report"
+            routerLinkActive="active-subitem"
+            class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
+          >
+            Nutrition Report
+          </a>
+          <a
+            routerLink="/app/trends/print-report"
+            routerLinkActive="active-subitem"
+            class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
+          >
+            Print Report
+          </a>
+          <a
+            routerLink="/app/trends/snapshots"
+            routerLinkActive="active-subitem"
+            class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
+          >
+            Snapshots
+          </a>
+        </div>
+      </div>
+
+      <a
+        routerLink="/app/foods"
+        routerLinkActive="active"
+        class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+      >
+        Foods
+      </a>
+      <a
+        routerLink="/app/plans"
+        routerLinkActive="active"
+        class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+      >
+        Plans
+      </a>
+      <a
+        routerLink="/app/support"
+        routerLinkActive="active"
+        class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+      >
+        Support
+      </a>
+      <a
+        routerLink="/app/about"
+        routerLinkActive="active"
+        class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
+      >
+        About
+      </a>
+    </nav>
+    <a
+      href="#"
+      class="utility-link block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] mt-6 px-4"
+    >
+      Just a link
+    </a>
+  </aside>
+
+  <main class="flex-1 p-6">
+    <router-outlet></router-outlet>
+  </main>
+</div>

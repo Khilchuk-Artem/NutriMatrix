@@ -2,9 +2,9 @@
 {
     public class AddFoodRecordDto
     {
-        public DateOnly DateEaten { get; set; }
+        public DateTime DateEaten { get; set; }
         public string UserId { get; set; }
-        public Guid FoodMeasureId { get; set; }
+        public long FoodMeasureId { get; set; }
         public float Amount { get; set; }
     }
 }

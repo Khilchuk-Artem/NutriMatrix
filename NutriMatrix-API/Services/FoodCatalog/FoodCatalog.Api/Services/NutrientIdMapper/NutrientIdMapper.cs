@@ -16,7 +16,7 @@ namespace FoodCatalog.Api.Services.NutrientIdMapper
             using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
 
             var records = csv.GetRecords<NutrientCsvRow>().ToList();
-            _mappings = records.ToDictionary(r => r.AttrId, r => r.Id);
+            //_mappings = records.ToDictionary(r => r.AttrId, r => r.Id);
         }
 
         public Guid? GetGuidForAttrId(int attrId)

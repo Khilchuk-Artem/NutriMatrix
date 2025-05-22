@@ -2,9 +2,9 @@
 {
     public class FoodMeal:IEntity
     {
-        public Guid Id { get; set; }
-        public Guid MeasureId { get; set; }
-        public Guid MealId { get; set; }
+        public long Id { get; set; }
+        public long MeasureId { get; set; }
+        public long MealId { get; set; }
         public float Quantity { get; set; }
         public bool IsDeleted { get; set; }
 

@@ -1,0 +1,46 @@
+::ng-deep .calendar-styled .ui-datepicker {
+  color: #27272a; /* this is the hex for text-gray-800 */
+  border-radius: 0.75rem; /* rounded-xl */
+  border: 0;
+  box-shadow: none;
+}
+
+::ng-deep .calendar-styled .ui-datepicker td a {
+  transition: color 0.2s ease;
+  border-radius: 0.375rem; /* rounded-md */
+}
+::ng-deep .calendar-styled .ui-datepicker td a:hover {
+  background-color: #E0F7F1;
+}
+
+::ng-deep .calendar-styled .ui-datepicker .ui-datepicker-today a {
+  background-color: rgba(212,160,23,0.125); /* bg-[#D4A017]/20 */
+  font-weight: 600;
+}
+
+::ng-deep .calendar-styled .ui-datepicker .ui-state-active {
+  background-color: #D4A017;
+  color: white;
+  font-weight: 700;
+}
+:host ::ng-deep .calendar-styled .p-datepicker-day-selected {
+  background: #6A9D8C;      /* primary: forest green */
+  color: #FFFFFF;           /* white text for contrast */
+  border-radius: 1rem;      /* rounded-xl per buttons/cards */
+  box-shadow: 0 0 8px #D4A017AA; /* subtle metallic gold glow (accent_luxe) */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.calendar-styled .p-datepicker-day-selected {
+  background: #6A9D8C;
+  color: #FFFFFF;
+  border-radius: 1rem;
+  box-shadow: 0 0 8px #D4A017AA;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Optional hover state */
+:host ::ng-deep .calendar-styled .p-datepicker-day-selected:hover {
+  background: #5B8A7A;       /* slightly darker forest green */
+  box-shadow: 0 0 12px #D4A017DD; /* stronger gold glow */
+}

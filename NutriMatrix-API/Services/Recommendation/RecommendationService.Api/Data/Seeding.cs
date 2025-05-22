@@ -18,15 +18,15 @@ namespace RecommendationService.Api.Data
         public float unit_amount { get; set; }
     }
 
-    // 2) Info POCO, with a custom converter for that JSON column:
     public class RecipeInfoRow
     {
         public long recipe_id { get; set; }
         public string title { get; set; }
-        public float? servings { get; set; }  // <-- allow nulls
+        public string description { get; set; }
+        public string directions { get; set; }
+        public float? servings { get; set; }
         public string primary_category_name { get; set; }
 
-        // we tell CsvHelper to use our JSON converter here:
         public List<IngredientClean> ingredients_clean { get; set; }
     }
 
@@ -38,17 +38,18 @@ namespace RecommendationService.Api.Data
         }
     }
 
-    // 3) Map only the columns we care about:
     public sealed class RecipeInfoMap : ClassMap<RecipeInfoRow>
     {
         public RecipeInfoMap()
         {
             Map(m => m.recipe_id).Name("recipe_id");
             Map(m => m.servings).Name("servings");
+            Map(m => m.description).Name("description");
+            Map(m => m.directions).Name("directions");
             Map(m => m.primary_category_name).Name("primary_category_name");
-            /*Map(m => m.ingredients_clean)
+            Map(m => m.ingredients_clean)
                 .Name("ingredients_clean")
-                .TypeConverter<IngredientCleanConverter>();*/
+                .TypeConverter<IngredientCleanConverter>();
         }
     }
     public static class Seeding
@@ -57,12 +58,12 @@ namespace RecommendationService.Api.Data
         {
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                Delimiter = ",",       // fields separated by commas
-                Quote = '"',       // text‑qualifier
-                Escape = '"',       // inner quotes are doubled
+                Delimiter = ",",
+                Quote = '"',
+                Escape = '"',
                 Mode = CsvMode.RFC4180,
-                BadDataFound = null,       // ignore malformed lines
-                MissingFieldFound = null        // ignore missing fields
+                BadDataFound = null,
+                MissingFieldFound = null
             };
 
             using var reader = new StreamReader(path);

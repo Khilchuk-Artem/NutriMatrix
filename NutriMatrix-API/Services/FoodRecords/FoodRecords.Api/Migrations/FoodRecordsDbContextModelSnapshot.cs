@@ -24,12 +24,14 @@ namespace FoodRecords.Api.Migrations
 
             modelBuilder.Entity("FoodRecords.Api.Models.Domain.FoodPlan", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("bigint");
 
-                    b.Property<Guid>("FoodMeasureId")
-                        .HasColumnType("uuid");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("FoodMeasureId")
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -39,7 +41,6 @@ namespace FoodRecords.Api.Migrations
                         .HasColumnType("double precision");
 
                     b.Property<string>("RecurringDaysRaw")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("RequireConfirmationOnAdd")
@@ -48,8 +49,8 @@ namespace FoodRecords.Api.Migrations
                     b.Property<DateTime>("ScheduledTime")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
@@ -58,18 +59,20 @@ namespace FoodRecords.Api.Migrations
 
             modelBuilder.Entity("FoodRecords.Api.Models.Domain.FoodRecord", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<float>("Amount")
                         .HasColumnType("real");
 
-                    b.Property<DateOnly>("DateEaten")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("DateEaten")
+                        .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("FoodMeasureId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("FoodMeasureId")
+                        .HasColumnType("bigint");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -81,6 +84,65 @@ namespace FoodRecords.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("FoodRecords");
+                });
+
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.IngredientSnapshot", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
+
+                    b.Property<long>("FoodMeasureId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("RecipeRecordId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecipeRecordId");
+
+                    b.ToTable("IngredientSnapshot");
+                });
+
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.RecipeRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("DateEaten")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RecipeRecords");
+                });
+
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.IngredientSnapshot", b =>
+                {
+                    b.HasOne("FoodRecords.Api.Models.Domain.RecipeRecord", null)
+                        .WithMany("IngredientSnapshots")
+                        .HasForeignKey("RecipeRecordId");
+                });
+
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.RecipeRecord", b =>
+                {
+                    b.Navigation("IngredientSnapshots");
                 });
 #pragma warning restore 612, 618
         }

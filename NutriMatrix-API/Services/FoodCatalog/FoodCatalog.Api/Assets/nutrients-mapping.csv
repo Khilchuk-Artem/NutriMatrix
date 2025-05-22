@@ -1,0 +1,162 @@
+id,attr_id,name,unit
+92904bea-e00f-48ae-9403-488b0f7b3bdb,301,"Calcium, Ca",mg
+09ec2628-6c48-42ac-b3c7-a6ce53a4686c,205,"Carbohydrate, by difference",g
+af9575b8-8158-46b0-8980-2bb3b03df6e9,601,Cholesterol,mg
+0fd0c57b-2b41-40a5-9c57-11085f19838c,208,Energy,kcal
+0f3cfcbf-1eb2-411c-aec9-a779bced180c,606,"Fatty acids, total saturated",g
+66db2a18-bcff-4797-ae0d-65a8a3bc41a1,204,Total fat,g
+285681ee-6908-4887-9034-34dc2aab51d4,605,"Fatty acids, total trans",g
+42e2a0b2-cbbc-4f7c-a6a4-3bd73c53412f,303,"Iron, Fe",mg
+c5ea852b-65b3-43be-8b31-ab0bbabe6814,291,"Fiber, total dietary",g
+82277d5b-19e9-4f3c-b2a5-2a7a001682bb,306,"Potassium, K",mg
+2c30679f-bf99-469c-9035-f9a973148b57,307,"Sodium, Na",mg
+b1ca0be3-46ea-4fc4-9ea4-f6b5460eea17,203,Protein,g
+180dd2ef-e910-4e7f-a8ab-cb41474d63b0,269,"Sugars, total",g
+6fb27a04-781e-49d5-a0cb-c25d7c78e7df,539,"Sugars, added",g
+62fdf1a3-209b-4e74-9ed6-0a2da6df10c0,324,Vitamin D,IU
+35435ac0-5216-469c-abe1-bf47088650ea,299,Sugar Alcohol,g
+b263a17b-f130-4689-93fc-417b2306b920,1001,Erythritol,g
+298693dd-534c-4dcf-8755-f0df1483142e,1006,Allulose,g
+d68f7f64-0c63-4e0e-aa3a-93f97ec37b14,1002,Glycerin,g
+cc5582a4-d536-43bb-8ddf-8a4a44cb8c9a,290,Xylitol,g
+fdec4a36-3c31-43a8-b96b-22aa746b892d,261,Sorbitol,g
+986480b6-e2aa-489e-897c-81926320d4e5,260,Mannitol,g
+8a8de098-e4af-4280-8121-172da7fa1653,1003,Maltitol,g
+195c204c-9a3a-48a9-a4ad-ae9fac6352fa,1004,Isomalt,g
+e35581d9-2c00-4182-b305-487e76de5204,1005,Lactitol,g
+35159dfe-2b2e-4859-adb8-7d17c2df8ddf,513,Alanine,g
+41e2b244-230a-4b54-b4ec-25db26ee7b4c,221,"Alcohol, ethyl",g
+8b6a0565-530a-4ae4-8163-201c485620b7,511,Arginine,g
+9792947b-cd46-4d9e-b175-4ba09c460d0e,207,Ash,g
+db803808-12a1-4e5f-b9dc-a932f5cb6ad6,514,Aspartic acid,g
+31a5fc29-515e-4ac6-bc5c-018a5d5460dd,454,Betaine,mg
+40eb533c-d9b9-420e-b57f-0d3554c3b7ef,262,Caffeine,mg
+e0ac6740-8942-44b5-931d-fb396631ee40,639,Campesterol,mg
+5ca3812b-d177-4a3e-8948-e45e1b5f2619,322,"Carotene, alpha",µg
+78979ca6-2f2e-449d-901f-03dc233b48d4,321,"Carotene, beta",µg
+09b254c2-6196-4d4a-bfb2-3acd9f5fd9f8,326,Vitamin D3 (cholecalciferol),µg
+13556c89-cc9c-4503-8254-8b519cfed2bb,421,"Choline, total",mg
+32cdc623-d7be-4f06-ab89-f071585d8c1c,334,"Cryptoxanthin, beta",µg
+4f2fd50b-0840-451d-a991-f174175bd456,312,"Copper, Cu",mg
+01d61688-924e-4a3d-8e39-1caca84e0844,507,Cystine,g
+b7ddacdd-33d9-4ffd-bf63-df5bf5a19c23,268,Energy,kJ
+eec306a8-2f88-4d65-8c9b-51cd9dcd2d06,325,Vitamin D2 (ergocalciferol),µg
+f2bc3b0f-5fed-4037-aede-119755394488,610,10:00,g
+bc1ba0b5-0ca3-4096-80d9-563eb1e57d97,611,12:00,g
+df660f92-ea89-4a90-b7bf-2bf090b84dad,696,13:00,g
+9457e52c-76cc-4391-b0e7-28d028e7dc0d,612,14:00,g
+f350a432-e749-4a78-b4ef-a85ed7c6533e,625,14:01,g
+213bfe86-6c2b-493f-a03f-a1d4fc58b2a0,652,15:00,g
+e6fd620d-1255-4cd2-b8e0-10b3f70c38b1,697,15:01,g
+cb760f8b-d0cf-4fce-9f9d-0c60167644ca,613,16:00,g
+f9fa052e-ff54-40a0-90cf-f34257baf5f2,626,16:1 undifferentiated,g
+e5366684-4dd5-4342-91fa-b9e7602ac195,673,16:1 c,g
+43e78938-72f8-4234-bc1d-8722678ca10f,662,16:1 t,g
+fd0715b9-c807-4106-bd41-82ad6e59ae24,653,17:00,g
+34a990a6-ecb2-4693-b6a2-7847dc5fe645,687,17:01,g
+7386602a-8239-4c3e-a354-5cc1c665fe66,614,18:00,g
+ed279501-bbaf-40de-9d24-3de7e2738803,617,18:1 undifferentiated,g
+15c90b30-4bf1-49b5-9149-ef09874044e9,674,18:1 c,g
+b5454db4-5500-418e-8baf-4e698e54e715,663,18:1 t,g
+a3d19f95-1ae7-4ac5-9cd1-c39adb1d9683,859,18:1-11t (18:1t n-7),g
+e1232069-daf0-444b-9546-8728fd184bca,618,18:2 undifferentiated,g
+031d7115-a0b5-4663-8fae-cd2d54d5860f,670,18:2 CLAs,g
+3126187d-5a90-4f94-b6a4-2bfa5a65eab7,675,"18:2 n-6 c,c",g
+c4b978dd-9415-430b-8f96-37152b817447,669,"18:2 t,t",g
+a7242e2f-9f8b-463c-9060-1aae8b42e887,619,18:3 undifferentiated,g
+5a49107d-53b9-412d-8a80-40fe0397fc02,851,"18:3 n-3 c,c,c (ALA)",g
+96e690a3-c48b-4a78-8f1b-5b456d197ddd,685,"18:3 n-6 c,c,c",g
+b3a9e840-d577-4527-bd87-288f8c5c9958,627,18:04,g
+e18bfbeb-fc4e-4d87-84a2-e28f855db851,615,20:00,g
+483fbbce-543e-494f-a71f-757c4683c7c3,628,20:01,g
+2c139fd7-981a-4962-a4e5-e380aaa7e1d1,672,"20:2 n-6 c,c",g
+d226a906-793e-4687-bc45-aed98ddadf7d,689,20:3 undifferentiated,g
+3bcaac8e-2033-4dfe-bc77-f3dac53d3adb,852,20:3 n-3,g
+7e539245-c33e-4bc9-ab3e-09a3bce96a38,853,20:3 n-6,g
+9d4b0a55-5022-4559-ab70-e26b8bd8f533,620,20:4 undifferentiated,g
+02868c37-7a2d-40af-bcd5-aa9ba05933c5,855,20:4 n-6,g
+711914de-5c17-4eb0-8749-b15912c6a634,629,20:5 n-3 (EPA),g
+880790e8-858f-49a3-ac0d-6816a03f0a8d,857,21:05,g
+5bcc8cdf-9ea9-477e-96dc-54e4fa8bfed3,624,22:00,g
+a8e864c0-6961-450c-a521-17ba7a39223e,630,22:1 undifferentiated,g
+c8378c55-f327-4ff5-aa18-ca439a26b601,858,22:04,g
+4a12bfd9-0157-45df-9a10-1f2a6e3811a1,631,22:5 n-3 (DPA),g
+cc9f1df6-c625-4e1b-890b-3804d4a18d21,621,22:6 n-3 (DHA),g
+c91397cf-b878-41e8-aad5-8ebc58af3857,654,24:00:00,g
+de113fea-6505-4bbe-9c8e-5f44d974e26d,671,24:1 c,g
+1d6e9df3-d6fd-47c0-82ce-57651eb1446a,607,4:00,g
+00187677-4fd7-4640-bfa2-64f492ca0d88,608,6:00,g
+a1539430-c0d7-4c43-8c5d-4c2135b48e6e,609,8:00,g
+2f10c771-cd87-4579-8211-2099dacc598e,645,"Fatty acids, total monounsaturated",g
+27a06531-a18d-43fa-8cb0-5120f346dfc1,646,"Fatty acids, total polyunsaturated",g
+f8ad92bd-5123-4741-b0c0-e24f1bcb0888,693,"Fatty acids, total trans-monoenoic",g
+c59d802f-0cef-410c-87f1-e64b9e68c072,695,"Fatty acids, total trans-polyenoic",g
+145d0bbc-b6b9-4d6b-acd2-de7a5b382f58,313,"Fluoride, F",µg
+8c3aca94-7a61-4cad-b97b-87f7ce9b7c26,417,"Folate, total",µg
+bcdb9b56-8b3e-42ad-815e-2b7ee52ebc27,431,Folic acid,µg
+95ce08d0-d496-4f58-a704-9cc8ae00bae6,435,"Folate, DFE",µg
+c9b361bc-228e-475e-8188-3a4314802351,432,"Folate, food",µg
+5b1d3996-f0aa-40ce-afab-0535983f3f71,212,Fructose,g
+d3198cc8-0dd0-4e72-acf0-256799619627,287,Galactose,g
+f79ed152-05d5-4ac9-9b1b-81f4a28d8698,515,Glutamic acid,g
+6adcbb0e-f797-4116-877d-2ba61c7ec2c8,211,Glucose (dextrose),g
+657a8a9f-bcf2-48bd-ac29-f1efa7fb0701,516,Glycine,g
+4c9ecaa3-4382-4f38-acce-a39833120c7e,512,Histidine,g
+71771f9e-ab46-42eb-9538-261a0ae70596,521,Hydroxyproline,g
+7b93f187-5386-40b3-a053-aea6548e8eb5,503,Isoleucine,g
+3fca3bf0-53ee-4b0a-be1d-25a70d3f5b48,213,Lactose,g
+7e581336-4f25-4866-8a8a-e22305a2e9e0,504,Leucine,g
+91347054-d516-4cfb-a876-e0293703f636,338,Lutein + zeaxanthin,µg
+1143c769-af9d-4183-8907-c46df3d408a6,337,Lycopene,µg
+c0b38407-970f-4690-be8c-6b9735eef4fd,505,Lysine,g
+ed3485f6-f55a-4cc7-b652-b99d2c82f64b,214,Maltose,g
+08e0d1ce-5fb3-4780-a9e7-878a6da46ef4,506,Methionine,g
+ff56dd07-244c-453e-aa97-4bcc7760cd79,304,"Magnesium, Mg",mg
+e5b847c7-2bff-46e6-8b2d-147b76bcf043,428,Menaquinone-4,µg
+41880e48-1311-41c7-91d5-5eae5bb78e6b,315,"Manganese, Mn",mg
+603875d4-a309-4e39-922c-37218fa1974c,406,Niacin,mg
+f71f0f17-00da-4a04-8942-c87a005f30c9,573,"Vitamin E, added",mg
+cbfa7cdf-e781-4a8a-8b93-1fca326d7ea6,578,"Vitamin B-12, added",µg
+8df11934-8272-474d-aedb-92ca6862384b,257,Adjusted Protein,g
+c952ffbd-bb70-4bb8-9bb3-5f64cc2a2a5a,664,22:1 t,g
+23b00007-ee3a-451d-9c8a-4bc238654f1d,676,22:1 c,g
+be1a8d9d-fd1e-4ebc-be95-abe5b1121d3d,856,18:3i,g
+bfb22e75-b296-4b79-8fe7-aa1fa049732e,665,18:2 t not further defined,g
+09a87134-6acd-433f-9f22-82949ad5878e,666,18:2 i,g
+b0b77c9a-79c7-40f1-b7e4-72f34068288e,305,"Phosphorus, P",mg
+dc62a44f-632a-4f56-adb9-51f8d0e6c896,410,Pantothenic acid,mg
+d5481a82-d13f-4c60-b454-243111f03a49,508,Phenylalanine,g
+5e1e5a94-47da-44e4-b1cb-2fec4d6cf81d,636,Phytosterols,mg
+e1511fd1-3de1-45ed-832a-ee5b4d61f983,517,Proline,g
+0e47721a-14b9-4174-a73d-5515cfbd00c6,319,Retinol,µg
+3048e404-f677-469c-9aef-ec5ad83158d2,405,Riboflavin,mg
+1a000942-9789-4ed0-8f68-84c168dc716b,317,"Selenium, Se",µg
+c6507833-497d-4060-8db1-cbf638f5a803,518,Serine,g
+1a5ffa66-c3bc-4989-b863-e3469dcae1de,641,Beta-sitosterol,mg
+2a91fd10-edd4-406c-b07b-8997dc5ee550,209,Starch,g
+299364c5-1ca0-48aa-964f-149c39c75763,638,Stigmasterol,mg
+8ef2c8a9-c00e-40c2-89f1-111a41c6c174,210,Sucrose,g
+7e89fa22-068b-4439-8cf6-284fc943f4fe,263,Theobromine,mg
+b9af5c83-26ff-49ca-9057-6cb05da209b4,404,Thiamin,mg
+3d6f2328-3da1-4f43-aa43-0bd4ff9356a8,502,Threonine,g
+c53d74db-b6d0-4d04-a61e-cb87c3bdebb4,323,Vitamin E (alpha-tocopherol),mg
+5fa842ab-7781-4bf1-8065-8debfaa5b811,341,"Tocopherol, beta",mg
+fb89788e-4fa2-4e4a-b211-74470af49b65,343,"Tocopherol, delta",mg
+3f8bd51b-531f-480c-a8d8-9172d721088b,342,"Tocopherol, gamma",mg
+eebf87fe-53a1-482c-9ec2-01e084dd5d74,501,Tryptophan,g
+0e1d39c8-500e-468a-8799-7497753a9186,509,Tyrosine,g
+d17dd16e-4313-4fbe-b754-236d6844122f,510,Valine,g
+f234bbd7-1fe1-4ca9-a0ba-4f58c6a26e7c,318,"Vitamin A, IU",IU
+6b597ae6-0dd2-4c15-91c7-d96be4767274,320,"Vitamin A, RAE",µg
+cd365c75-7129-4748-8af0-a8cbd505a0ec,418,Vitamin B-12,µg
+eef6bebc-dbc5-4c85-b668-8c05bb26a3e8,415,Vitamin B-6,mg
+88a4ff58-bd22-4e32-b169-c6d6ef67d2ee,401,"Vitamin C, total ascorbic acid",mg
+aa2f287c-cc85-4e96-8c6a-e1ca4e5ba4e6,328,Vitamin D (D2 + D3),µg
+c79dfa14-77c6-483f-a7f0-26e442b9df28,430,Vitamin K (phylloquinone),µg
+d4d13698-7c99-4560-972f-8df8d1bf50b8,429,Dihydrophylloquinone,µg
+0a8f83a8-225b-4332-97da-1b39ff2eaf5d,255,Water,g
+cbf7cd31-2708-4956-b1c7-d12dcd691208,309,"Zinc, Zn",mg
+f7362078-3adf-4cfd-accf-7ec71d59c353,344,"Tocotrienol, alpha",mg
+5b52676a-741b-49d8-a842-e8b63fcae889,345,"Tocotrienol, beta",mg
+c050ffb9-f639-4dd6-b692-108a5ac19878,346,"Tocotrienol, gamma",mg
+833d08a9-8775-4187-84d3-278efe75a5f1,347,"Tocotrienol,delta",mg

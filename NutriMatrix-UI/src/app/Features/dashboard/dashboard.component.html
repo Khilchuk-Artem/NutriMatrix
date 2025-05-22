@@ -1,0 +1,429 @@
+<div class="mt-20">
+  <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4 tracking-tight">
+    Food Diary
+  </h1>
+  <!-- Add Food Button -->
+  <div class="mb-8">
+    <button
+      (click)="openAddFoodModal()"
+      class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out"
+    >
+      + Add Record
+    </button>
+  </div>
+  <div class="flex flex-row gap-8 items-start">
+    <table class="consumed-table w-full border-separate border-spacing-0 rounded-2xl shadow-2xl bg-white border border-[#D4A017]/30">
+      <thead>
+      <tr>
+        <th class="p-5 text-left text-base font-medium border-b border-gray-100">Food Item</th>
+        <th class="p-5 text-left text-base font-medium border-b border-gray-100">Amount</th>
+        <th class="actions-col p-5 text-right text-base font-medium border-b border-gray-100">⋯</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr
+        class="hover:bg-[#E0F7F1]/30 transition-colors duration-300"
+        *ngFor="let vm of foodRecordViewModels"
+      >
+        <!-- Food Name -->
+        <td class="p-5 border-b border-gray-100">
+          {{ vm.measure?.food?.name || 'Loading...' }}
+        </td>
+
+        <!-- Measure Name -->
+        <td class="p-5 border-b border-gray-100">
+          {{ vm.record.amount}} {{vm.measure?.name}}
+        </td>
+
+        <!-- Action Button -->
+        <td class="p-5 border-b border-gray-100 text-right">
+          <button
+            (click)="openMenu($event, vm)"
+            class="rounded-lg px-4 py-2 hover:bg-[#E0F7F1]/50 transition-all duration-300"
+            type="button"
+          >
+            <svg
+              class="h-6 w-6 stroke-[#D4A017]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M12 6v.01M12 12v.01M12 18v.01"
+              ></path>
+            </svg>
+          </button>
+
+          <p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
+        </td>
+
+      </tr>
+      <tr class="hover:bg-[#E0F7F1]/30 transition-colors duration-300">
+        <td class="p-5 border-b border-gray-100">Oatmeal with Berries</td>
+        <td class="p-5 border-b border-gray-100">1 bowl</td>
+        <td class="p-5 border-b border-gray-100 text-right">
+          <button class="rounded-lg px-4 py-2 hover:bg-[#E0F7F1]/50 transition-all duration-300" aria-label="Actions for Oatmeal with Berries">
+            <svg class="h-6 w-6 stroke-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v.01M12 12v.01M12 18v.01"></path>
+            </svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="hover:bg-[#E0F7F1]/30 transition-colors duration-300">
+        <td class="p-5 border-b border-gray-100">Grilled Chicken Salad</td>
+        <td class="p-5 border-b border-gray-100">1 plate</td>
+        <td class="p-5 border-b border-gray-100 text-right">
+          <button class="rounded-lg px-4 py-2 hover:bg-[#E0F7F1]/50 transition-all duration-300" aria-label="Actions for Grilled Chicken Salad">
+            <svg class="h-6 w-6 stroke-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v.01M12 12v.01M12 18v.01"></path>
+            </svg>
+          </button>
+        </td>
+      </tr>
+      <tr class="hover:bg-[#E0F7F1]/30 transition-colors duration-300">
+        <td class="p-5 border-b border-gray-100">Greek Yogurt</td>
+        <td class="p-5 border-b border-gray-100">1 cup</td>
+        <td class="p-5 border-b border-gray-100 text-right">
+          <button class="rounded-lg px-4 py-2 hover:bg-[#E0F7F1]/50 transition-all duration-300" aria-label="Actions for Greek Yogurt">
+            <svg class="h-6 w-6 stroke-[#D4A017]" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v.01M12 12v.01M12 18v.01"></path>
+            </svg>
+          </button>
+        </td>
+      </tr>
+
+      </tbody>
+    </table>
+
+    <div class="w-1/3 max-w-sm -mt-4">
+      <p-calendar
+        [(ngModel)]="date"
+        (ngModelChange)="onDateChange($event)"
+        [inline]="true"
+        [showWeek]="false"
+        class="w-full calendar-styled"
+      ></p-calendar>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal Overlay -->
+<div
+  *ngIf="isAddFoodModalOpen"
+  id="addFoodModal"
+  class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="addFoodModalTitle"
+  style="background-color: rgba(0, 0, 0, 0.2);"
+  [@fadeInOut]
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl p-8 max-w-3xl w-full relative border border-[#D4A017]/30 max-h-[80vh] overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+  >
+    <!-- Modal Title -->
+    <h2
+      id="modalTitle"
+      class="text-3xl font-[Playfair_Display] font-semibold tracking-tight leading-[1.2] text-[#2D2D2D] mb-6"
+    >
+      Add Food Entry
+    </h2>
+
+    <!-- Search Bar & Barcode Controls -->
+    <div class="flex items-center space-x-3 mb-6">
+      <input
+        *ngIf="!isBarcodeActive"
+        type="search"
+        (input)="updateShortcuts()"
+        [(ngModel)]="searchQuery"
+        placeholder="Search foods..."
+        aria-label="Search foods"
+        class="flex-grow rounded-xl px-5 py-3 bg-[#E0F7F1] placeholder:text-text/60 text-text focus:bg-[#E0F7F1]/80 transition-colors duration-300 ease-in-out shadow-sm"
+      />
+
+      <!-- Barcode Button -->
+      <button
+        *ngIf="!isBarcodeActive"
+        type="button"
+        aria-label="Scan barcode"
+        class="p-3 rounded-xl bg-[#6A9D8C] text-white shadow-lg hover:bg-[#6A9D8C]/80 transition transform hover:scale-[1.05]"
+        (click)="onBarcodeClick()"
+      >
+        <!-- SVG Icon -->
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <line x1="2" y1="6" x2="2" y2="18"></line>
+          <line x1="6" y1="6" x2="6" y2="18"></line>
+          <line x1="10" y1="6" x2="10" y2="18"></line>
+          <line x1="14" y1="6" x2="14" y2="18"></line>
+          <line x1="18" y1="6" x2="18" y2="18"></line>
+          <line x1="22" y1="6" x2="22" y2="18"></line>
+        </svg>
+      </button>
+
+      <!-- Cancel Barcode -->
+      <button
+        *ngIf="isBarcodeActive"
+        type="button"
+        aria-label="Cancel barcode scanning"
+        class="p-3 rounded-xl bg-red-600 text-white shadow-lg hover:bg-red-700 transition transform hover:scale-[1.05]"
+        (click)="closeBarcode()"
+      >
+        Cancel
+      </button>
+    </div>
+
+    <!-- Shortcuts List -->
+    <div
+      *ngIf="!isBarcodeActive"
+      class="max-h-80 overflow-y-auto rounded-xl border border-[#D4A017]/40 p-4 bg-[#E0F7F1]"
+      aria-live="polite"
+      aria-relevant="additions"
+    >
+      <ul role="list" class="space-y-3">
+        <li
+          *ngFor="let shortcut of allShortcuts"
+          class="cursor-pointer rounded-xl p-3 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 focus:outline-none focus:ring-2 focus:ring-[#D4A017]"
+          tabindex="0"
+          (click)="selectFood(shortcut.id)"
+        >
+          <span class="font-semibold text-[#2D2D2D]">{{ shortcut.name }}</span>
+        </li>
+        <li *ngIf="allShortcuts.length === 0" class="text-[#2D2D2D]/60 italic text-center py-4">
+          No matches found.
+        </li>
+      </ul>
+    </div>
+
+    <!-- Barcode Scanner View -->
+    <div
+      *ngIf="isBarcodeActive"
+      class="flex flex-col items-center justify-center max-h-80 rounded-xl"
+      [ngClass]="{'border border-[#D4A017]/40 p-4 bg-[#E0F7F1]':!isBarcodeActive}"
+    >
+      <div class="mb-4 text-center mt-2">
+        <label for="deviceSelect" class="mr-2 text-[#2D2D2D] font-semibold">Choose Camera:</label>
+        <select id="deviceSelect"
+                class="rounded-lg border border-gray-300 px-4 py-2"
+                (change)="onDeviceSelect($event)">
+          <option *ngFor="let device of videoInputDevices" [value]="device.deviceId">
+            {{ device.label || 'Camera ' + device.deviceId }}
+          </option>
+        </select>
+      </div>
+      <!-- wrap in a flex container if you want it alongside other content -->
+      <div class="flex flex-col items-center w-full max-w-md mx-auto">
+        <video
+          #video
+          autoplay
+          muted
+          class="
+      w-full                      /* fill container width */
+      h-auto                      /* keep aspect ratio */
+      max-h-[35vh]                /* at most 35% of viewport height */
+      flex-shrink                  /* allow it to shrink if needed */
+      rounded-2xl
+      shadow-2xl
+      border
+      border-[#D4A017]/40
+      object-contain
+      bg-black
+    "
+        ></video>
+      </div>
+
+
+      <p *ngIf="result" class="mt-12 text-text font-semibold">Scanned Code: {{ result }}</p>
+    </div>
+
+    <!-- Close button top-right -->
+    <button
+      (click)="closeAddFoodModal()"
+      aria-label="Close Add Food Modal"
+      class="absolute top-4 right-4 text-[#D4A017] hover:text-[#FFB85F] transition-colors duration-300"
+      type="button"
+    >
+      <svg class="h-6 w-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Selected food details -->
+    <section
+      *ngIf="selectedFood"
+      class="mt-10 p-6 bg-white rounded-2xl shadow-lg border border-[#D4A017]/30 grid grid-cols-1 lg:grid-cols-3 gap-6"
+      aria-labelledby="foodOverviewTitle"
+    >
+      <!-- Food Title -->
+      <div class="lg:col-span-3">
+        <h2
+          id="foodOverviewTitle"
+          class="text-4xl font-heading font-semibold tracking-tight leading-snug text-[#2D2D2D] mb-4"
+        >
+          {{ selectedFood.name || 'Select a food…' }}
+        </h2>
+      </div>
+
+      <!-- Amount Input -->
+      <div class="flex flex-col">
+        <label
+          for="amountInput"
+          class="mb-2 text-lg font-heading font-semibold text-primary"
+        >
+          Amount
+        </label>
+        <input
+          id="amountInput"
+          type="number"
+          [(ngModel)]="enteredAmount"
+          [disabled]="!selectedFood"
+          placeholder="e.g. 1"
+          class="rounded-xl px-4 py-2 bg-accent_light text-text text-base font-body focus:outline-none focus:ring-2 focus:ring-primary shadow-sm transition-all duration-300 ease-in-out w-full"
+        />
+      </div>
+
+      <!-- Measure Select -->
+      <div class="flex flex-col">
+        <label
+          for="measuresSelect"
+          class="mb-2 text-lg font-heading font-semibold text-primary"
+        >
+          Measure
+        </label>
+        <select
+          id="measuresSelect"
+          [(ngModel)]="selectedMeasure"
+          [disabled]="!selectedFood"
+          (change)="onSelected()"
+          class="rounded-xl px-4 py-2 bg-accent_light text-text text-base font-body focus:outline-none focus:ring-2 focus:ring-primary shadow-sm transition-all duration-300 ease-in-out w-full"
+        >
+          <option
+            *ngFor="let m of selectedFood?.measures || []"
+            [value]="m.name"
+            class="bg-white text-text"
+          >
+            {{ m.name }} — {{ m.weightInGrams }} g
+          </option>
+        </select>
+      </div>
+      <!-- Submit Food Entry Button -->
+      <div class="lg:col-span-3 flex justify-end mt-4">
+        <button
+          (click)="submitFoodEntry()"
+          [disabled]="!selectedFood || !enteredAmount"
+          class="px-6 py-3 rounded-xl bg-[#D4A017] text-white font-semibold hover:bg-[#FFB85F] transition disabled:opacity-50"
+        >
+          Add to Dashboard
+        </button>
+      </div>
+      <!-- Food Photo & Nutrients -->
+      <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+        <div class="flex items-center justify-center">
+          <img
+            *ngIf="selectedFood.photo"
+            [src]="selectedFood.photo"
+            alt="{{ selectedFood.name }}"
+            class="w-full max-w-xs h-auto rounded-xl object-cover shadow-md"
+          />
+        </div>
+        <div>
+          <h3 class="text-2xl font-heading font-semibold text-primary mb-3">
+            Nutritional Details
+          </h3>
+          <ul class="list-disc list-inside space-y-2 text-base font-body text-text">
+            <li *ngFor="let n of selectedFood.foodNutrients">
+          <span class="font-emphasis text-accent_luxe">
+            {{ getNutrientLabel(n.nutrientId)[0] }}
+          </span>
+              :
+              <strong>
+                {{ Math.round((n.amount * enteredAmount / 100 * (selectedMeasureDto?.weightInGrams || 0)) * 100) / 100 }}
+                {{ getNutrientLabel(n.nutrientId)[1] }}
+              </strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+
+<section id="home" class="hero min-h-screen flex items-center justify-center bg-gradient-to-br from-[#E0F7F1] to-white pt-20">
+  <div class="container mx-auto px-12 flex flex-col md:flex-row items-center">
+    <div class="md:w-1/2 text-center md:text-left">
+      <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4 tracking-tight">Track Your Nutrition, Build Healthy Habits</h1>
+      <p class="text-xl text-[#2D2D2D] mb-8 leading-relaxed">Monitor your meals, gain insights, and achieve your health goals with ease.</p>
+      <a href="#" class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out">Get Started</a>
+    </div>
+    <div class="md:w-1/2 mt-8 md:mt-0">
+      <div class="bg-[#E0F7F1] h-64 w-full rounded-xl">
+        <img class="mx-auto relative -top-14" src="assets/TrackTopus_Nutrimatrix-logo.png">
+      </div>
+    </div>
+  </div>
+</section>
+<section id="features" class="features py-20 bg-white">
+  <div class="container mx-auto px-12">
+    <h2 class="text-3xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] text-center mb-12 tracking-tight">Features</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="feature-card rounded-2xl shadow-2xl p-8 bg-white border border-[#D4A017]/30 animate-reveal">
+        <svg class="h-8 w-8 stroke-[#D4A017] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+        </svg>
+
+        <h3 class="text-xl font-medium mb-2">Easy Meal Logging</h3>
+        <p class="text-base text-[#2D2D2D] leading-relaxed">Quickly log your meals with lots of automation</p>
+      </div>
+      <div class="feature-card rounded-2xl shadow-2xl p-8 bg-white border border-[#D4A017]/30 animate-reveal">
+        <svg class="h-8 w-8 stroke-[#D4A017] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="7" />
+          <line x1="16.656" y1="16.657" x2="21" y2="21" />
+        </svg>
+        <h3 class="text-xl font-medium mb-2">Nutritional Insights</h3>
+        <p class="text-base text-[#2D2D2D] leading-relaxed">Extremely flexible tracking system</p>
+      </div>
+      <div class="feature-card rounded-2xl shadow-2xl p-8 bg-white border border-[#D4A017]/30 animate-reveal">
+        <svg class="h-8 w-8 stroke-[#D4A017] mb-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+        <h3 class="text-xl font-medium mb-2">Recommendation services</h3>
+        <p class="text-base text-[#2D2D2D] leading-relaxed">Get your meal schedule personalized for your needs</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="testimonials" class="testimonials py-20 bg-[#F8FAF9]">
+  <div class="container mx-auto px-12">
+    <h2 class="text-3xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] text-center mb-12 tracking-tight">Integrates</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div class="testimonial-card rounded-2xl shadow-2xl p-8 bg-white border border-[#D4A017]/30 animate-reveal">
+        <img class="img-gold h-25 mx-auto" src="/assets/nutrionix.png">
+        <div class="text-base text-[#2D2D2D] mb-4 leading-relaxed text-center mt-8 text-lg font-semibold">Nutrionix</div>
+      </div>
+      <div class="testimonial-card rounded-2xl shadow-2xl p-8 bg-white border border-[#D4A017]/30 animate-reveal">
+        <img class="img-gold h-25 mx-auto" src="/assets/identity.png">
+        <div class="text-base text-[#2D2D2D] mb-4 leading-relaxed text-center mt-8 text-lg font-semibold">Google Identity Service</div>
+      </div>
+      <div class="testimonial-card rounded-2xl shadow-2xl p-8 bg-white border border-[#D4A017]/30 animate-reveal">
+        <img class="img-gold h-25 mx-auto" src="/assets/brevo.png">
+        <div class="text-base text-[#2D2D2D] mb-4 leading-relaxed text-center mt-8 text-lg font-semibold">Brevo</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section id="cta" class="cta py-20 bg-gradient-to-br from-[#E0F7F1] to-white">
+  <div class="container mx-auto px-12 text-center">
+    <h2 class="text-3xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4 tracking-tight">Ready to become the coolest biohacker?</h2>
+    <p class="text-xl text-[#2D2D2D] mb-8 leading-relaxed">Join NutriMatrix today and take control of your nutrition</p>
+    <a href="#" class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out">Register</a>
+  </div>
+</section>
+

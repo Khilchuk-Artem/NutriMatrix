@@ -1,0 +1,30 @@
+{
+  "name": "barkoder-wasm",
+  "version": "1.3.9",
+  "description": "Barkoder Barcode Scanner SDK for the Web",
+  "main": "barkoder-umd.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "browser": {
+    "fs": false,
+    "os": false,
+    "path": false,
+    "crypto": false
+  },
+  "keywords": [
+    "barkoder",
+    "barcode",
+    "scanner",
+	"scanning-sdk",
+    "web",
+    "javascript",
+    "webassembly"
+  ],
+  "author": "Barkoder",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "bugs": {
+    "url": "https://barkoder.com/issues"
+  },
+  "homepage": "https://barkoder.com/"
+}

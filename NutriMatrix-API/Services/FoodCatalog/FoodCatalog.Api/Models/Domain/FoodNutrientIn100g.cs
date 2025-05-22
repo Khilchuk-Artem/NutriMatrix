@@ -2,9 +2,9 @@
 {
     public class FoodNutrientIn100g:IEntity
     {
-        public Guid Id { get; set; }
-        public Guid FoodId { get; set; }
-        public Guid NutrientId { get; set; }
+        public long Id { get; set; }
+        public long FoodId { get; set; }
+        public long NutrientId { get; set; }
         public float Amount { get; set; }
         public bool IsDeleted { get; set; }
 

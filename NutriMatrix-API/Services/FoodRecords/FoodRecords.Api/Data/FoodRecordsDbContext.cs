@@ -10,6 +10,8 @@ namespace FoodRecords.Api.Data
         { }
 
         public DbSet<FoodRecord> FoodRecords { get; set; }
+        public DbSet<RecipeRecord> RecipeRecords { get; set; }
+
         public DbSet<FoodPlan> FoodPlans { get; set; }
 
     }

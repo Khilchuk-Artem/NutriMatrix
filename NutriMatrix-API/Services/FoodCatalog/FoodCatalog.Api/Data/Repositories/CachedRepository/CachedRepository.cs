@@ -26,7 +26,7 @@ namespace FoodCatalog.Api.Data.Repositories.CachedRepository
             return entity;
         }
 
-        public async Task<T> Delete(Guid id)
+        public async Task<T> Delete(long id)
         {
             var entity = await _collection.FirstOrDefaultAsync(e => e.Id == id);
 
@@ -37,12 +37,12 @@ namespace FoodCatalog.Api.Data.Repositories.CachedRepository
             return entity;
         }
 
-        public Task<T> Get(Guid id)
+        public Task<T> Get(long id)
         {
             return _collection.FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public Task<T> Get(Guid id, Specification<T> specification)
+        public Task<T> Get(long id, Specification<T> specification)
         {
             return ApplySpecifications(_collection.AsQueryable(), specification)
                 .FirstOrDefaultAsync(t => t.Id == id);

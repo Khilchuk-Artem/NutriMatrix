@@ -1,1 +1,66 @@
 /* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@import 'ngx-toastr/toastr';
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@keyframes reveal {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-reveal {
+  animation: reveal 400ms ease-in-out forwards;
+}
+html {
+  scroll-behavior: smooth;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/assets/fonts/playfair-display-cyrillic-600-normal.woff') format('woff2');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/open-sans-v40-cyrillic_cyrillic-ext_latin-regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/assets/fonts/open-sans-v40-cyrillic_cyrillic-ext_latin-500.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/assets/fonts/fira-code-v26-cyrillic_cyrillic-ext_latin-regular.woff2') format('woff2');
+}
+
+
+
+@theme {
+  --nutriyellow: #FFD580;
+  --nutrigold: #D4A017;
+  --nutrigreen: #E0F7F1;
+  --nutridark: #2D2D2D;
+  --nutrilight: #F8FAF9;
+  --nutriaccent: #6A9D8C;
+}
+
+.img-gold{
+  filter: brightness(0) saturate(100%) invert(77%) sepia(92%) saturate(2866%) hue-rotate(351deg) brightness(87%) contrast(89%);
+}

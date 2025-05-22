@@ -1,5 +1,6 @@
 
 using FoodCatalog.Grpc;
+using Microsoft.EntityFrameworkCore;
 using Qdrant.Client;
 using RecommendationService.Api.Data;
 using RecommendationService.Api.Models.Dto;
@@ -17,10 +18,9 @@ namespace RecommendationService.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
 
             builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
@@ -33,6 +33,11 @@ namespace RecommendationService.Api
             builder.Services.AddScoped<INutrientsAnalysisService, NutrientsAnalysisService>();
             builder.Services.AddScoped<IRecipeRecommendationService, RecipeRecommendationService>();
             builder.Services.AddScoped<IQdrantService, QdrantService>();
+
+            builder.Services.AddDbContext<RecipeDbContext>(options =>
+            {
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
 
             builder.Services.AddSingleton<QdrantClient>(_ =>
             {
@@ -61,6 +66,12 @@ namespace RecommendationService.Api
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<RecipeDbContext>();
+                db.Database.Migrate();
             }
 
             app.UseHttpsRedirection();

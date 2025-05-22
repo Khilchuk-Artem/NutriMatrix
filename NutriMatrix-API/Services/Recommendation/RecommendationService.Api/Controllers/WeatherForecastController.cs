@@ -85,5 +85,16 @@ namespace RecommendationService.Api.Controllers
 
             return Ok(res);
         }
+
+        [HttpPost("Checking")]
+        public async Task<IActionResult> Checking()
+        {
+            var nutrition = RecipeParser.ParseRecipes(
+                Path.Combine(AppContext.BaseDirectory, "Assets", "recipe_nutrition_data.csv"),
+                Path.Combine(AppContext.BaseDirectory, "Assets", "my_recipes.csv"));
+
+
+            return Ok(nutrition);
+        }
     }
 }

@@ -12,8 +12,10 @@ namespace FoodCatalog.Api.Data.Context
                 .AddJsonFile("appsettings.json")
                 .Build();
 
+            var connstring = "Host=localhost;Port=1334;Database=FoodCatalogDb;Username=postgres;Password=postgres;";
+            var tmp = config.GetConnectionString("DefaultConnection");
             var optionsBuilder = new DbContextOptionsBuilder<FoodCatalogDbContext>();
-            optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
+            optionsBuilder.UseNpgsql(connstring);
 
             return new FoodCatalogDbContext(optionsBuilder.Options);
         }

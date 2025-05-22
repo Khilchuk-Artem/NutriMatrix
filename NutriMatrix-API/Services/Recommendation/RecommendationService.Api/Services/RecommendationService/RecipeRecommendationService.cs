@@ -42,7 +42,7 @@ namespace RecommendationService.Api.Services.RecommendationService
             }
 
             //step 2: define expectations for each of them
-            var averages = new List<Dictionary<int, float>>();
+            /*var averages = new List<Dictionary<int, float>>();
 
             foreach(var req in dto.RecipeRequests)
             {
@@ -59,7 +59,7 @@ namespace RecommendationService.Api.Services.RecommendationService
                         );
 
                     return expectations;
-                }).ToList();
+                }).ToList();*/
 
             //take k nearest neighboors for each candidate
             var k = 200;
@@ -70,7 +70,7 @@ namespace RecommendationService.Api.Services.RecommendationService
                 var reference = _recipesCollection.Where(r=>r.Id== 46989).ToList();
 
                 var vector = reference[0].NutrientAmounts.Keys
-                    .Select(k => expectations[i].TryGetValue(k, out var value) ? value : 0f)
+                    .Select(k => dto.NutritionalGoals.TryGetValue(k, out var value) ? value : 0f)
                     .ToList();
                 var pastIds = candidatesList.SelectMany(innerList => innerList).Select(r=>(int)r.Id);
 
@@ -121,6 +121,8 @@ namespace RecommendationService.Api.Services.RecommendationService
                     }));
             if (currentCombo.Count == candidatesList.Count|| currentDistance>bestDistance)
             {
+                //change to checking if i have closed in on the distance or went further 
+                //but really must check mathematically if i have started to drift away from target means i'll keep getting away from it
                 return new Tuple<float, Stack<Tuple<RecipeShortcutRedis, int>>>(currentDistance, new Stack<Tuple<RecipeShortcutRedis, int>>(currentCombo.Reverse()));
             }
 

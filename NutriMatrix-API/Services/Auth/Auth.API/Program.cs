@@ -2,6 +2,7 @@ using Auth.API.Data;
 using Auth.API.Models.Settings;
 using Auth.API.Services.AuthService;
 using Auth.API.Services.EmailService;
+using Auth.API.Services.UserSummaryService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,7 @@ namespace Auth.API
 
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IUserSummaryService, UserSummaryService>();
 
             builder.Services
                 .AddIdentityCore<IdentityUser>()
@@ -67,10 +69,18 @@ namespace Auth.API
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth API V1");
+                });
             }
 
-
+            app.UseCors(options =>
+            {
+                options.AllowAnyHeader();
+                options.AllowAnyOrigin();
+                options.AllowAnyMethod();
+            });
 
             app.UseHttpsRedirection();
 

@@ -6,16 +6,16 @@ using System.Collections;
 namespace RecommendationService.Api.Models.Redis
 {
     [Document(
-    StorageType = StorageType.Json,               // store as RedisJSON  
-    Prefixes = new[] { "RecipeShortcut" }    // key prefix  
+    StorageType = StorageType.Json,
+    Prefixes = new[] { "RecipeShortcut" }
 )]
     public class RecipeShortcutRedis : IRedisEntity
     {
-        [RedisIdField]      // ← marks this as the document’s key
-        [Indexed]           // ← lets you filter by Id in LINQ
+        [RedisIdField]
+        [Indexed]
         public long Id { get; set; }
 
-        [Indexed]           // ← now you can do .Where(x=>x.RecipeId==…)
+        [Indexed]
         public long RecipeId { get; set; }
 
         public float Servings { get; set; }

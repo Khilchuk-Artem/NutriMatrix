@@ -2,7 +2,7 @@
 {
     public class UpdateFoodRecordDto
     {
-        public Guid FoodMeasureId { get; set; }
+        public long FoodMeasureId { get; set; }
         public float Amount { get; set; }
     }
 }

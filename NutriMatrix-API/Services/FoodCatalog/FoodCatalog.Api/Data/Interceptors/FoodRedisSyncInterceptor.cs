@@ -4,16 +4,19 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Redis.OM;
 using Redis.OM.Contracts;
+using Redis.OM.Searching;
 
 namespace FoodCatalog.Api.Data.Interceptors
 {
     public class FoodRedisSyncInterceptor : SaveChangesInterceptor
     {
-        private readonly IRedisConnectionProvider _redisProvider;
+        private readonly RedisCollection<FoodRedis> _foodRedisCollection;
+        private readonly RedisCollection<MeasureRedis> _measureRedisCollection;
 
-        public FoodRedisSyncInterceptor(RedisConnectionProvider redisProvider)
+        public FoodRedisSyncInterceptor(RedisCollection<FoodRedis> foodRedisCollection, RedisCollection<MeasureRedis> measureRedisCollection)
         {
-            _redisProvider = redisProvider;
+            _foodRedisCollection = foodRedisCollection;
+            _measureRedisCollection = measureRedisCollection;
         }
 
         public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
@@ -32,32 +35,42 @@ namespace FoodCatalog.Api.Data.Interceptors
 
             if (addedFoods.Any())
             {
-                var foodRedisCollection = _redisProvider.RedisCollection<FoodRedis>();
-                var measureRedisCollection = _redisProvider.RedisCollection<MeasureRedis>();
 
                 foreach (var food in addedFoods)
                 {
-                    var foodRedis = await foodRedisCollection.FirstOrDefaultAsync(e => e.Id == food.Id)
+                    await context.Entry(food).Collection(f => f.FoodNutrients).LoadAsync(cancellationToken);
+                    await context.Entry(food).Collection(f => f.Measures).LoadAsync(cancellationToken);
+
+                    var foodRedis = await _foodRedisCollection.FirstOrDefaultAsync(e => e.Id == food.Id)
                                       ?? new FoodRedis { Id = food.Id };
 
                     foodRedis.Name = food.Name ?? foodRedis.Name;
                     foodRedis.Photo = food.Photo ?? foodRedis.Photo;
-                    foodRedis.FoodNutrients = food.FoodNutrients;
+                    foodRedis.Barcode = food.Barcode;
+                    foodRedis.FoodNutrients = food.FoodNutrients?
+                        .Select(n => new FoodNutrientIn100g
+                        {
+                            Id = n.Id,
+                            FoodId = n.FoodId,
+                            NutrientId = n.NutrientId,
+                            Amount = n.Amount,
+                            IsDeleted = n.IsDeleted
+                        }).ToList();
 
-                    await foodRedisCollection.InsertAsync(foodRedis);
+                    await _foodRedisCollection.InsertAsync(foodRedis);
 
                     if (food.Measures != null)
                     {
                         foreach (var measure in food.Measures)
                         {
-                            var measureRedis = await measureRedisCollection.FirstOrDefaultAsync(m => m.Id == measure.Id)
+                            var measureRedis = await _measureRedisCollection.FirstOrDefaultAsync(m => m.Id == measure.Id)
                                                  ?? new MeasureRedis { Id = measure.Id };
 
                             measureRedis.Name = measure.Name;
                             measureRedis.WeightInGrams = measure.WeightInGrams;
                             measureRedis.FoodId = food.Id;
 
-                            await measureRedisCollection.InsertAsync(measureRedis);
+                            await _measureRedisCollection.InsertAsync(measureRedis);
                         }
                     }
                 }

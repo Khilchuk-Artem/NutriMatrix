@@ -1,0 +1,86 @@
+<div class="mt-20 max-w-4xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
+  <h1 class="text-4xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-6 tracking-tight">
+    Edit Profile of {{ user?.name || 'Unknown User' }}
+  </h1>
+
+  <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+
+    <section class="mb-10">
+      <h2 class="text-2xl font-semibold mb-3 text-[#2D2D2D]">User Details</h2>
+
+      <p><strong>User ID:</strong> {{ user?.userId }}</p>
+
+      <p><strong>Roles:</strong> {{ (user?.roles ?? []).join(', ') }}</p>
+
+      <label class="block mb-2 font-semibold text-[#2D2D2D]" for="name">Name</label>
+      <input
+        id="name"
+        formControlName="name"
+        type="text"
+        class="w-full p-2 border border-gray-300 rounded"
+        placeholder="Enter your name"
+      />
+      <div *ngIf="editForm.controls['name'].invalid && !editForm.controls['name'].untouched" class="text-red-600 mt-1">
+        Name is required.
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-2xl font-semibold mb-3 text-[#2D2D2D]">Nutrients To Track</h2>
+
+      <table class="w-full border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30">
+        <thead>
+        <tr>
+          <th class="p-4 text-left font-medium border-b border-gray-200">Nutrient</th>
+          <th class="p-4 text-left font-medium border-b border-gray-200">Target Amount</th>
+          <th class="p-4 text-left font-medium border-b border-gray-200">Active</th>
+        </tr>
+        </thead>
+        <tbody formArrayName="nutrientsToTrack">
+        <tr *ngFor="let nutrientCtrl of nutrients.controls; let i = index" [formGroupName]="i" class="hover:bg-[#E0F7F1]/30 transition-colors duration-300">
+          <td class="p-4 border-b border-gray-200">{{ getNutrientLabel(nutrientCtrl.value['nutrientId']) }}</td>
+          <td class="p-4 border-b border-gray-200">
+            <input
+              type="number"
+              formControlName="targetAmount"
+              class="w-full p-1 border border-gray-300 rounded"
+              min="0"
+              step="any"
+            />
+            <div *ngIf="nutrientCtrl.get('targetAmount')?.invalid && nutrientCtrl.get('targetAmount')?.touched" class="text-red-600 text-xs mt-1">
+              Enter a valid amount.
+            </div>
+          </td>
+          <td class="p-4 border-b border-gray-200 text-center">
+            <input type="checkbox" formControlName="isActive" />
+          </td>
+        </tr>
+        <tr *ngIf="nutrients.length === 0">
+          <td colspan="3" class="p-4 text-center text-gray-400">No nutrients to track</td>
+        </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="mt-6 flex justify-end gap-4">
+      <button
+        type="submit"
+        class="px-6 py-2 bg-[#D4A017] text-white rounded hover:bg-[#b78e12]"
+        [disabled]="editForm.invalid || saving"
+      >
+        {{ saving ? 'Saving...' : 'Save Changes' }}
+      </button>
+      <button
+        type="button"
+        class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-100"
+        (click)="resetForm()"
+        [disabled]="saving"
+      >
+        Reset
+      </button>
+    </div>
+
+    <p *ngIf="errorMsg" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm">{{ errorMsg }}</p>
+
+  </form>
+</div>
