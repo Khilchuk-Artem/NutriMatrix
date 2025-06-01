@@ -16,12 +16,13 @@ export class NutrientService{
 
   constructor(private http: HttpClient) {}
 
-  async loadNutrientData(): Promise<void> {
+  async loadNutrientData(): Promise<NutrientInfo[] | null> {
     if (!this.nutrientData) {
       this.nutrientData = await firstValueFrom(
         this.http.get<NutrientInfo[]>('assets/nutrients.json')
       );
     }
+    return this.nutrientData;
   }
 
   async getNutrientById(attrId: number): Promise<{ name: string; unit: string } | null> {

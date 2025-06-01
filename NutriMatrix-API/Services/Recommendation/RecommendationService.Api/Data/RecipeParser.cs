@@ -50,7 +50,7 @@ namespace RecommendationService.Api.Data
                     Servings = meta.servings,
                     IsDeleted = false,
                     Measures = new List<RecipeMeasure>(),
-                    NutrientsPerServing = new List<NutrientAmount>()
+                    NutrientsPerTotalServings = new List<NutrientAmount>()
                 };
 
                 var nutrientEntry = nutrients.FirstOrDefault(n => n.recipe_id == meta.recipe_id);
@@ -75,7 +75,7 @@ namespace RecommendationService.Api.Data
                         if (key.StartsWith("attr_") && float.TryParse(value.ToString(), out var amount))
                         {
                             var nutrientId = int.Parse(key.Replace("attr_", ""));
-                            ((List<NutrientAmount>)recipe.NutrientsPerServing).Add(new NutrientAmount
+                            ((List<NutrientAmount>)recipe.NutrientsPerTotalServings).Add(new NutrientAmount
                             {
                                 NutrientId = nutrientId,
                                 Amount = amount,

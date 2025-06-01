@@ -1,127 +1,229 @@
 ﻿using CsvHelper;
 using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
-using RecommendationService.Api.Models.Redis;
-using System.Formats.Asn1;
+using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Numerics;
+using System.Linq;
 using System.Text.Json;
-using Redis.OM;
-using Vector = Redis.OM.Vector;
+using RecommendationService.Api.Models;
+
 namespace RecommendationService.Api.Data
 {
-    public class IngredientClean
-    {
-        public string food_name { get; set; }
-        public string unit_name { get; set; }
-        public float unit_amount { get; set; }
-    }
-
-    public class RecipeInfoRow
-    {
-        public long recipe_id { get; set; }
-        public string title { get; set; }
-        public string description { get; set; }
-        public string directions { get; set; }
-        public float? servings { get; set; }
-        public string primary_category_name { get; set; }
-
-        public List<IngredientClean> ingredients_clean { get; set; }
-    }
-
-    public class IngredientCleanConverter : DefaultTypeConverter
-    {
-        public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
-        {
-            return JsonSerializer.Deserialize<List<IngredientClean>>(text);
-        }
-    }
-
-    public sealed class RecipeInfoMap : ClassMap<RecipeInfoRow>
-    {
-        public RecipeInfoMap()
-        {
-            Map(m => m.recipe_id).Name("recipe_id");
-            Map(m => m.servings).Name("servings");
-            Map(m => m.description).Name("description");
-            Map(m => m.directions).Name("directions");
-            Map(m => m.primary_category_name).Name("primary_category_name");
-            Map(m => m.ingredients_clean)
-                .Name("ingredients_clean")
-                .TypeConverter<IngredientCleanConverter>();
-        }
-    }
     public static class Seeding
     {
-        static Dictionary<long, Dictionary<int, float>> LoadNutrition(string path)
+        private class IngredientMeasure
         {
+            public long food_id { get; set; }
+            public long measure_id { get; set; }
+            public float unit_amount { get; set; }
+        }
+
+        private class FullNutritionData
+        {
+            public List<IngredientMeasure> Measures { get; set; } = new();
+            public Dictionary<int, float> Nutrients { get; set; } = new();
+        }
+
+        private class RecipeInfoRow
+        {
+            public long recipe_id { get; set; }
+            public string title { get; set; }  // Already present
+            public string description { get; set; }
+            public float? servings { get; set; }
+            public string directions { get; set; }
+            public string photo_url { get; set; }
+            public string primary_category_name { get; set; }
+        }
+
+        private sealed class RecipeInfoMap : ClassMap<RecipeInfoRow>
+        {
+            public RecipeInfoMap()
+            {
+                Map(m => m.recipe_id).Name("recipe_id");
+                Map(m => m.title).Name("title"); 
+                Map(m => m.description).Name("description");
+                Map(m => m.servings).Name("servings");
+                Map(m => m.directions).Name("directions");
+                Map(m => m.photo_url).Name("photo_url");
+                Map(m => m.primary_category_name).Name("primary_category_name");
+            }
+        }
+
+        public static (List<Recipe> Recipes, List<RecipeMeasure> Measures, List<NutrientAmount> Nutrients)
+            GetRecipes()
+        {
+            var nutritionPath = Path.Combine(AppContext.BaseDirectory, "Assets", "recipe_nutrition_data_sample.csv");
+            var infoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "my_recipes_sample.csv");
+
+            var nutritionDict = ParseNutritionCsv(nutritionPath);
+            var recipeInfos = ParseRecipeInfoCsv(infoPath);
+
+            var recipes = new List<Recipe>();
+            var recipeMeasures = new List<RecipeMeasure>();
+            var nutrientAmounts = new List<NutrientAmount>();
+
+            foreach (var info in recipeInfos)
+            {
+                var recipe = new Recipe
+                {
+                    Id = info.recipe_id,
+                    Title = info.title,  // ADDED TITLE HERE
+                    Category = info.primary_category_name,
+                    Servings = info.servings,
+                    Description = info.description,
+                    Directions = info.directions,
+                    PhotoUrl = info.photo_url,
+                    IsDeleted = false,
+                    Measures = new List<RecipeMeasure>(),
+                    NutrientsPerTotalServings = new List<NutrientAmount>()
+                };
+
+                if (nutritionDict.TryGetValue(info.recipe_id, out var nutritionData))
+                {
+                    foreach (var measure in nutritionData.Measures)
+                    {
+                        var rm = new RecipeMeasure
+                        {
+                            FoodId = measure.food_id,
+                            MeasureId = measure.measure_id,
+                            RecipeId = info.recipe_id,
+                            Amount = measure.unit_amount,
+                            IsDeleted = false
+                        };
+                        recipeMeasures.Add(rm);
+                        recipe.Measures.Add(rm);
+                    }
+
+                    foreach (var nutrient in nutritionData.Nutrients)
+                    {
+                        var na = new NutrientAmount
+                        {
+                            RecipeId = info.recipe_id,
+                            NutrientId = nutrient.Key,
+                            Amount = nutrient.Value,
+                            IsDeleted = false
+                        };
+                        nutrientAmounts.Add(na);
+                        recipe.NutrientsPerTotalServings.Add(na);
+                    }
+                }
+
+                recipes.Add(recipe);
+            }
+
+            return (recipes, recipeMeasures, nutrientAmounts);
+        }
+
+        private static Dictionary<long, FullNutritionData> ParseNutritionCsv(string path)
+        {
+            var nutritionDict = new Dictionary<long, FullNutritionData>();
             var config = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
-                Delimiter = ",",
-                Quote = '"',
-                Escape = '"',
-                Mode = CsvMode.RFC4180,
                 BadDataFound = null,
-                MissingFieldFound = null
+                MissingFieldFound = null,
+                HasHeaderRecord = true,
+                Mode = CsvMode.RFC4180,
+                DetectDelimiter = true,
+                PrepareHeaderForMatch = args => args.Header.Trim().ToLower()
             };
 
             using var reader = new StreamReader(path);
             using var csv = new CsvReader(reader, config);
 
-            var records = csv.GetRecords<dynamic>()
-                             .Cast<IDictionary<string, object>>()
-                             .ToList();
+            csv.Read();
+            csv.ReadHeader();
+            var headers = csv.HeaderRecord.ToList();
 
-            var result = new Dictionary<long, Dictionary<int, float>>();
-            foreach (var row in records)
+            while (csv.Read())
             {
-                var id = long.Parse((string)row["recipe_id"]);
-                var nutrients = new Dictionary<int, float>();
-
-                foreach (var kv in row)
+                try
                 {
-                    if (kv.Key.StartsWith("attr_") &&
-                        float.TryParse((string)kv.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out var val))
-                    {
-                        var nutId = int.Parse(kv.Key.Substring(5));
-                        nutrients[nutId] = val;
-                    }
-                }
+                    if (!long.TryParse(csv.GetField("recipe_id"), out long recipeId))
+                        continue;
 
-                result[id] = nutrients;
+                    var ingredientsJson = csv.GetField("ingredients_clean");
+                    var measures = new List<IngredientMeasure>();
+
+                    try
+                    {
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true,
+                            NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
+                        };
+                        measures = JsonSerializer.Deserialize<List<IngredientMeasure>>(ingredientsJson, options)
+                                   ?? new List<IngredientMeasure>();
+                    }
+                    catch
+                    {
+                        // Log error but continue
+                    }
+
+                    var nutrients = new Dictionary<int, float>();
+                    foreach (var header in headers)
+                    {
+                        if (header.StartsWith("attr_") &&
+                            int.TryParse(header.AsSpan(5), out int nutrientId))
+                        {
+                            var fieldValue = csv.GetField(header);
+                            if (float.TryParse(
+                                fieldValue,
+                                NumberStyles.Float | NumberStyles.AllowThousands,
+                                CultureInfo.InvariantCulture,
+                                out float amount))
+                            {
+                                nutrients[nutrientId] = amount;
+                            }
+                        }
+                    }
+
+                    nutritionDict[recipeId] = new FullNutritionData
+                    {
+                        Measures = measures,
+                        Nutrients = nutrients
+                    };
+                }
+                catch
+                {
+                    // Skip bad rows
+                }
             }
 
-            return result;
-        }
-        static List<RecipeShortcutRedis> BuildShortcuts(
-            List<RecipeInfoRow> infos,
-            Dictionary<long, Dictionary<int, float>> nutData)
-        {
-            return infos.Select(info => new RecipeShortcutRedis
-            {
-                Id = info.recipe_id,
-                Servings = info.servings ?? 0f,
-                Category = info.primary_category_name,
-                IngredientIds = null,
-                NutrientAmounts = nutData.TryGetValue(info.recipe_id, out var dict2)
-                                         ? dict2
-                                         : new Dictionary<int, float>()
-            }).Where(r=>r.NutrientAmounts.Count==161).ToList();
-        }
-        static List<RecipeInfoRow> LoadInfo(string path)
-        {
-            using var reader = new StreamReader(path);
-            using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
-            csv.Context.RegisterClassMap<RecipeInfoMap>();
-            return csv.GetRecords<RecipeInfoRow>().ToList();
+            return nutritionDict;
         }
 
-        public static IEnumerable<RecipeShortcutRedis> GetRecipeShortcutRedis()
+        private static List<RecipeInfoRow> ParseRecipeInfoCsv(string path)
         {
-            var nutrition = LoadNutrition(Path.Combine(AppContext.BaseDirectory, "Assets", "recipe_nutrition_data.csv"));
-            var infos = LoadInfo(Path.Combine(AppContext.BaseDirectory, "Assets", "my_recipes.csv"));
-            return BuildShortcuts(infos, nutrition);
+            var config = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                MissingFieldFound = null,
+                BadDataFound = null,
+                HeaderValidated = null,
+                PrepareHeaderForMatch = args => args.Header.Trim().ToLower()
+            };
+
+            using var reader = new StreamReader(path);
+            using var csv = new CsvReader(reader, config);
+
+            csv.Context.RegisterClassMap<RecipeInfoMap>();
+            var rows = csv.GetRecords<RecipeInfoRow>().ToList();
+
+            foreach (var row in rows)
+            {
+                row.title = Clean(row.title);
+                row.description = Clean(row.description);
+                row.directions = Clean(row.directions);
+                row.photo_url = Clean(row.photo_url);
+                row.primary_category_name = Clean(row.primary_category_name);
+            }
+
+            return rows;
         }
+        private static string? Clean(string? input)
+        {
+            return input?.Replace("\0", string.Empty).Trim();
+        }
+
     }
 }

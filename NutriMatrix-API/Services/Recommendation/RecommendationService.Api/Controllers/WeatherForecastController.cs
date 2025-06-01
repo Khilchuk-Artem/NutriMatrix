@@ -38,7 +38,7 @@ namespace RecommendationService.Api.Controllers
         [HttpGet("Seed")]
         public async Task<IActionResult> SeedAsync()
         {
-            var data = Seeding.GetRecipeShortcutRedis();
+            /*var data = Seeding.GetRecipeShortcutRedis();
             await _qdrantService.CreateCollectionAsync();
 
             foreach (var a in data)
@@ -49,7 +49,8 @@ namespace RecommendationService.Api.Controllers
 
             var res = await _collection.Take(20).ToListAsync();
 
-            return Ok(res);
+            return Ok(res);*/
+            return Ok();
         }
         [HttpPost("Recommendation")]
         public async Task<IActionResult> Recommendation(RecommendationRequestDto dto)

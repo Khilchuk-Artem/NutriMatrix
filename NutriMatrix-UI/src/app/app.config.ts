@@ -4,7 +4,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {provideToastr} from "ngx-toastr";
-import {provideAnimations} from '@angular/platform-browser/animations';
+import {provideAnimations, provideNoopAnimations} from '@angular/platform-browser/animations';
 import {provideAnimationsAsync} from '@angular/platform-browser/animations/async';
 import {providePrimeNG} from 'primeng/config';
 import Aura from '@primeng/themes/aura';
@@ -18,6 +18,8 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideToastr(),
     provideAnimationsAsync(),
+    provideAnimations(),
+    provideNoopAnimations(),
     providePrimeNG({
       theme: {
         preset: Aura

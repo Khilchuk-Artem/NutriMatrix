@@ -86,7 +86,7 @@ namespace FoodRecords.Api.Migrations
                     b.ToTable("FoodRecords");
                 });
 
-            modelBuilder.Entity("FoodRecords.Api.Models.Domain.IngredientSnapshot", b =>
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.MealIngredientSnapshot", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -100,17 +100,20 @@ namespace FoodRecords.Api.Migrations
                     b.Property<long>("FoodMeasureId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("RecipeRecordId")
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<long?>("MealRecordId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RecipeRecordId");
+                    b.HasIndex("MealRecordId");
 
-                    b.ToTable("IngredientSnapshot");
+                    b.ToTable("MealIngredientSnapshots");
                 });
 
-            modelBuilder.Entity("FoodRecords.Api.Models.Domain.RecipeRecord", b =>
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.MealRecord", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,23 +127,29 @@ namespace FoodRecords.Api.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<long>("MealId")
+                        .HasColumnType("bigint");
+
+                    b.Property<float>("ServingsEaten")
+                        .HasColumnType("real");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("RecipeRecords");
+                    b.ToTable("MealRecords");
                 });
 
-            modelBuilder.Entity("FoodRecords.Api.Models.Domain.IngredientSnapshot", b =>
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.MealIngredientSnapshot", b =>
                 {
-                    b.HasOne("FoodRecords.Api.Models.Domain.RecipeRecord", null)
+                    b.HasOne("FoodRecords.Api.Models.Domain.MealRecord", null)
                         .WithMany("IngredientSnapshots")
-                        .HasForeignKey("RecipeRecordId");
+                        .HasForeignKey("MealRecordId");
                 });
 
-            modelBuilder.Entity("FoodRecords.Api.Models.Domain.RecipeRecord", b =>
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.MealRecord", b =>
                 {
                     b.Navigation("IngredientSnapshots");
                 });

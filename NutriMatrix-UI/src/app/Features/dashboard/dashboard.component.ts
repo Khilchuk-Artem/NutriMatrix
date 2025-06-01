@@ -1,13 +1,13 @@
 import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {BarcodeFormat, BrowserMultiFormatReader, IScannerControls} from '@zxing/browser';
-import {NgClass, NgForOf, NgIf} from '@angular/common';
+import {DecimalPipe, NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {ZXingScannerModule} from '@zxing/ngx-scanner';
 import {DecodeHintType, Result} from '@zxing/library';
 import {Calendar} from 'primeng/calendar';
 import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
 import {animate, style, transition, trigger} from '@angular/animations';
 import {FoodDTO, FoodShortcutDTO, MeasureDto} from '../FoodCatalog/models/food.models';
-import {FoodService} from '../FoodCatalog/food.service';
+import {FoodService} from '../FoodCatalog/Services/food.service';
 import {AuthService} from '../Auth/Services/auth.service';
 import {NutrientInfo} from '../../Core/services/nutrient.service';
 import {HttpClient} from '@angular/common/http';
@@ -15,12 +15,63 @@ import {AddFoodRecordDto, FoodRecordDto, FoodRecordsService} from '../FoodRecord
 import {MeasureService, MeasureWithFoodDto} from '../FoodRecords/services/measure.service';
 import {MenuItem} from 'primeng/api';
 import {Menu} from 'primeng/menu';
+import {NUTRIENT_CATEGORIES} from '../../Core/services/nutrient-categories';
+import {min} from 'rxjs';
+import {FoodSelectModalComponent} from '../FoodCatalog/components/food-select-modal/food-select-modal.component';
+import {MealSelectModalComponent} from '../FoodCatalog/components/meal-select-modal/meal-select-modal.component';
+import {MealDto, MealService} from '../FoodCatalog/Services/meal.service';
+import {
+  AddMealRecordDto,
+  MealRecordDto,
+  MealRecordsService,
+  UpdateMealRecordDto
+} from '../FoodRecords/services/meal-records.service';
 
-interface FoodRecordViewModel {
+export interface FoodRecordViewModel {
+  type: 'food';
   record: FoodRecordDto;
   measure?: MeasureWithFoodDto;
 }
 
+export interface NutrientAmountDto {
+  nutrientId: number;
+  amount: number;
+}
+
+export interface RecipeShortcutDto {
+  id: number;
+  title: string;
+  recipeId: number;
+  servings: number;
+  category: string;
+  ingredientIds: number[];
+  nutrients: NutrientAmountDto[];
+}
+
+export interface RecipeMeasure {
+  ingredientId: number;
+  quantity: number;
+  measureName: string;
+}
+
+export interface Recipe {
+  id: number;
+  title: string;
+  servings: number;
+  category: string;
+  measures: RecipeMeasure[];
+  nutrientsPerServing: NutrientAmountDto[];
+  isDeleted: boolean;
+}
+export interface MealRecordViewModel {
+  type: 'meal';
+  record: MealRecordDto;
+  mealName: string;
+  expanded: boolean;
+  ingredientDetails: { foodName: string; measureName: string; amount: number; measure?: MeasureWithFoodDto }[];
+}
+
+type RecordViewModel = FoodRecordViewModel | MealRecordViewModel;
 
 @Component({
   selector: 'app-dashboard',
@@ -31,8 +82,12 @@ interface FoodRecordViewModel {
     Calendar,
     FormsModule,
     ReactiveFormsModule,
+    Menu,
     NgClass,
-    Menu
+    NgStyle,
+    FoodSelectModalComponent,
+    MealSelectModalComponent,
+    DecimalPipe
   ],
   templateUrl: './dashboard.component.html',
   standalone: true,
@@ -58,31 +113,31 @@ interface FoodRecordViewModel {
     ]),
   ],
 })
-export class DashboardComponent implements OnInit, OnDestroy {
-  @ViewChild('video') video!: ElementRef<HTMLVideoElement>;
-  private codeReader = new BrowserMultiFormatReader();
-  result: string = '';
+export class DashboardComponent  implements OnInit, OnDestroy {
   videoInputDevices: MediaDeviceInfo[] = [];
-  selectedDeviceId: string | null = null;
   private controls?: IScannerControls;
   date: Date = new Date(new Date().setHours(0, 0, 0, 0));
   allShortcuts: FoodShortcutDTO[] = [];
   public searchQuery = '';
   addFoodForm: FormGroup;
   isAddFoodModalOpen = false;
-  foodEntries: { foodName: string; amount: string }[] = [];
-  selectedFood: FoodDTO | null = null;
-  includeIds:number[] = []
+  includeIds: number[] = [];
   public nutrientMetadata: NutrientInfo[] = [];
-  public selectedMeasureDto: MeasureDto | undefined;
-  public records!:FoodRecordDto[];
-  public foodRecordViewModels!:FoodRecordViewModel[];
-  constructor(private fb: FormBuilder,
-              private foodService:FoodService,
-              private authService:AuthService,
-              private http:HttpClient,
-              private foodRecordService:FoodRecordsService,
-              private measureService:MeasureService) {
+  public recordViewModels: RecordViewModel[] = [];
+  @ViewChild('foodModal') foodModal!: FoodSelectModalComponent;
+  @ViewChild('mealModal') mealModal!: MealSelectModalComponent;
+  @ViewChild('menu') menu!: Menu;
+
+  constructor(
+    private fb: FormBuilder,
+    private foodService: FoodService,
+    private authService: AuthService,
+    private http: HttpClient,
+    private foodRecordService: FoodRecordsService,
+    private measureService: MeasureService,
+    private mealRecordService: MealRecordsService,
+    private mealService: MealService
+  ) {
     this.addFoodForm = this.fb.group({
       foodName: ['', Validators.required],
       amount: ['', Validators.required],
@@ -90,74 +145,123 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadDevices();
     this.http.get<NutrientInfo[]>('assets/nutrient_attributes.json')
       .subscribe(data => {
         this.nutrientMetadata = data;
       });
-    var user = this.authService.getUser();
+    const user = this.authService.getUser();
     if (user && 'nutrientsToTrack' in user) {
       this.includeIds = user.nutrientsToTrack
         .filter(rec => rec.isActive)
         .map(r => r.nutrientId);
-
-      console.log(this.includeIds)
     }
+    this.loadRecords();
+  }
 
+  private loadRecords(): void {
+    const userId = this.authService.getUser()?.userId || '';
+    const endDate = new Date(this.date);
+    endDate.setHours(23, 59, 59, 999);
 
-    this.foodRecordService.getAllRecords(user?.userId||'', true, this.date).subscribe(records => {
-      const viewModels: FoodRecordViewModel[] = records.map(record => ({ record }));
-
-      this.foodRecordViewModels = viewModels;
-
-      for (const vm of viewModels) {
+    this.foodRecordService.getAllRecords(userId, true, this.date).subscribe(foodRecords => {
+      const foodViewModels: FoodRecordViewModel[] = foodRecords.map(record => ({ type: 'food', record }));
+      this.recordViewModels = [...foodViewModels, ...this.recordViewModels.filter(vm => vm.type === 'meal')];
+      foodViewModels.forEach(vm => {
         this.measureService.getMeasureWithFood(vm.record.foodMeasureId).subscribe(measure => {
           vm.measure = measure;
         });
-      }
+      });
+      this.sortRecords();
+    });
+
+    this.mealRecordService.getAllRecords(userId, true, this.date, endDate).subscribe(mealRecords => {
+      const mealViewModels: MealRecordViewModel[] = mealRecords.map(record => ({
+        type: 'meal',
+        record,
+        mealName: 'Loading...',
+        expanded: false,
+        ingredientDetails: record.ingredientSnapshots.map(snapshot => ({
+          foodName: 'Loading...',
+          measureName: '',
+          amount: snapshot.amount
+        }))
+      }));
+      this.recordViewModels = [...this.recordViewModels.filter(vm => vm.type === 'food'), ...mealViewModels];
+      mealViewModels.forEach(vm => {
+        if (vm.record.mealId) {
+          this.mealService.getMealById(vm.record.mealId).subscribe(meal => {
+            vm.mealName = meal.name;
+          });
+        }
+        this.loadIngredientDetails(vm);
+      });
+      this.sortRecords();
     });
   }
+
+  private sortRecords(): void {
+    this.recordViewModels.sort((a, b) => {
+      const dateA = new Date(a.record.dateEaten);
+      const dateB = new Date(b.record.dateEaten);
+      return dateB.getTime() - dateA.getTime(); // Descending order
+    });
+  }
+
+  private loadIngredientDetails(vm: MealRecordViewModel): void {
+    vm.ingredientDetails.forEach((detail, index) => {
+      const snapshot = vm.record.ingredientSnapshots[index];
+      this.measureService.getMeasureWithFood(snapshot.foodMeasureId).subscribe(measure => {
+        detail.foodName = measure.food.name;
+        detail.measureName = measure.name;
+        detail.measure = measure;
+      });
+    });
+  }
+
+  toggleMealRow(vm: RecordViewModel): void {
+    if (vm.type === 'meal') {
+      (vm as MealRecordViewModel).expanded = !(vm as MealRecordViewModel).expanded;
+    }
+  }
+
+  onMealSelected(event: { editedMealRecord: number | null; meal: MealDto; servings: number }) {
+    const snapshots = event.meal.foodMeals.map(fm => ({
+      foodMeasureId: fm.measureId,
+      amount: fm.quantity * (event.servings / event.meal.totalServings)
+    }));
+
+    const dto = {
+      mealId: event.meal.id,
+      dateEaten: this.date.toISOString(),
+      servingsEaten: event.servings,
+      ingredientSnapshots: snapshots
+    };
+
+    if (event.editedMealRecord == null) {
+      const addDto: AddMealRecordDto = {
+        ...dto,
+        userId: this.authService.getUser()?.userId || ""
+      };
+      this.mealRecordService.addRecord(addDto).subscribe({
+        next: () => this.loadRecords(),
+        error: (err) => console.error('Failed to add meal record', err),
+      });
+    } else {
+      this.mealRecordService.updateRecord(event.editedMealRecord, dto).subscribe({
+        next: () => this.loadRecords(),
+        error: (err) => console.error('Failed to update meal record', err),
+      });
+    }
+  }
+
   getNutrientLabel(id: number): string[] {
     const match = this.nutrientMetadata.find(n => n.attr_id === id);
-    return match ? [match.name, match.unit] : ['',''];
+    return match ? [match.name, match.unit] : ['', ''];
   }
+
   ngOnDestroy(): void {
     this.stopScanner();
   }
-
-  async loadDevices() {
-    try {
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      this.videoInputDevices = devices.filter((d) => d.kind === 'videoinput');
-      if (this.videoInputDevices.length > 0) {
-        this.selectedDeviceId = this.videoInputDevices[0].deviceId;
-        this.startScanner(this.selectedDeviceId);
-      }
-    } catch (err) {
-      console.error('Error accessing camera:', err);
-    }
-  }
-
-  /*async startScanner(deviceId: string) {
-    try {
-      const videoElement = this.video.nativeElement;
-
-      this.stopScanner();
-
-      this.controls = await this.codeReader.decodeFromVideoDevice(
-        deviceId,
-        videoElement,
-        (result: Result | undefined, error) => {
-          if (result) {
-            this.result = result.getText();
-            console.log('Scanned:', this.result);
-          }
-        }
-      );
-    } catch (err) {
-      console.error('Error starting scanner:', err);
-    }
-  }*/
 
   stopScanner() {
     if (this.controls) {
@@ -165,234 +269,171 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  onDeviceSelect(event: Event) {
-    const selectedId = (event.target as HTMLSelectElement).value;
-    this.selectedDeviceId = selectedId;
-    this.startScanner(selectedId);
-  }
-
-  // === Add Food modal methods ===
-  searchControl: any;
-  selectedMeasure!: string;
-  enteredAmount: number = 1;
-  openAddFoodModal() {
+  openAddFoodModal(vm?: FoodRecordViewModel, recordId?: number): void {
+    if (vm) {
+      this.foodModal.open({ amount: vm.record.amount, measure: vm.measure }, recordId);
+    } else {
+      this.foodModal.open();
+    }
     this.isAddFoodModalOpen = true;
-    this.foodService.getFoodShortcuts(1,30).subscribe(res=>{
+    this.foodService.getFoodShortcuts(1, 30).subscribe(res => {
       this.allShortcuts = res;
-    })
-  }
-
-  closeAddFoodModal() {
-    this.isAddFoodModalOpen = false;
-    this.selectedFood = null;
-  }
-
-  submitAddFood() {
-    if (this.addFoodForm.valid) {
-      const newEntry = this.addFoodForm.value;
-      this.foodEntries.push(newEntry);
-      this.closeAddFoodModal();
-    }
-  }
-
-  onBarcodeClick() {
-    this.isBarcodeActive = true;
-    this.result = 'null';
-    if (this.selectedDeviceId != null) {
-      this.selectedFood = null;
-      this.startScanner(this.selectedDeviceId);
-    }
-  }
-
-  selectFood(id: number) {
-    this.foodService.getFoodById(id,this.includeIds).subscribe({
-      next: (food) => {
-        this.selectedFood = food;
-        this.selectedMeasure = food.measures[0].name
-        this.selectedMeasureDto = this.selectedFood.measures.find(m => m.name === this.selectedMeasure);
-
-      },
-      error: (err) => {
-        console.error('Failed to fetch food by id', err);
-      }
     });
   }
-  updateShortcuts() {
-    if(this.searchQuery.length>1||this.searchQuery.length==0){
-      this.foodService.getFoodShortcuts(1,30,this.includeIds,this.searchQuery).subscribe(res=>{
-        this.allShortcuts = res;
-      })
+
+  openAddMealModal(vm?: MealRecordViewModel, recordId?: number): void {
+    if (vm) {
+      this.mealModal.open({ servings: vm.record.servingsEaten }, recordId);
+    } else {
+      this.mealModal.open();
     }
   }
 
-  onSelected() {
-    if (this.selectedFood ) {
-      this.selectedMeasureDto = this.selectedFood.measures.find(m => m.name === this.selectedMeasure);
+  menuItems: MenuItem[] = [];
+
+  openMenu(event: Event, vm: RecordViewModel): void {
+    if (vm.type === 'food') {
+      const foodVm = vm as FoodRecordViewModel;
+      this.menuItems = [
+        { label: 'Edit', icon: 'pi pi-pencil', command: () => this.onEditFood(foodVm) },
+        { label: 'Delete', icon: 'pi pi-trash', command: () => this.onDeleteFood(foodVm) },
+      ];
+    } else {
+      const mealVm = vm as MealRecordViewModel;
+      this.menuItems = [
+        { label: 'Edit', icon: 'pi pi-pencil', command: () => this.onEditMeal(mealVm) },
+        { label: 'Delete', icon: 'pi pi-trash', command: () => this.onDeleteMeal(mealVm) },
+      ];
+    }
+    this.menu.toggle(event);
+  }
+
+  onEditFood(vm: FoodRecordViewModel): void {
+    this.openAddFoodModal(vm, vm.record.id);
+  }
+
+  onDeleteFood(vm: FoodRecordViewModel): void {
+    if (!vm.record?.id || !confirm(`Delete food record for ${vm.measure?.food?.name || 'this item'}?`)) return;
+    this.foodRecordService.deleteRecord(vm.record.id).subscribe({
+      next: () => this.loadRecords(),
+      error: (err) => console.error('Failed to delete food record:', err)
+    });
+  }
+
+  onEditMeal(vm: MealRecordViewModel): void {
+    this.openAddMealModal(vm, vm.record.id);
+  }
+
+  onDeleteMeal(vm: MealRecordViewModel): void {
+    if (!vm.record?.id || !confirm(`Delete meal record for ${vm.mealName || 'this meal'}?`)) return;
+    this.mealRecordService.deleteRecord(vm.record.id).subscribe({
+      next: () => this.loadRecords(),
+      error: (err) => console.error('Failed to delete meal record:', err)
+    });
+  }
+
+  onDateChange(event: Date): void {
+    this.date = new Date(event.getFullYear(), event.getMonth(), event.getDate());
+    this.recordViewModels = []
+    this.loadRecords();
+  }
+
+  private consumedNutrients: Map<number, number> = new Map();
+
+  private calculateConsumedNutrients(): void {
+    this.consumedNutrients.clear();
+    const user = this.authService.getUser();
+    const trackedNutrients = user?.nutrientsToTrack?.filter(n => this.includeIds.includes(n.nutrientId)) || [];
+
+    for (const vm of this.recordViewModels) {
+      if (vm.type === 'food') {
+        const measure = vm.measure;
+        const amount = vm.record.amount;
+        if (!measure?.food?.nutrients) continue;
+        for (const nutrient of measure.food.nutrients) {
+          if (!this.includeIds.includes(nutrient.nutrientId)) continue;
+          const nutrientAmount = (nutrient.amount * amount * (measure.weightInGrams || 0)) / 100;
+          const currentAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
+          this.consumedNutrients.set(nutrient.nutrientId, currentAmount + nutrientAmount);
+        }
+      } else {
+        const servingsEaten = vm.record.servingsEaten;
+        for (const detail of vm.ingredientDetails) {
+          const measure = detail.measure;
+          const amount = detail.amount;
+          if (!measure?.food?.nutrients) continue;
+          for (const nutrient of measure.food.nutrients) {
+            if (!this.includeIds.includes(nutrient.nutrientId)) continue;
+            const nutrientAmount = (nutrient.amount * amount * (measure.weightInGrams || 0)) / 100;
+            const currentAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
+            this.consumedNutrients.set(nutrient.nutrientId, currentAmount + nutrientAmount);
+          }
+        }
+      }
+    }
+  }
+
+  getConsumedNutrients(): { nutrientId: number; consumedAmount: number; targetAmount: number; percentage: number }[] {
+    this.calculateConsumedNutrients();
+    const user = this.authService.getUser();
+    const trackedNutrients = user?.nutrientsToTrack?.filter(n => this.includeIds.includes(n.nutrientId)) || [];
+    const result: { nutrientId: number; consumedAmount: number; targetAmount: number; percentage: number }[] = [];
+
+    for (const nutrient of trackedNutrients) {
+      const consumedAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
+      const targetAmount = nutrient.targetAmount;
+      let percentage = 0;
+      if (targetAmount > 0) {
+        percentage = Math.round((consumedAmount / targetAmount) * 100);
+      }
+      result.push({
+        nutrientId: nutrient.nutrientId,
+        consumedAmount: Math.round(consumedAmount * 100) / 100,
+        targetAmount: targetAmount,
+        percentage: percentage,
+      });
+    }
+    return result;
+  }
+
+  getNutrientCategories() {
+    return Object.entries(NUTRIENT_CATEGORIES).map(([name, ids]) => ({ name, ids }));
+  }
+
+  filterConsumedNutrientsByCategory(categoryIds: number[]): { nutrientId: number; consumedAmount: number; targetAmount: number; percentage: number }[] {
+    return this.getConsumedNutrients().filter(n => categoryIds.includes(n.nutrientId));
+  }
+
+  hasConsumedNutrients(): boolean {
+    return this.getConsumedNutrients().length > 0;
+  }
+
+  onModalClosed() {}
+
+  onFoodSelected(event: { editedFoodRecord: number | null, food: FoodDTO; amount: number; measure: MeasureDto }) {
+    if (event.editedFoodRecord == null) {
+      const dto: AddFoodRecordDto = {
+        userId: this.authService.getUser()?.userId || '',
+        foodMeasureId: event.measure.id,
+        amount: event.amount,
+        dateEaten: this.date.toISOString(),
+      };
+      this.foodRecordService.addRecord(dto).subscribe({
+        next: () => this.loadRecords(),
+        error: (err) => console.error('Failed to add food record', err),
+      });
+    } else {
+      const dto = {
+        foodMeasureId: event.measure.id,
+        amount: event.amount,
+      };
+      this.foodRecordService.updateRecord(event.editedFoodRecord, dto).subscribe({
+        next: () => this.loadRecords(),
+        error: (err) => console.error('Failed to update food record', err),
+      });
     }
   }
 
   protected readonly Math = Math;
-  isBarcodeActive = false;
-
-
-  closeBarcode() {
-    this.isBarcodeActive = false;
-    this.result = '';
-    // Stop video stream / scanner if needed
-  }
-  // In the DashboardComponent class, add the following method:
-
-  private handleBarcodeResult(barcode: string): void {
-    if (!barcode) return;
-
-    this.foodService.getFoodByBarcode(barcode, this.includeIds).subscribe({
-      next: (food: FoodDTO) => {
-        // Create a shortcut from the scanned food
-        const shortcut: FoodShortcutDTO = {
-          id: food.id,
-          name: food.name,
-          nutrients: food.foodNutrients
-        };
-
-        // Add to shortcuts if not exists
-        if (!this.allShortcuts.some(s => s.id === food.id)) {
-          this.allShortcuts = [shortcut, ...this.allShortcuts];
-        }
-
-        // Clear search and select the food
-        this.searchQuery = '';
-        this.selectedFood = food;
-        this.selectedMeasure = food.measures[0]?.name || '';
-        this.selectedMeasureDto = food.measures[0];
-
-        // Switch back to main view
-        this.isBarcodeActive = false;
-        this.result = '';
-        this.stopScanner();
-      },
-      error: (error) => {
-        console.error('Error fetching food by barcode:', error);
-        // Handle error (e.g., show error message)
-      }
-    });
-  }
-
-  async startScanner(deviceId: string) {
-    try {
-      const videoElement = this.video.nativeElement;
-      this.stopScanner();
-
-      this.controls = await this.codeReader.decodeFromVideoDevice(
-        deviceId,
-        videoElement,
-        (result: Result | undefined, error) => {
-          if (result) {
-            this.result = result.getText();
-            this.handleBarcodeResult(this.result); // Add this line
-          }
-        }
-      );
-    } catch (err) {
-      console.error('Error starting scanner:', err);
-    }
-  }
-
-  onEdit(vm: FoodRecordViewModel) {
-    console.log('Edit clicked for record id:', vm.record.id);
-    // your edit logic here
-  }
-
-  onDelete(vm: FoodRecordViewModel) {
-    if (!vm || !vm.record?.id) {
-      console.error('Invalid record to delete');
-      return;
-    }
-
-    // Optional: Confirm deletion
-    if (!confirm(`Delete record for ${vm.measure?.food?.name || 'this item'}?`)) {
-      return;
-    }
-
-    this.foodRecordService.deleteRecord(vm.record.id).subscribe({
-      next: () => {
-        // Remove from list after successful delete
-        this.foodRecordViewModels = this.foodRecordViewModels.filter(x => x.record.id !== vm.record.id);
-        console.log('Record deleted:', vm.record.id);
-      },
-      error: (err) => {
-        console.error('Failed to delete record:', err);
-      }
-    });
-  }
-
-  submitFoodEntry() {
-    if (!this.selectedFood || !this.enteredAmount) return;
-
-    const dto: AddFoodRecordDto = {
-      userId: this.authService.getUser()?.userId||"",
-      foodMeasureId: this.selectedMeasureDto?.id||-1,
-      amount: this.enteredAmount,
-      dateEaten: new Date().toISOString(),
-    };
-    console.log(dto)
-    this.foodRecordService.addRecord(dto).subscribe({
-      next: (record) => {
-        console.log('Record added:', record);
-        // Optional: push to dashboard records collection or emit event
-        this.closeAddFoodModal(); // Close modal
-      },
-      error: (err) => {
-        console.error('Failed to add food record', err);
-        // Optionally show an error message
-      }
-    });
-    this.isAddFoodModalOpen = false;
-    this.selectedFood = null;
-    this.enteredAmount = 0;
-    this.closeAddFoodModal()
-  }
-
-
-  onDateChange(event: Date): void {
-    this.date = new Date(
-      event.getFullYear(),
-      event.getMonth(),
-      event.getDate()
-    );
-    this.foodRecordService.getAllRecords(this.authService.getUser()?.userId||'', true, this.date).subscribe(records => {
-      const viewModels: FoodRecordViewModel[] = records.map(record => ({ record }));
-
-      this.foodRecordViewModels = viewModels;
-
-      for (const vm of viewModels) {
-        this.measureService.getMeasureWithFood(vm.record.foodMeasureId).subscribe(measure => {
-          vm.measure = measure;
-        });
-      }
-    });
-  }
-  @ViewChild('menu') menu!: Menu;
-
-  menuItems: any[] = [];
-  currentVm: any;
-
-  openMenu(event: Event, vm: any) {
-    this.currentVm = vm; // store current record for commands
-
-    this.menuItems = [
-      {
-        label: 'Edit',
-        icon: 'pi pi-pencil',
-        command: () => this.onEdit(this.currentVm),
-      },
-      {
-        label: 'Delete',
-        icon: 'pi pi-trash',
-        command: () => this.onDelete(this.currentVm),
-      },
-    ];
-
-    this.menu.toggle(event);
-  }
-
+  protected readonly console = console;
 }

@@ -44,3 +44,41 @@
   background: #5B8A7A;       /* slightly darker forest green */
   box-shadow: 0 0 12px #D4A017DD; /* stronger gold glow */
 }
+@keyframes scan {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+::ng-deep .p-menu-item-label.ng-star-inserted {
+  color: #2D2D2D !important;                 /* Matches your main text color */
+  font-family: 'Playfair Display', serif;   /* Use same font family */
+  font-weight: 600;                          /* Semi-bold for clarity */
+  font-size: 1rem;                           /* 16px base size for consistency */
+  line-height: 1.4;                          /* Comfortable line height */
+  transition: color 0.3s ease;               /* Smooth color transition on hover/focus */
+}
+
+::ng-deep .p-menu-item.ng-star-inserted:hover .p-menu-item-label,
+::ng-deep .p-menu-item.ng-star-inserted:focus .p-menu-item-label {
+  color: #D4A017 !important; /* Highlight color on hover/focus */
+  cursor: pointer;
+}
+
+::ng-deep .p-menu-item-link:hover .p-menu-item-icon.pi.ng-star-inserted {
+  filter: brightness(0) saturate(100%) invert(77%) sepia(92%) saturate(2866%) hue-rotate(351deg) brightness(87%) contrast(89%);
+}
+
+/* Smooth transition for the icon normally */
+::ng-deep .p-menu-item-icon.pi.ng-star-inserted {
+}
+
+::ng-deep .p-menu-item-content :hover{
+  background-color:#E0F7F1;
+  border-radius: 4px;
+}

@@ -67,7 +67,6 @@ namespace FoodRecords.Api
 
             app.UseAuthorization();
 
-
             app.MapControllers();
 
             app.Run();

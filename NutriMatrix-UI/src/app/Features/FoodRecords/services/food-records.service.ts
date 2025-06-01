@@ -11,9 +11,8 @@ export interface AddFoodRecordDto {
 }
 
 export interface UpdateFoodRecordDto {
-  foodId: number;
-  amountGrams: number;
-  dateEaten: string;
+  foodMeasureId: number;
+  amount: number;
 }
 
 export interface FoodRecordDto {
@@ -37,7 +36,7 @@ export interface NutrientInfo {
   providedIn: 'root'
 })
 export class FoodRecordsService {
-  private baseUrl = `${environment.foodRecordsApiUrl}/FoodRecord`;
+  private baseUrl = `${environment.foodRecordsApiUrl}/api/FoodRecord`;
 
   constructor(private http: HttpClient) {
   }

@@ -23,7 +23,7 @@
           [attr.aria-expanded]="submenuOpen['diary']"
           type="button"
         >
-          Diary
+          Recipes
           <svg
             class="h-5 w-5 stroke-[#D4A017]"
             fill="none"
@@ -44,18 +44,18 @@
           [class.hidden]="!submenuOpen['diary']"
         >
           <a
-            routerLink="/app/diary/subitem1"
+            routerLink="/app/recipes/private"
             routerLinkActive="active-subitem"
             class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
           >
-            Subitem1
+            My Recipes
           </a>
           <a
-            routerLink="/app/diary/subitem2"
+            routerLink="/app/recipes/public"
             routerLinkActive="active-subitem"
             class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
           >
-            Subitem2
+            Public recipes
           </a>
         </div>
       </div>
@@ -67,7 +67,7 @@
           [attr.aria-expanded]="submenuOpen['trends']"
           type="button"
         >
-          Trends
+          Statistics
           <svg
             class="h-5 w-5 stroke-[#D4A017]"
             fill="none"
@@ -88,11 +88,11 @@
           [class.hidden]="!submenuOpen['trends']"
         >
           <a
-            routerLink="/app/trends/charts"
+            routerLink="/app/generate-report"
             routerLinkActive="active-subitem"
             class="block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/20 py-1 px-4 rounded-lg"
           >
-            Charts
+            Generate File Report
           </a>
           <a
             routerLink="/app/trends/nutrition-report"
@@ -139,20 +139,7 @@
       >
         Support
       </a>
-      <a
-        routerLink="/app/about"
-        routerLinkActive="active"
-        class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
-      >
-        About
-      </a>
     </nav>
-    <a
-      href="#"
-      class="utility-link block text-sm text-[#2D2D2D] hover:text-[#6A9D8C] mt-6 px-4"
-    >
-      Just a link
-    </a>
   </aside>
 
   <main class="flex-1 p-6">

@@ -8,7 +8,7 @@
         public bool IsDeleted { get; set; }
         public string? Barcode { get; set; }
 
-        public IEnumerable<Measure> Measures { get; set; }
-        public IEnumerable<FoodNutrientIn100g> FoodNutrients { get; set; }
+        public ICollection<Measure> Measures { get; set; }
+        public ICollection<FoodNutrientIn100g> FoodNutrients { get; set; }
     }
 }

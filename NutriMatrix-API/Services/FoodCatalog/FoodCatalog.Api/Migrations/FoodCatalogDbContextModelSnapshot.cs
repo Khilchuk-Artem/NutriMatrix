@@ -48,6 +48,35 @@ namespace FoodCatalog.Api.Migrations
                     b.ToTable("Foods");
                 });
 
+            modelBuilder.Entity("FoodCatalog.Api.Models.Domain.FoodMeal", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("MealId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("MeasureId")
+                        .HasColumnType("bigint");
+
+                    b.Property<float>("Quantity")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealId");
+
+                    b.HasIndex("MeasureId");
+
+                    b.ToTable("FoodMeals");
+                });
+
             modelBuilder.Entity("FoodCatalog.Api.Models.Domain.FoodNutrientIn100g", b =>
                 {
                     b.Property<long>("Id")
@@ -75,6 +104,33 @@ namespace FoodCatalog.Api.Migrations
                     b.HasIndex("NutrientId");
 
                     b.ToTable("FoodNutrientIn100Gs");
+                });
+
+            modelBuilder.Entity("FoodCatalog.Api.Models.Domain.Meal", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AddedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<float>("TotalServings")
+                        .HasColumnType("real");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Meals");
                 });
 
             modelBuilder.Entity("FoodCatalog.Api.Models.Domain.Measure", b =>
@@ -127,6 +183,1154 @@ namespace FoodCatalog.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Nutrients");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 301L,
+                            IsDeleted = false,
+                            Name = "Calcium, Ca",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 205L,
+                            IsDeleted = false,
+                            Name = "Carbohydrate, by difference",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 601L,
+                            IsDeleted = false,
+                            Name = "Cholesterol",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 208L,
+                            IsDeleted = false,
+                            Name = "Energy",
+                            Unit = "kcal"
+                        },
+                        new
+                        {
+                            Id = 606L,
+                            IsDeleted = false,
+                            Name = "Fatty acids, total saturated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 204L,
+                            IsDeleted = false,
+                            Name = "Total fat",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 605L,
+                            IsDeleted = false,
+                            Name = "Fatty acids, total trans",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 303L,
+                            IsDeleted = false,
+                            Name = "Iron, Fe",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 291L,
+                            IsDeleted = false,
+                            Name = "Fiber, total dietary",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 306L,
+                            IsDeleted = false,
+                            Name = "Potassium, K",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 307L,
+                            IsDeleted = false,
+                            Name = "Sodium, Na",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 203L,
+                            IsDeleted = false,
+                            Name = "Protein",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 269L,
+                            IsDeleted = false,
+                            Name = "Sugars, total",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 539L,
+                            IsDeleted = false,
+                            Name = "Sugars, added",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 324L,
+                            IsDeleted = false,
+                            Name = "Vitamin D",
+                            Unit = "IU"
+                        },
+                        new
+                        {
+                            Id = 299L,
+                            IsDeleted = false,
+                            Name = "Sugar Alcohol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 1001L,
+                            IsDeleted = false,
+                            Name = "Erythritol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 1006L,
+                            IsDeleted = false,
+                            Name = "Allulose",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 1002L,
+                            IsDeleted = false,
+                            Name = "Glycerin",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 290L,
+                            IsDeleted = false,
+                            Name = "Xylitol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 261L,
+                            IsDeleted = false,
+                            Name = "Sorbitol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 260L,
+                            IsDeleted = false,
+                            Name = "Mannitol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 1003L,
+                            IsDeleted = false,
+                            Name = "Maltitol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 1004L,
+                            IsDeleted = false,
+                            Name = "Isomalt",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 1005L,
+                            IsDeleted = false,
+                            Name = "Lactitol",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 513L,
+                            IsDeleted = false,
+                            Name = "Alanine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 221L,
+                            IsDeleted = false,
+                            Name = "Alcohol, ethyl",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 511L,
+                            IsDeleted = false,
+                            Name = "Arginine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 207L,
+                            IsDeleted = false,
+                            Name = "Ash",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 514L,
+                            IsDeleted = false,
+                            Name = "Aspartic acid",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 454L,
+                            IsDeleted = false,
+                            Name = "Betaine",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 262L,
+                            IsDeleted = false,
+                            Name = "Caffeine",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 639L,
+                            IsDeleted = false,
+                            Name = "Campesterol",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 322L,
+                            IsDeleted = false,
+                            Name = "Carotene, alpha",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 321L,
+                            IsDeleted = false,
+                            Name = "Carotene, beta",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 326L,
+                            IsDeleted = false,
+                            Name = "Vitamin D3 (cholecalciferol)",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 421L,
+                            IsDeleted = false,
+                            Name = "Choline, total",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 334L,
+                            IsDeleted = false,
+                            Name = "Cryptoxanthin, beta",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 312L,
+                            IsDeleted = false,
+                            Name = "Copper, Cu",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 507L,
+                            IsDeleted = false,
+                            Name = "Cystine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 268L,
+                            IsDeleted = false,
+                            Name = "Energy",
+                            Unit = "kJ"
+                        },
+                        new
+                        {
+                            Id = 325L,
+                            IsDeleted = false,
+                            Name = "Vitamin D2 (ergocalciferol)",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 610L,
+                            IsDeleted = false,
+                            Name = "10:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 611L,
+                            IsDeleted = false,
+                            Name = "12:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 696L,
+                            IsDeleted = false,
+                            Name = "13:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 612L,
+                            IsDeleted = false,
+                            Name = "14:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 625L,
+                            IsDeleted = false,
+                            Name = "14:01",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 652L,
+                            IsDeleted = false,
+                            Name = "15:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 697L,
+                            IsDeleted = false,
+                            Name = "15:01",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 613L,
+                            IsDeleted = false,
+                            Name = "16:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 626L,
+                            IsDeleted = false,
+                            Name = "16:1 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 673L,
+                            IsDeleted = false,
+                            Name = "16:1 c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 662L,
+                            IsDeleted = false,
+                            Name = "16:1 t",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 653L,
+                            IsDeleted = false,
+                            Name = "17:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 687L,
+                            IsDeleted = false,
+                            Name = "17:01",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 614L,
+                            IsDeleted = false,
+                            Name = "18:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 617L,
+                            IsDeleted = false,
+                            Name = "18:1 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 674L,
+                            IsDeleted = false,
+                            Name = "18:1 c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 663L,
+                            IsDeleted = false,
+                            Name = "18:1 t",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 859L,
+                            IsDeleted = false,
+                            Name = "18:1-11t (18:1t n-7)",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 618L,
+                            IsDeleted = false,
+                            Name = "18:2 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 670L,
+                            IsDeleted = false,
+                            Name = "18:2 CLAs",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 675L,
+                            IsDeleted = false,
+                            Name = "18:2 n-6 c,c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 669L,
+                            IsDeleted = false,
+                            Name = "18:2 t,t",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 619L,
+                            IsDeleted = false,
+                            Name = "18:3 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 851L,
+                            IsDeleted = false,
+                            Name = "18:3 n-3 c,c,c (ALA)",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 685L,
+                            IsDeleted = false,
+                            Name = "18:3 n-6 c,c,c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 627L,
+                            IsDeleted = false,
+                            Name = "18:04",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 615L,
+                            IsDeleted = false,
+                            Name = "20:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 628L,
+                            IsDeleted = false,
+                            Name = "20:01",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 672L,
+                            IsDeleted = false,
+                            Name = "20:2 n-6 c,c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 689L,
+                            IsDeleted = false,
+                            Name = "20:3 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 852L,
+                            IsDeleted = false,
+                            Name = "20:3 n-3",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 853L,
+                            IsDeleted = false,
+                            Name = "20:3 n-6",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 620L,
+                            IsDeleted = false,
+                            Name = "20:4 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 855L,
+                            IsDeleted = false,
+                            Name = "20:4 n-6",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 629L,
+                            IsDeleted = false,
+                            Name = "20:5 n-3 (EPA)",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 857L,
+                            IsDeleted = false,
+                            Name = "21:05",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 624L,
+                            IsDeleted = false,
+                            Name = "22:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 630L,
+                            IsDeleted = false,
+                            Name = "22:1 undifferentiated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 858L,
+                            IsDeleted = false,
+                            Name = "22:04",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 631L,
+                            IsDeleted = false,
+                            Name = "22:5 n-3 (DPA)",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 621L,
+                            IsDeleted = false,
+                            Name = "22:6 n-3 (DHA)",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 654L,
+                            IsDeleted = false,
+                            Name = "24:00:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 671L,
+                            IsDeleted = false,
+                            Name = "24:1 c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 607L,
+                            IsDeleted = false,
+                            Name = "4:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 608L,
+                            IsDeleted = false,
+                            Name = "6:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 609L,
+                            IsDeleted = false,
+                            Name = "8:00",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 645L,
+                            IsDeleted = false,
+                            Name = "Fatty acids, total monounsaturated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 646L,
+                            IsDeleted = false,
+                            Name = "Fatty acids, total polyunsaturated",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 693L,
+                            IsDeleted = false,
+                            Name = "Fatty acids, total trans-monoenoic",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 695L,
+                            IsDeleted = false,
+                            Name = "Fatty acids, total trans-polyenoic",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 313L,
+                            IsDeleted = false,
+                            Name = "Fluoride, F",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 417L,
+                            IsDeleted = false,
+                            Name = "Folate, total",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 431L,
+                            IsDeleted = false,
+                            Name = "Folic acid",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 435L,
+                            IsDeleted = false,
+                            Name = "Folate, DFE",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 432L,
+                            IsDeleted = false,
+                            Name = "Folate, food",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 212L,
+                            IsDeleted = false,
+                            Name = "Fructose",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 287L,
+                            IsDeleted = false,
+                            Name = "Galactose",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 515L,
+                            IsDeleted = false,
+                            Name = "Glutamic acid",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 211L,
+                            IsDeleted = false,
+                            Name = "Glucose (dextrose)",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 516L,
+                            IsDeleted = false,
+                            Name = "Glycine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 512L,
+                            IsDeleted = false,
+                            Name = "Histidine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 521L,
+                            IsDeleted = false,
+                            Name = "Hydroxyproline",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 503L,
+                            IsDeleted = false,
+                            Name = "Isoleucine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 213L,
+                            IsDeleted = false,
+                            Name = "Lactose",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 504L,
+                            IsDeleted = false,
+                            Name = "Leucine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 338L,
+                            IsDeleted = false,
+                            Name = "Lutein + zeaxanthin",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 337L,
+                            IsDeleted = false,
+                            Name = "Lycopene",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 505L,
+                            IsDeleted = false,
+                            Name = "Lysine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 214L,
+                            IsDeleted = false,
+                            Name = "Maltose",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 506L,
+                            IsDeleted = false,
+                            Name = "Methionine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 304L,
+                            IsDeleted = false,
+                            Name = "Magnesium, Mg",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 428L,
+                            IsDeleted = false,
+                            Name = "Menaquinone-4",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 315L,
+                            IsDeleted = false,
+                            Name = "Manganese, Mn",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 406L,
+                            IsDeleted = false,
+                            Name = "Niacin",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 573L,
+                            IsDeleted = false,
+                            Name = "Vitamin E, added",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 578L,
+                            IsDeleted = false,
+                            Name = "Vitamin B-12, added",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 257L,
+                            IsDeleted = false,
+                            Name = "Adjusted Protein",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 664L,
+                            IsDeleted = false,
+                            Name = "22:1 t",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 676L,
+                            IsDeleted = false,
+                            Name = "22:1 c",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 856L,
+                            IsDeleted = false,
+                            Name = "18:3i",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 665L,
+                            IsDeleted = false,
+                            Name = "18:2 t not further defined",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 666L,
+                            IsDeleted = false,
+                            Name = "18:2 i",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 305L,
+                            IsDeleted = false,
+                            Name = "Phosphorus, P",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 410L,
+                            IsDeleted = false,
+                            Name = "Pantothenic acid",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 508L,
+                            IsDeleted = false,
+                            Name = "Phenylalanine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 636L,
+                            IsDeleted = false,
+                            Name = "Phytosterols",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 517L,
+                            IsDeleted = false,
+                            Name = "Proline",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 319L,
+                            IsDeleted = false,
+                            Name = "Retinol",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 405L,
+                            IsDeleted = false,
+                            Name = "Riboflavin",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 317L,
+                            IsDeleted = false,
+                            Name = "Selenium, Se",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 518L,
+                            IsDeleted = false,
+                            Name = "Serine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 641L,
+                            IsDeleted = false,
+                            Name = "Beta-sitosterol",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 209L,
+                            IsDeleted = false,
+                            Name = "Starch",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 638L,
+                            IsDeleted = false,
+                            Name = "Stigmasterol",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 210L,
+                            IsDeleted = false,
+                            Name = "Sucrose",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 263L,
+                            IsDeleted = false,
+                            Name = "Theobromine",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 404L,
+                            IsDeleted = false,
+                            Name = "Thiamin",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 502L,
+                            IsDeleted = false,
+                            Name = "Threonine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 323L,
+                            IsDeleted = false,
+                            Name = "Vitamin E (alpha-tocopherol)",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 341L,
+                            IsDeleted = false,
+                            Name = "Tocopherol, beta",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 343L,
+                            IsDeleted = false,
+                            Name = "Tocopherol, delta",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 342L,
+                            IsDeleted = false,
+                            Name = "Tocopherol, gamma",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 501L,
+                            IsDeleted = false,
+                            Name = "Tryptophan",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 509L,
+                            IsDeleted = false,
+                            Name = "Tyrosine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 510L,
+                            IsDeleted = false,
+                            Name = "Valine",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 318L,
+                            IsDeleted = false,
+                            Name = "Vitamin A, IU",
+                            Unit = "IU"
+                        },
+                        new
+                        {
+                            Id = 320L,
+                            IsDeleted = false,
+                            Name = "Vitamin A, RAE",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 418L,
+                            IsDeleted = false,
+                            Name = "Vitamin B-12",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 415L,
+                            IsDeleted = false,
+                            Name = "Vitamin B-6",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 401L,
+                            IsDeleted = false,
+                            Name = "Vitamin C, total ascorbic acid",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 328L,
+                            IsDeleted = false,
+                            Name = "Vitamin D (D2 + D3)",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 430L,
+                            IsDeleted = false,
+                            Name = "Vitamin K (phylloquinone)",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 429L,
+                            IsDeleted = false,
+                            Name = "Dihydrophylloquinone",
+                            Unit = "µg"
+                        },
+                        new
+                        {
+                            Id = 255L,
+                            IsDeleted = false,
+                            Name = "Water",
+                            Unit = "g"
+                        },
+                        new
+                        {
+                            Id = 309L,
+                            IsDeleted = false,
+                            Name = "Zinc, Zn",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 344L,
+                            IsDeleted = false,
+                            Name = "Tocotrienol, alpha",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 345L,
+                            IsDeleted = false,
+                            Name = "Tocotrienol, beta",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 346L,
+                            IsDeleted = false,
+                            Name = "Tocotrienol, gamma",
+                            Unit = "mg"
+                        },
+                        new
+                        {
+                            Id = 347L,
+                            IsDeleted = false,
+                            Name = "Tocotrienol,delta",
+                            Unit = "mg"
+                        });
+                });
+
+            modelBuilder.Entity("FoodCatalog.Api.Models.Domain.FoodMeal", b =>
+                {
+                    b.HasOne("FoodCatalog.Api.Models.Domain.Meal", "Meal")
+                        .WithMany("FoodMeals")
+                        .HasForeignKey("MealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FoodCatalog.Api.Models.Domain.Measure", "Measure")
+                        .WithMany()
+                        .HasForeignKey("MeasureId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Meal");
+
+                    b.Navigation("Measure");
                 });
 
             modelBuilder.Entity("FoodCatalog.Api.Models.Domain.FoodNutrientIn100g", b =>
@@ -164,6 +1368,11 @@ namespace FoodCatalog.Api.Migrations
                     b.Navigation("FoodNutrients");
 
                     b.Navigation("Measures");
+                });
+
+            modelBuilder.Entity("FoodCatalog.Api.Models.Domain.Meal", b =>
+                {
+                    b.Navigation("FoodMeals");
                 });
 #pragma warning restore 612, 618
         }

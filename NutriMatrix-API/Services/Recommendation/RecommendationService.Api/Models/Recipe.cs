@@ -9,9 +9,9 @@ namespace RecommendationService.Api.Models
         public string Description { get; set; }
         public string Directions { get; set; }
         public string PhotoUrl { get; set; }
-
-        public IEnumerable<RecipeMeasure> Measures { get; set; }
-        public IEnumerable<NutrientAmount> NutrientsPerServing { get; set; }
+        public string Title { get; set; }
+        public ICollection<RecipeMeasure> Measures { get; set; }
+        public ICollection<NutrientAmount> NutrientsPerTotalServings { get; set; }
         public bool IsDeleted { get; set; }
     }
 }

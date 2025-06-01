@@ -9,6 +9,18 @@ import {SidebarComponent} from './Core/Components/sidebar/sidebar.component';
 import {DashboardComponent} from './Features/dashboard/dashboard.component';
 import {ViewUserComponent} from './Features/Auth/view-user/view-user.component';
 import {EditUserComponent} from './Features/Auth/edit-user/edit-user.component';
+import {
+  ViewPrivateRecipesComponent
+} from './Features/FoodCatalog/Meals/view-private-recipes/view-private-recipes.component';
+import {
+  ViewPrivateRecipeComponent
+} from './Features/FoodCatalog/Meals/view-private-recipe/view-private-recipe.component';
+import {AddPrivateRecipeComponent} from './Features/FoodCatalog/Meals/add-private-recipe/add-private-recipe.component';
+import {
+  EditPrivateRecipeComponent
+} from './Features/FoodCatalog/Meals/edit-private-recipe/edit-private-recipe.component';
+import {GenerateReportComponent} from './Features/FoodRecords/generate-report/generate-report.component';
+import {ViewPublicRecipesComponent} from './Features/Recipes/view-public-recipes/view-public-recipes.component';
 
 export const routes: Routes = [
   {
@@ -41,7 +53,13 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardComponent },
       { path:'me', component:ViewUserComponent },
-      { path:'me/edit', component:EditUserComponent }
+      { path:'me/edit', component:EditUserComponent },
+      { path:'recipes/private', component:ViewPrivateRecipesComponent},
+      { path:'recipes/private/add', component:AddPrivateRecipeComponent},
+      { path:'recipes/private/:id', component:ViewPrivateRecipeComponent},
+      { path:'recipes/private/:id/edit', component:EditPrivateRecipeComponent},
+      { path:'generate-report', component:GenerateReportComponent},
+      { path:'recipes/public', component:ViewPublicRecipesComponent},
 
     ],
   }

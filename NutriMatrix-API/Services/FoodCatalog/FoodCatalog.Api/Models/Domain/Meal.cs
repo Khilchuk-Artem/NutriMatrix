@@ -6,8 +6,8 @@
         public string Name { get; set; }
         public string AddedBy { get; set; }
         public bool IsDeleted { get; set; }
-
-        public IEnumerable<Food> Foods { get; set; }
+        public float TotalServings { get; set; }
+        public ICollection<FoodMeal> FoodMeals { get; set; }
 
     }
 }

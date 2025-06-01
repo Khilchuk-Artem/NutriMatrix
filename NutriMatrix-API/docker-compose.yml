@@ -55,4 +55,3 @@ volumes:
   qdrant_data:
   postgres_recipes:
 
-

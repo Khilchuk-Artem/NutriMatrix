@@ -78,6 +78,10 @@ namespace RecommendationService.Api.Migrations
                     b.Property<float?>("Servings")
                         .HasColumnType("real");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Recipes");

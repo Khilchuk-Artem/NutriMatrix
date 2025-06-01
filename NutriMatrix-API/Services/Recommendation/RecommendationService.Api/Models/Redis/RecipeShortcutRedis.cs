@@ -17,6 +17,8 @@ namespace RecommendationService.Api.Models.Redis
 
         [Indexed]
         public long RecipeId { get; set; }
+        [Indexed]
+        public string Title { get; set; }
 
         public float Servings { get; set; }
 
@@ -24,7 +26,7 @@ namespace RecommendationService.Api.Models.Redis
         public string Category { get; set; }
 
         [Indexed(CascadeDepth = 1)]
-        public IEnumerable<Guid> IngredientIds { get; set; }
+        public IEnumerable<long> IngredientIds { get; set; }
         public IDictionary<int, float> NutrientAmounts { get; set; }
     }
 }

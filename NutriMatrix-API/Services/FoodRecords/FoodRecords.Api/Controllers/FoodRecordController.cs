@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FoodRecords.Api.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class FoodRecordController : ControllerBase
     {
         private readonly IFoodRecordService _foodRecordService;
@@ -35,7 +35,6 @@ namespace FoodRecords.Api.Controllers
             return Ok(deletedRecord);
         }
 
-        // GET /FoodRecord/{id}
         [HttpGet("{id:long}", Name = "GetFoodRecordById")]
         public async Task<IActionResult> Get(long id)
         {
@@ -62,8 +61,7 @@ namespace FoodRecords.Api.Controllers
         }
 
 
-        // PUT /FoodRecord/{id}
-        [HttpPut("{id:guid}")]
+        [HttpPut("{id:long}")]
         public async Task<IActionResult> Update(long id, [FromBody] UpdateFoodRecordDto dto)
         {
             var updatedRecord = await _foodRecordService.UpdateAsync(id, dto);

@@ -15,10 +15,10 @@
       <label class="block mb-2 font-semibold text-[#2D2D2D]" for="name">Name</label>
       <input
         id="name"
-        formControlName="name"
         type="text"
         class="w-full p-2 border border-gray-300 rounded"
         placeholder="Enter your name"
+        formControlName="name"
       />
       <div *ngIf="editForm.controls['name'].invalid && !editForm.controls['name'].untouched" class="text-red-600 mt-1">
         Name is required.
@@ -27,7 +27,16 @@
 
     <section>
       <h2 class="text-2xl font-semibold mb-3 text-[#2D2D2D]">Nutrients To Track</h2>
-
+      <div class="mb-6">
+        <label for="nutrient-search" class="sr-only">Search Nutrients</label>
+        <input
+          id="nutrient-search"
+          type="text"
+          formControlName='searchTerm'
+          placeholder="Search nutrients..."
+          class="w-full px-4 py-3 rounded-xl border border-[#D4A017]/40 focus:outline-none focus:ring-2 focus:ring-[#D4A017]/50 shadow-sm font-[Open_Sans] text-[#2D2D2D] placeholder-gray-400 transition-all"
+        />
+      </div>
       <table class="w-full border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30">
         <thead>
         <tr>
@@ -37,28 +46,28 @@
         </tr>
         </thead>
         <tbody formArrayName="nutrientsToTrack">
-        <tr *ngFor="let nutrientCtrl of nutrients.controls; let i = index" [formGroupName]="i" class="hover:bg-[#E0F7F1]/30 transition-colors duration-300">
-          <td class="p-4 border-b border-gray-200">{{ getNutrientLabel(nutrientCtrl.value['nutrientId']) }}</td>
-          <td class="p-4 border-b border-gray-200">
-            <input
-              type="number"
-              formControlName="targetAmount"
-              class="w-full p-1 border border-gray-300 rounded"
-              min="0"
-              step="any"
-            />
-            <div *ngIf="nutrientCtrl.get('targetAmount')?.invalid && nutrientCtrl.get('targetAmount')?.touched" class="text-red-600 text-xs mt-1">
-              Enter a valid amount.
-            </div>
-          </td>
-          <td class="p-4 border-b border-gray-200 text-center">
-            <input type="checkbox" formControlName="isActive" />
-          </td>
-        </tr>
-        <tr *ngIf="nutrients.length === 0">
-          <td colspan="3" class="p-4 text-center text-gray-400">No nutrients to track</td>
-        </tr>
+        <ng-container *ngFor="let group of groupedControls">
+          <tr class="bg-gradient-to-r from-[#E0F7F1] to-[#D4A017]/20 border-y border-[#D4A017]/60 shadow-sm">
+            <td colspan="3" class="p-4 text-lg font-semibold text-[#1F1F1F] font-[Playfair_Display]">
+              {{ group.category }}
+            </td>
+          </tr>
+
+          <tr *ngFor="let item of group.controls" [formGroupName]="item.index">
+            <td class="p-4 border-b border-gray-200">
+              {{ getNutrientLabel(item.control.get('nutrientId')?.value) }}
+            </td>
+            <td class="p-4 border-b border-gray-200">
+              <input type="number" formControlName="targetAmount" class="w-full p-1 border border-gray-300 rounded" />
+            </td>
+            <td class="p-4 border-b border-gray-200 text-center">
+              <input type="checkbox" formControlName="isActive" />
+            </td>
+          </tr>
+        </ng-container>
         </tbody>
+
+
       </table>
     </section>
 

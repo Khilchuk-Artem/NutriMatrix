@@ -9,5 +9,6 @@
         public bool IsDeleted { get; set; }
 
         public Measure Measure { get; set; }
+        public Meal Meal { get; set; }
     }
 }

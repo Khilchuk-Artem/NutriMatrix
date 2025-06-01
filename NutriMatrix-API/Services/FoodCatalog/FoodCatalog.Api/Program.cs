@@ -55,11 +55,7 @@ namespace FoodCatalog.Api
             {
                 var db = scope.ServiceProvider.GetRequiredService<FoodCatalogDbContext>();
 
-                //await db.Database.EnsureDeletedAsync();
-                //await db.Database.EnsureCreatedAsync();
-
-
-                //db.Database.Migrate();
+                db.Database.Migrate();
 
                 /*await db.FoodNutrientIn100Gs.ExecuteDeleteAsync();
                 await db.Measures.ExecuteDeleteAsync();
@@ -121,9 +117,9 @@ namespace FoodCatalog.Api
                         food.FoodNutrients = allNutrients.Where(n => n.FoodId == food.Id).ToList();
                     }
 
-                    foreach (var batch in foods.Chunk(500))
+                    foreach (var food in foods)
                     {
-                        await db.Foods.AddRangeAsync(batch);
+                        await db.Foods.AddAsync(food);
 
                         await db.SaveChangesAsync();
                     }
