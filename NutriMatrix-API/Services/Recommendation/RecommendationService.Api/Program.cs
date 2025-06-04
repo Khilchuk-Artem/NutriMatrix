@@ -1,4 +1,6 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Qdrant.Client;
 using RecommendationService.Api.Data;
 using RecommendationService.Api.Models.Dto;
@@ -53,8 +55,15 @@ namespace RecommendationService.Api
 
             builder.Services.AddSingleton<QdrantClient>(_ =>
             {
-                return new QdrantClient("qdrant", 6334);
+                var qdrantConn = builder.Configuration.GetConnectionString("Qdrant");
+                var parts = qdrantConn.Split(':');
+                var host = parts[0];
+                var port = int.Parse(parts[1]);
+
+                return new QdrantClient(host, port);
             });
+
+
 
             var app = builder.Build();
 
