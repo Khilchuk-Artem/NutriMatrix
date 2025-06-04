@@ -32,6 +32,19 @@ namespace RecommendationService.Api
             builder.Services.AddScoped<IQdrantService, QdrantService>();
             builder.Services.AddScoped<RecipeRedisSyncInterceptor>();
 
+            // Example using Kestrel
+            if (builder.Environment.IsProduction())
+            {
+                var portVar = Environment.GetEnvironmentVariable("PORT");
+                if (portVar is { Length: > 0 } && int.TryParse(portVar, out var port))
+                {
+                    builder.WebHost.ConfigureKestrel(options =>
+                    {
+                        options.ListenAnyIP(port); // Listen on all network interfaces
+                    });
+                }
+            }
+
             builder.Services.AddDbContext<RecipeDbContext>((sp, options) =>
             {
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -51,18 +64,7 @@ namespace RecommendationService.Api
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            // Example using Kestrel
-            if (builder.Environment.IsProduction())
-            {
-                var portVar = Environment.GetEnvironmentVariable("PORT");
-                if (portVar is { Length: > 0 } && int.TryParse(portVar, out var port))
-                {
-                    builder.WebHost.ConfigureKestrel(options =>
-                    {
-                        options.ListenAnyIP(port); // Listen on all network interfaces
-                    });
-                }
-            }
+
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<RecipeDbContext>();
