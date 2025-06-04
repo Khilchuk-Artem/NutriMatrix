@@ -21,7 +21,7 @@ namespace RecommendationService.Api.Services.NutrientsAnalysisService
                 .Where(ca => ca.Category == category)
                 .FirstOrDefault();
 
-            if (averages != null || averages.Amounts.Count !=0) return averages.Amounts;
+            if (averages != null && averages.Amounts.Count !=0) return averages.Amounts;
 
             var computedAverage = _recipes
                 .Where(r => r.Category == category)

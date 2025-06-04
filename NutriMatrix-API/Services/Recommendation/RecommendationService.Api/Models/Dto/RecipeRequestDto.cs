@@ -2,8 +2,8 @@
 {
     public class RecipeRequestDto
     {
-        public IEnumerable<Guid>? IncludeIngredientIds { get; set; }
-        public IEnumerable<Guid>? ExcludeIngredientIds { get; set; }
+        public List<string>? IncludeIngredientIds { get; set; }
+        public List<string>? ExcludeIngredientIds { get; set; }
 
         public string? Category { get; set; }
     }

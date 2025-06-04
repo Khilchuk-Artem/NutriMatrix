@@ -1,0 +1,7 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "Dockerfile"
+context = "../../.."
+
+[deploy]
+startCommand = "dotnet RecommendationService.Api.dll"

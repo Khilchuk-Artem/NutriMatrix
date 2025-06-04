@@ -37,6 +37,7 @@ namespace RecommendationService.Api.Services.Qdrant
                 Id = (ulong)id,
                 Vectors = PerformUnitNormalization(rawVector).ToArray(),
                 Payload = {
+                    ["recipeId"] = id,
                     ["category"] = category,
                     ["ingredients"] = ingredientIds.ToArray()
                 }
@@ -58,33 +59,33 @@ namespace RecommendationService.Api.Services.Qdrant
             Filter filterOptions = null;
 
 
-            if (category != null)
+            /*if (category != null)
             {
                 var tmp = MatchKeyword("category", category);
                 filterOptions = tmp;
-            }
+            }*/
             if (excludeIds != null)
             {
                 foreach (var id in excludeIds)
                 {
-                    if (filterOptions == null) filterOptions = !MatchKeyword("id", id.ToString());
-                    else filterOptions &= !MatchKeyword("id", id.ToString());
+                    if (filterOptions == null) filterOptions = !MatchKeyword("recipeId", id.ToString());
+                    else filterOptions &= !MatchKeyword("recipeId", id.ToString());
                 }
             }
             if (includeIngredientIds != null)
             {
                 foreach (var ing in includeIngredientIds)
                 {
-                    if (filterOptions == null) filterOptions = MatchKeyword("ingredients[]", ing);
-                    else filterOptions &= MatchKeyword("ingredients[]", ing);
+                    if (filterOptions == null) filterOptions = MatchKeyword("ingredients", ing);
+                    else filterOptions &= MatchKeyword("ingredients", ing);
                 }
             }
             if (excludeIngredientIds != null)
             {
                 foreach (var ing in excludeIngredientIds)
                 {
-                    if (filterOptions == null) filterOptions = !MatchKeyword("ingredients[]", ing);
-                    else filterOptions &= !MatchKeyword("ingredients[]", ing);
+                    if (filterOptions == null) filterOptions = !MatchKeyword("ingredients", ing);
+                    else filterOptions &= !MatchKeyword("ingredients", ing);
                 }
             }
 

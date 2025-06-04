@@ -25,7 +25,7 @@ export interface MeasureWithFoodDto {
   providedIn: 'root'
 })
 export class MeasureService {
-  private baseUrl = `${environment.foodCatalogApiUrl}/Measure`;
+  private baseUrl = `${environment.foodCatalogApiUrl}/api/Measure`;
 
   constructor(private http: HttpClient) {}
 

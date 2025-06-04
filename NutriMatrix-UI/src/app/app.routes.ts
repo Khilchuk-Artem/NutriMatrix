@@ -21,6 +21,7 @@ import {
 } from './Features/FoodCatalog/Meals/edit-private-recipe/edit-private-recipe.component';
 import {GenerateReportComponent} from './Features/FoodRecords/generate-report/generate-report.component';
 import {ViewPublicRecipesComponent} from './Features/Recipes/view-public-recipes/view-public-recipes.component';
+import {GetRecommendationComponent} from './Features/Recomendation/get-recommendation/get-recommendation.component';
 
 export const routes: Routes = [
   {
@@ -60,6 +61,7 @@ export const routes: Routes = [
       { path:'recipes/private/:id/edit', component:EditPrivateRecipeComponent},
       { path:'generate-report', component:GenerateReportComponent},
       { path:'recipes/public', component:ViewPublicRecipesComponent},
+      { path:'recommendation', component:GetRecommendationComponent},
 
     ],
   }

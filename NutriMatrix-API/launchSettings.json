@@ -7,7 +7,8 @@
         "auth.api": "StartDebugging",
         "foodcatalog.api": "StartDebugging",
         "foodrecords.api": "StartDebugging",
-        "recommendationservice.api": "StartDebugging"
+        "recommendationservice.api": "StartDebugging",
+        "gateway.api": "StartDebugging"
       }
     }
   }

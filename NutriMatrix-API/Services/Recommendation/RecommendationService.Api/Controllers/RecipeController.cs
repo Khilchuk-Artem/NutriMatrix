@@ -104,7 +104,7 @@ namespace RecommendationService.Api.Controllers
             {
                 Amount = m.Amount,
                 FoodId = m.FoodId,
-                MeasureId = m.Id,
+                MeasureId = m.MeasureId,
             }).ToList();
 
             return new RecipeShortcutDto

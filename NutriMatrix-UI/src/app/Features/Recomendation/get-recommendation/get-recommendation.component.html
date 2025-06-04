@@ -1,0 +1,327 @@
+<div class="mt-20 min-h-screen max-w-5xl mx-auto">
+  <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-8 tracking-tight">
+    Recipe Selector
+  </h1>
+
+  <!-- Form Container with Spinner -->
+  <div class="relative">
+    <div class="grid grid-cols-2 gap-8" [ngClass]="{'opacity-50 pointer-events-none': isLoading}">
+      <!-- Left Column: Dish Slots -->
+      <div>
+        <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
+          Dish Slots
+        </h2>
+        <button
+          (click)="addDishSlot()"
+          [disabled]="dishSlots.length >= 6 || isLoading"
+          class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed font-['Open_Sans']"
+        >
+          + Add Dish Slot
+        </button>
+        <div *ngFor="let slot of dishSlots; let i = index" class="mt-4">
+          <div
+            class="flex justify-between items-center p-4 bg-white rounded-xl shadow-lg border border-[#D4A017]/30 cursor-pointer"
+            (click)="toggleSlotExpansion(i)"
+          >
+            <span class="font-['Open_Sans'] text-[#2D2D2D]">
+              Slot {{ i + 1 }}: {{ slot.category || 'No category' }}
+            </span>
+            <svg
+              class="h-6 w-6 stroke-[#D4A017] transition-transform duration-300"
+              [ngClass]="{ 'rotate-180': slot.expanded }"
+              fill="none"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+          <div *ngIf="slot.expanded" class="mt-2 p-4 bg-gray-100 rounded-xl">
+            <div class="mb-4">
+              <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Category</label>
+              <select
+                [(ngModel)]="slot.category"
+                [disabled]="isLoading"
+                class="w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#FFD580] transition-all duration-300"
+              >
+                <option [ngValue]="null">Select category</option>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+            <div class="mb-4">
+              <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Included Ingredients</label>
+              <p-autoComplete
+                [(ngModel)]="slot.includedIngredients"
+                [suggestions]="ingredients"
+                (completeMethod)="onIngredientsFilter($event)"
+                [optionLabel]="'name'"
+                [multiple]="true"
+                [disabled]="isLoading"
+                fluid
+                placeholder="Select ingredients"
+                class="w-full"
+              ></p-autoComplete>
+            </div>
+            <div class="mb-4">
+              <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Excluded Ingredients</label>
+              <p-autoComplete
+                [(ngModel)]="slot.excludedIngredients"
+                [suggestions]="ingredients"
+                (completeMethod)="onIngredientsFilter($event)"
+                [optionLabel]="'name'"
+                [multiple]="true"
+                [disabled]="isLoading"
+                fluid
+                placeholder="Exclude ingredients"
+                class="w-full"
+              ></p-autoComplete>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Nutritional Goals -->
+      <div>
+        <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
+          Nutritional Goals
+        </h2>
+        <button
+          (click)="addNutrientGoal()"
+          [disabled]="isLoading"
+          class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out font-['Open_Sans']"
+        >
+          + Add Nutrient Goal
+        </button>
+        <div *ngFor="let goal of nutrientGoals; let i = index" class="mt-4">
+          <div class="flex items-center gap-4">
+            <div class="w-full">
+              <div class="flex gap-4 items-start">
+                <div class="relative w-1/2" (clickOutside)="onClickOutsideSearch(i)">
+                  <div
+                    [ngClass]="{
+                      'border-gray-200': !goal.searchControl.invalid || goal.searchControl.untouched,
+                      'border-[#EF4444]': goal.searchControl.invalid && !goal.searchControl.untouched
+                    }"
+                    class="flex items-start w-full border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#FFD580] transition-all duration-300"
+                  >
+                    <input
+                      [formControl]="goal.searchControl"
+                      [disabled]="isLoading"
+                      class="flex-grow p-4 placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none w-full"
+                      placeholder="Search for a nutrient"
+                      (input)="onNutrientSearch(i)"
+                    />
+                    <div
+                      *ngIf="goal.searchControl.value?.length > 0"
+                      class="my-auto px-4 cursor-pointer text-red-600"
+                      (click)="clearSearch(i)"
+                    >
+                      ✕
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="(nutrientSearchResults[i]?.length || 0) > 0 && !goal.nutrientId"
+                    class="absolute z-10 top-14 w-full bg-white border border-[#D4A017]/30 rounded-xl shadow-lg max-h-60 overflow-y-auto"
+                  >
+                    <div
+                      *ngFor="let nutrient of nutrientSearchResults[i]"
+                      class="relative p-4 hover:bg-[#E0F7F1]/50 cursor-pointer transition-colors duration-300 font-['Open_Sans'] text-[#2D2D2D] capitalize"
+                      (click)="selectNutrient(i, nutrient)"
+                      (mouseenter)="onHoverNutrient(nutrient)"
+                      (mouseleave)="onLeaveNutrient()"
+                      (mousemove)="onMouseMove($event)"
+                    >
+                      {{ nutrient.name }}
+                    </div>
+                    <div
+                      *ngIf="hoveredNutrient && hoveredNutrientId"
+                      class="fixed z-50 bg-white border border-[#D4A017]/30 rounded-xl shadow-lg p-4 max-w-xs"
+                      [ngStyle]="{ top: tooltipPosition.y + 'px', left: tooltipPosition.x + 'px' }"
+                    >
+                      <h4 class="text-sm font-semibold text-[#2D2D2D] font-['Open_Sans'] mb-2">
+                        Nutrient Info
+                      </h4>
+                      <p class="text-sm text-[#2D2D2D] font-['Open_Sans']">
+                        {{ hoveredNutrient.name }} ({{ hoveredNutrient.unit }})
+                      </p>
+                    </div>
+                  </div>
+                  <div *ngIf="!goal.searchControl.untouched && goal.searchControl.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-2 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+                    <div *ngIf="goal.searchControl.errors?.['required']">
+                      Nutrient is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="w-1/4">
+                  <input
+                    type="number"
+                    [(ngModel)]="goal.targetQuantity"
+                    #qty="ngModel"
+                    [disabled]="!goal.nutrientId || isLoading"
+                    min="0"
+                    step="0.1"
+                    required
+                    placeholder="Target quantity"
+                    class="w-full p-4 rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 border transition-all duration-300 focus:outline-none"
+                    [ngClass]="{
+                      'outline-none border-[#D4A017]/30 focus:ring-2 focus:ring-[#FFD580] outline-0': goal.nutrientId,
+                      'pointer-events-none opacity-60 border-gray-200 focus:ring-0 outline-0': !goal.nutrientId,
+                      'border-[#EF4444] outline-0': goal.nutrientId && (qty.touched || qty.dirty) && qty.invalid,
+                      'border-gray-200': goal.nutrientId && (qty.touched || qty.dirty) && qty.valid
+                    }"
+                  />
+                  <div
+                    *ngIf="goal.nutrientId && (qty.touched || qty.dirty) && qty.invalid"
+                    class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-2 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']"
+                  >
+                    <div *ngIf="qty.errors?.['required']">Quantity is required.</div>
+                    <div *ngIf="qty.errors?.['min']">Quantity must be ≥ 0.</div>
+                  </div>
+                </div>
+                <span class="my-auto text-lg">{{ goal.nutrientUnitName }}</span>
+                <button
+                  class="text-[#EF4444] hover:underline font-['Open_Sans'] font-bold my-auto"
+                  (click)="removeNutrientGoal(i)"
+                  [disabled]="isLoading"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spinner -->
+    <div *ngIf="isLoading" class="absolute inset-0 flex items-center justify-center">
+      <div class="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full border-t-[#D4A017]" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Find Recipes Button and Save Recipes Button -->
+  <div class="mt-8">
+    <button
+      (click)="findRecipes()"
+      [disabled]="hasIncompleteGoals() || dishSlots.length === 0 || nutrientGoals.length === 0 || isLoading"
+      class="w-full p-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed font-['Open_Sans']"
+    >
+      Find Recipes
+    </button>
+    <button
+      *ngIf="recommendedRecipes.length > 0"
+      (click)="saveRecipesAndLogMeals()"
+      class="mt-4 w-full p-4 bg-gradient-to-r from-[#6A9D8C] to-[#D4A017] text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out font-['Open_Sans']"
+    >
+      Save Recipes and Log Meals
+    </button>
+  </div>
+
+  <!-- Recommended Recipes Section with Nutrient Tables -->
+  <div *ngIf="recommendedRecipes.length > 0" class="mt-8 flex gap-8">
+    <!-- Left Column: Recipes List (2/3 width) -->
+    <div class="w-3/5">
+      <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
+        Recommended Recipes
+      </h2>
+      <div class="flex flex-col gap-6">
+        <ng-container *ngFor="let recipe of recommendedRecipes; let i = index">
+          <div class="bg-white rounded-2xl shadow-lg border border-[#D4A017]/30 p-5">
+            <div class="flex justify-between items-center">
+              <span class="font-['Open_Sans'] text-[#2D2D2D]">
+                {{ recipe.recipe.name || 'Recipe ' + recipe.recipe.id }} - {{ recipe.amount }} servings
+              </span>
+              <svg
+                (click)="toggleRecommendedRow(recipe.recipe.id)"
+                class="w-6 h-6 stroke-[#D4A017] transition-transform duration-300 cursor-pointer"
+                [ngClass]="{'rotate-180': expandedRecommendedRows[recipe.recipe.id]}"
+                fill="none"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+            <div *ngIf="expandedRecommendedRows[recipe.recipe.id]" class="mt-4">
+              <h3 class="text-base font-semibold text-[#2D2D2D] font-['Open_Sans']">
+                Ingredients for {{recipe.recipe.totalServings}} servings:
+              </h3>
+              <p *ngIf="!recipeIngredients[recipe.recipe.id] || recipeIngredients[recipe.recipe.id].length === 0" class="font-['Open_Sans'] text-[#2D2D2D]">
+                Loading...
+              </p>
+              <ul class="mt-2 list-disc list-inside">
+                <li *ngFor="let ingredient of recipeIngredients[recipe.recipe.id]" class="font-['Open_Sans'] text-[#2D2D2D]">
+                  {{ ingredient.foodName }}: {{ ingredient.quantity }} {{ ingredient.measureName }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Right Column: Total Nutrient Tables (1/3 width) -->
+    <div class="w-2/5">
+      <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
+        Total Nutrients for All Recipes
+      </h2>
+      <div class="columns-1 gap-8">
+        <ng-container *ngFor="let category of getNutrientCategories()">
+          <table
+            class="w-full break-inside-avoid border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30 mb-8"
+            role="table"
+            *ngIf="filterTotalNutrientsByCategory(category.ids).length > 0"
+          >
+            <colgroup>
+              <col style="width: 30%">
+              <col style="width: 15%">
+              <col style="width: 5%">
+              <col style="width: 40%">
+              <col style="width: 10%">
+            </colgroup>
+            <tbody>
+            <tr class="bg-gradient-to-r from-[#E0F7F1] to-[#D4A017]/20 border-y border-[#D4A017]/60 shadow-sm">
+              <td colspan="5" class="p-4 text-lg font-semibold text-[#1F1F1F] font-['Playfair_Display'] rounded-t-2xl">
+                {{ category.name }}
+              </td>
+            </tr>
+            <tr
+              *ngFor="let nutrient of filterTotalNutrientsByCategory(category.ids); let last = last"
+              class="hover:bg-[#E0F7F1]/40 transition-colors duration-300"
+              [class.rounded-b-2xl]="last"
+            >
+              <td class="p-4 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]" [class.rounded-bl-2xl]="last">
+                {{ getNutrientLabel(nutrient.nutrientId)[0] }}
+              </td>
+              <td class="p-4 pr-0 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D] text-right">
+                {{ nutrient.amount.toFixed(2) }}
+              </td>
+              <td class="p-4 pl-2 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]">
+                {{ getNutrientLabel(nutrient.nutrientId)[1] }}
+              </td>
+              <td class="p-4 border-b border-gray-200">
+                <div class="h-5 w-full rounded-full bg-[#E0F7F1]">
+                  <div
+                    class="h-full rounded-full bg-gradient-to-r from-[#6A9D8C] to-[#D4A017]"
+                    [ngStyle]="{ width: Math.min(nutrient.percentage, 100) + '%' }"
+                  ></div>
+                </div>
+              </td>
+              <td class="p-4 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]" [class.rounded-br-2xl]="last">
+                {{ nutrient.targetAmount > 0 ? nutrient.percentage + '%' : '—' }}
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </ng-container>
+      </div>
+      <div *ngIf="totalNutrientsData.length === 0" class="p-4 text-center text-gray-400 font-['Open_Sans']">
+        No nutritional data available.
+      </div>
+    </div>
+  </div>
+</div>

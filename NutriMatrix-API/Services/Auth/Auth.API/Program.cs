@@ -62,7 +62,7 @@ namespace Auth.API
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-                db.Database.Migrate();
+//                db.Database.Migrate();
             }
 
             // Configure the HTTP request pipeline.

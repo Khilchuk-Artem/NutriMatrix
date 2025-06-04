@@ -40,9 +40,9 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-	  <None Remove="Assets\my_recipes_sample.csv" />
-	  <None Remove="Assets\recipe_nutrition_data(1).csv" />
-	  <None Remove="Assets\recipe_nutrition_data_sample.csv" />
+	  <Folder Include="Models\GeneticAlgorithm\" />
+	  <Folder Include="NewFolder1\" />
+	  <Folder Include="NewFolder\" />
 	</ItemGroup>
 
 </Project>

@@ -20,12 +20,14 @@ namespace RecommendationService.Api.Controllers
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IRecipeRecommendationService _recipeRecommendationService;
         private readonly IQdrantService _qdrantService;
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, RedisCollection<RecipeShortcutRedis> collection, IRecipeRecommendationService recipeRecommendationService, IQdrantService qdrantService)
+        private readonly RecipeDbContext _dbContext;
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, RedisCollection<RecipeShortcutRedis> collection, IRecipeRecommendationService recipeRecommendationService, IQdrantService qdrantService, RecipeDbContext dbContext)
         {
             _logger = logger;
             _collection = collection;
             _recipeRecommendationService = recipeRecommendationService;
             _qdrantService = qdrantService;
+            _dbContext = dbContext;
         }
 
         [HttpGet("GetWeatherForecast")]
@@ -38,18 +40,25 @@ namespace RecommendationService.Api.Controllers
         [HttpGet("Seed")]
         public async Task<IActionResult> SeedAsync()
         {
-            /*var data = Seeding.GetRecipeShortcutRedis();
             await _qdrantService.CreateCollectionAsync();
 
-            foreach (var a in data)
+            await foreach (var record in _dbContext.Recipes.Include(r=>r.Measures).AsAsyncEnumerable())
             {
-                var key = await _collection.InsertAsync(a);
-                await _qdrantService.InsertRecipeVectorAsync((int)a.Id,a.NutrientAmounts.Values,a.Category,new List<string>());
+                var redis = await _collection.FirstOrDefaultAsync(r => r.Id == record.Id);
+
+                if (redis.NutrientAmounts.Count == 161)
+                {
+                    var ingredients = record.Measures.Select(m => m.FoodId.ToString()).ToList();
+                    var nutrients = redis.NutrientAmounts.Select(kv => kv.Value).ToList();
+                    await _qdrantService.InsertRecipeVectorAsync((int)record.Id, nutrients, record.Category, ingredients);
+                }
+                if (redis.NutrientAmounts.Count != 161)
+                {
+                    var hmmm = 1;
+                }
+
             }
 
-            var res = await _collection.Take(20).ToListAsync();
-
-            return Ok(res);*/
             return Ok();
         }
         [HttpPost("Recommendation")]

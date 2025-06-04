@@ -53,8 +53,8 @@ namespace RecommendationService.Api.Data
         public static (List<Recipe> Recipes, List<RecipeMeasure> Measures, List<NutrientAmount> Nutrients)
             GetRecipes()
         {
-            var nutritionPath = Path.Combine(AppContext.BaseDirectory, "Assets", "recipe_nutrition_data_sample.csv");
-            var infoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "my_recipes_sample.csv");
+            var nutritionPath = Path.Combine(AppContext.BaseDirectory, "Assets", "recipe_nutrition_data.csv");
+            var infoPath = Path.Combine(AppContext.BaseDirectory, "Assets", "my_recipes.csv");
 
             var nutritionDict = ParseNutritionCsv(nutritionPath);
             var recipeInfos = ParseRecipeInfoCsv(infoPath);
@@ -68,7 +68,7 @@ namespace RecommendationService.Api.Data
                 var recipe = new Recipe
                 {
                     Id = info.recipe_id,
-                    Title = info.title,  // ADDED TITLE HERE
+                    Title = info.title,
                     Category = info.primary_category_name,
                     Servings = info.servings,
                     Description = info.description,
@@ -142,9 +142,18 @@ namespace RecommendationService.Api.Data
                     if (!long.TryParse(csv.GetField("recipe_id"), out long recipeId))
                         continue;
 
-                    var ingredientsJson = csv.GetField("ingredients_clean");
-                    var measures = new List<IngredientMeasure>();
+                    // Отримуємо "сирий" рядок колонки ingredients_clean
+                    var raw = csv.GetField("ingredients_clean");
+                    // Якщо raw починається та закінчується подвійною лапкою, відрізаємо їх
+                    if (raw.Length >= 2 && raw[0] == '"' && raw[^1] == '"')
+                    {
+                        raw = raw[1..^1];
+                    }
+                    raw = raw.Replace("\"\"", "\""); // ← ОЦЕ ДОДАЙ
 
+                    // Тепер raw виглядає як [{"food_id": 1, "measure_id": 6, "unit_amount": 46.0}, …]
+
+                    var measures = new List<IngredientMeasure>();
                     try
                     {
                         var options = new JsonSerializerOptions
@@ -152,12 +161,12 @@ namespace RecommendationService.Api.Data
                             PropertyNameCaseInsensitive = true,
                             NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString
                         };
-                        measures = JsonSerializer.Deserialize<List<IngredientMeasure>>(ingredientsJson, options)
+                        measures = JsonSerializer.Deserialize<List<IngredientMeasure>>(raw, options)
                                    ?? new List<IngredientMeasure>();
                     }
                     catch
                     {
-                        // Log error but continue
+                        // Якщо раптом не вдається розпарсити JSON, залишаємо measures пустим
                     }
 
                     var nutrients = new Dictionary<int, float>();
@@ -186,12 +195,13 @@ namespace RecommendationService.Api.Data
                 }
                 catch
                 {
-                    // Skip bad rows
+                    // Пропустити «битий» рядок
                 }
             }
 
             return nutritionDict;
         }
+
 
         private static List<RecipeInfoRow> ParseRecipeInfoCsv(string path)
         {

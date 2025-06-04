@@ -1,16 +1,16 @@
-import {Component, OnInit} from '@angular/core';
-import {FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
-import {FoodDTO, FoodShortcutDTO, MeasureDto} from '../../models/food.models';
-import {MeasureService, MeasureWithFoodDto} from '../../../FoodRecords/services/measure.service';
-import {debounceTime, filter, Subject, switchMap, takeUntil, timer} from 'rxjs';
-import {FoodService} from '../../Services/food.service';
-import {AuthService} from '../../../Auth/Services/auth.service';
-import {CreateMealDto, MealService} from '../../Services/meal.service';
-import {Router} from '@angular/router';
-import {DecimalPipe, NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
-import {NUTRIENT_CATEGORIES} from '../../../../Core/services/nutrient-categories';
-import {HttpClient} from '@angular/common/http';
-import {NgClickOutsideDirective} from 'ng-click-outside2';
+import { Component, OnInit } from '@angular/core';
+import { FormArray, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FoodDTO, FoodShortcutDTO, MeasureDto } from '../../models/food.models';
+import { MeasureService, MeasureWithFoodDto } from '../../../FoodRecords/services/measure.service';
+import { debounceTime, filter, Subject, switchMap, takeUntil, timer } from 'rxjs';
+import { FoodService } from '../../Services/food.service';
+import { AuthService } from '../../../Auth/Services/auth.service';
+import { CreateMealDto, MealService } from '../../Services/meal.service';
+import { Router } from '@angular/router';
+import { DecimalPipe, NgClass, NgForOf, NgIf, NgStyle } from '@angular/common';
+import { NUTRIENT_CATEGORIES } from '../../../../Core/services/nutrient-categories';
+import { HttpClient } from '@angular/common/http';
+import { NgClickOutsideDirective } from 'ng-click-outside2';
 
 interface IngredientEntry {
   measure: {
@@ -44,7 +44,7 @@ interface NutrientInfo {
   standalone: true,
   styleUrl: './add-private-recipe.component.css'
 })
-export class AddPrivateRecipeComponent  implements OnInit {
+export class AddPrivateRecipeComponent implements OnInit {
   recipeForm: FormGroup;
   searchControl = new FormControl('');
   quantityControl = new FormControl('', [Validators.required, Validators.min(0.01)]);
@@ -67,6 +67,17 @@ export class AddPrivateRecipeComponent  implements OnInit {
   private hoverSubject = new Subject<number | null>();
   private hoverCancel$ = new Subject<void>();
 
+  // New properties for nutrient search
+  nutrientSearchControl = new FormControl('');
+  nutrientSearchResults: NutrientInfo[] = [];
+  selectedNutrient: NutrientInfo | null = null;
+  private nutrientSearchSubject = new Subject<string>();
+  hoveredNutrientId: number | null = null;
+  hoveredNutrient: NutrientInfo | null = null;
+  nutrientTooltipPosition = { x: 0, y: 0 };
+  private nutrientHoverSubject = new Subject<number | null>();
+  private nutrientHoverCancel$ = new Subject<void>();
+
   constructor(
     private foodService: FoodService,
     private measureService: MeasureService,
@@ -85,6 +96,7 @@ export class AddPrivateRecipeComponent  implements OnInit {
   ngOnInit() {
     const trackedNutrients = this.authService.getUser()?.nutrientsToTrack?.filter(n => n.isActive).map(k => k.nutrientId) || [];
 
+    // Food search setup
     this.searchSubject
       .pipe(
         debounceTime(300),
@@ -99,12 +111,14 @@ export class AddPrivateRecipeComponent  implements OnInit {
       this.searchSubject.next(value || '');
     });
 
+    // Load nutrient metadata and setup nutrient search
     this.http.get<NutrientInfo[]>('assets/nutrient_attributes.json')
       .subscribe(data => {
         this.nutrientMetadata = data;
+        this.setupNutrientSearch();
       });
 
-    // Handle hover delay for nutrient tooltip
+    // Food hover setup
     this.hoverSubject.pipe(
       switchMap(foodId => {
         if (foodId === null) {
@@ -123,6 +137,48 @@ export class AddPrivateRecipeComponent  implements OnInit {
     ).subscribe();
   }
 
+  // New method to setup nutrient search
+  private setupNutrientSearch() {
+    this.nutrientSearchSubject
+      .pipe(
+        debounceTime(300),
+        filter(query => query.length > 0),
+        switchMap(query => {
+          const lowercaseQuery = query.toLowerCase();
+          const results = this.nutrientMetadata.filter(nutrient =>
+            nutrient.name.toLowerCase().includes(lowercaseQuery)
+          ).slice(0, 10); // Limit to 10 results
+          return [results];
+        })
+      )
+      .subscribe(results => {
+        this.nutrientSearchResults = results;
+      });
+
+    this.nutrientSearchControl.valueChanges.subscribe(value => {
+      this.nutrientSearchSubject.next(value || '');
+    });
+
+    // Nutrient hover setup
+    this.nutrientHoverSubject.pipe(
+      switchMap(nutrientId => {
+        if (nutrientId === null) {
+          this.hoveredNutrientId = null;
+          this.hoveredNutrient = null;
+          return [];
+        }
+        return timer(500).pipe(
+          takeUntil(this.nutrientHoverCancel$),
+          switchMap(() => {
+            this.hoveredNutrientId = nutrientId;
+            return [];
+          })
+        );
+      })
+    ).subscribe();
+  }
+
+  // Existing food-related methods (unchanged)
   onHoverFood(food: FoodShortcutDTO) {
     this.hoverCancel$.next();
     this.hoveredFood = food;
@@ -135,23 +191,48 @@ export class AddPrivateRecipeComponent  implements OnInit {
   }
 
   onMouseMove(event: MouseEvent) {
-    this.tooltipPosition = {
-      x: event.clientX + 10,
-      y: event.clientY + 10
-    };
+    this.tooltipPosition = { x: event.clientX + 10, y: event.clientY + 10 };
   }
 
-  get name() {
-    return this.recipeForm.get('name');
+  // New nutrient-related methods
+  onHoverNutrient(nutrient: NutrientInfo) {
+    this.nutrientHoverCancel$.next();
+    this.hoveredNutrient = nutrient;
+    this.nutrientHoverSubject.next(nutrient.attr_id);
   }
 
-  get totalServings() {
-    return this.recipeForm.get('totalServings');
+  onLeaveNutrient() {
+    this.nutrientHoverCancel$.next();
+    this.nutrientHoverSubject.next(null);
   }
 
-  get ingredients() {
-    return this.recipeForm.get('ingredients') as FormArray;
+  onMouseMoveNutrient(event: MouseEvent) {
+    this.nutrientTooltipPosition = { x: event.clientX + 10, y: event.clientY + 10 };
   }
+
+  selectNutrient(nutrient: NutrientInfo) {
+    this.selectedNutrient = nutrient;
+    this.nutrientSearchControl.setValue(nutrient.name);
+    this.nutrientSearchResults = [];
+  }
+
+  clearNutrientSearch() {
+    this.selectedNutrient = null;
+    this.nutrientSearchResults = [];
+    this.nutrientSearchControl.reset();
+  }
+
+  onClickOutsideNutrientSearch() {
+    if (this.nutrientSearchResults.length > 0) {
+      this.nutrientSearchResults = [];
+      this.nutrientSearchControl.setValue(this.selectedNutrient?.name || '');
+    }
+  }
+
+  // Remaining existing methods (unchanged)
+  get name() { return this.recipeForm.get('name'); }
+  get totalServings() { return this.recipeForm.get('totalServings'); }
+  get ingredients() { return this.recipeForm.get('ingredients') as FormArray; }
 
   selectFood(food: FoodShortcutDTO) {
     this.selectedFood = food;
@@ -167,7 +248,6 @@ export class AddPrivateRecipeComponent  implements OnInit {
     if (this.selectedMeasure && this.quantityControl.valid && this.selectedFood) {
       const tmpQuantity = this.quantityControl.value;
       const trackedNutrients = this.authService.getUser()?.nutrientsToTrack?.filter(n => n.isActive).map(k => k.nutrientId) || [];
-
       this.foodService.getFoodById(this.selectedFood.id, trackedNutrients).subscribe(food => {
         const ingredient: IngredientEntry = {
           measure: {
@@ -194,11 +274,7 @@ export class AddPrivateRecipeComponent  implements OnInit {
     this.editingIndex = index;
     const ingredient = this.addedIngredients[index];
     this.editQuantityControl.setValue(String(ingredient.quantity));
-    this.editMeasure = {
-      id: ingredient.measure.id,
-      name: ingredient.measure.name,
-      weightInGrams: ingredient.measure.weightInGrams
-    };
+    this.editMeasure = { id: ingredient.measure.id, name: ingredient.measure.name, weightInGrams: ingredient.measure.weightInGrams };
     this.foodService.getFoodById(ingredient.measure.food.id).subscribe(food => {
       this.editMeasures = food.measures;
     });
@@ -282,15 +358,12 @@ export class AddPrivateRecipeComponent  implements OnInit {
     this.consumedNutrients.clear();
     const user = this.authService.getUser();
     const trackedNutrients = user?.nutrientsToTrack?.filter(n => n.isActive) || [];
-
     for (const ingredient of this.addedIngredients) {
       const measure = ingredient.measure;
       const amount = ingredient.quantity;
       if (!measure.food.foodNutrients) continue;
-
       for (const nutrient of measure.food.foodNutrients) {
         if (!trackedNutrients.some(t => t.nutrientId === nutrient.nutrientId)) continue;
-
         const nutrientAmount = (nutrient.amount * amount * (measure.weightInGrams || 0)) / 100;
         const currentAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
         this.consumedNutrients.set(nutrient.nutrientId, currentAmount + nutrientAmount);
@@ -303,7 +376,6 @@ export class AddPrivateRecipeComponent  implements OnInit {
     const user = this.authService.getUser();
     const trackedNutrients = user?.nutrientsToTrack?.filter(n => n.isActive) || [];
     const result: { nutrientId: number; consumedAmount: number; targetAmount: number; percentage: number }[] = [];
-
     for (const nutrient of trackedNutrients) {
       const consumedAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
       const targetAmount = nutrient.targetAmount;
@@ -311,7 +383,6 @@ export class AddPrivateRecipeComponent  implements OnInit {
       if (targetAmount > 0) {
         percentage = Math.round((consumedAmount / targetAmount) * 100);
       }
-
       result.push({
         nutrientId: nutrient.nutrientId,
         consumedAmount: Math.round(consumedAmount * 100) / 100,
@@ -319,7 +390,6 @@ export class AddPrivateRecipeComponent  implements OnInit {
         percentage: percentage
       });
     }
-
     return result;
   }
 

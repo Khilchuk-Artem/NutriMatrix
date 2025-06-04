@@ -55,7 +55,7 @@ namespace FoodCatalog.Api
             {
                 var db = scope.ServiceProvider.GetRequiredService<FoodCatalogDbContext>();
 
-                db.Database.Migrate();
+                //db.Database.Migrate();
 
                 /*await db.FoodNutrientIn100Gs.ExecuteDeleteAsync();
                 await db.Measures.ExecuteDeleteAsync();

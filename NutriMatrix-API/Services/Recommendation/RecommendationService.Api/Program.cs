@@ -18,8 +18,6 @@ namespace RecommendationService.Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            var kek = Seeding.GetRecipes();
-
             builder.Services.AddControllers();
 
             builder.Services.AddEndpointsApiExplorer();
@@ -75,12 +73,17 @@ namespace RecommendationService.Api
             {
                 var db = scope.ServiceProvider.GetRequiredService<RecipeDbContext>();
                 //db.Database.Migrate();
-                var hmmm = !db.Recipes.Any();
-                if (hmmm)
+                if (!db.Recipes.Any())
                 {
                     var (recipes, recipeMeasures, nutrientAmounts) = Seeding.GetRecipes();
 
-                    foreach (var recipe in recipes)
+                    var non161Nutrients = recipes.Where(r => nutrientAmounts.Where(na => na.RecipeId == r.Id).Count() != 161).ToList();
+                    if (non161Nutrients.Count > 0)
+                    {
+                        var hmmmm = 1;
+                    }
+
+                    Parallel.ForEach(recipes, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, recipe =>
                     {
                         recipe.Measures = recipeMeasures
                             .Where(m => m.RecipeId == recipe.Id)
@@ -89,11 +92,12 @@ namespace RecommendationService.Api
                         recipe.NutrientsPerTotalServings = nutrientAmounts
                             .Where(n => n.RecipeId == recipe.Id)
                             .ToList();
-                    }
+                    });
 
-                    foreach (var recipe in recipes)
+
+                    foreach (var recipeChunk in recipes.Chunk(100))
                     {
-                        await db.Recipes.AddAsync(recipe);
+                        await db.Recipes.AddRangeAsync(recipeChunk);
                         await db.SaveChangesAsync(); 
                     }
                 }
