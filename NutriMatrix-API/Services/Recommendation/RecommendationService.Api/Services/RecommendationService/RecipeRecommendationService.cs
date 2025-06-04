@@ -104,8 +104,7 @@ namespace RecommendationService.Api.Services.RecommendationService
                 if (bestIndividual == null || indiv.Fitness < bestIndividual.Fitness) bestIndividual = indiv;
             }
 
-            int maxGenerations = 100000; // or choose 10000, 50000 as reasonable values
-            for (int generation = 0; generation < maxGenerations; generation++)
+            while (_searchStopwatch.Elapsed < _timeLimit)
             {
                 var newPopulation = new List<Individual>(populationSize);
                 for (int i = 0; i < populationSize; i++)
@@ -120,7 +119,10 @@ namespace RecommendationService.Api.Services.RecommendationService
 
                     newPopulation.Add(child);
                     if (child.Fitness < bestIndividual.Fitness) bestIndividual = child;
+
+                    if (_searchStopwatch.Elapsed >= _timeLimit) break;
                 }
+
                 population = newPopulation;
             }
 
