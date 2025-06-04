@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using RecommendationService.Api.Models;
+using System.Collections.Concurrent;
 
 namespace RecommendationService.Api.Data
 {
@@ -59,11 +60,11 @@ namespace RecommendationService.Api.Data
             var nutritionDict = ParseNutritionCsv(nutritionPath);
             var recipeInfos = ParseRecipeInfoCsv(infoPath);
 
-            var recipes = new List<Recipe>();
-            var recipeMeasures = new List<RecipeMeasure>();
-            var nutrientAmounts = new List<NutrientAmount>();
+            var recipesBag = new ConcurrentBag<Recipe>();
+            var recipeMeasuresBag = new ConcurrentBag<RecipeMeasure>();
+            var nutrientAmountsBag = new ConcurrentBag<NutrientAmount>();
 
-            foreach (var info in recipeInfos)
+            Parallel.ForEach(recipeInfos, info =>
             {
                 var recipe = new Recipe
                 {
@@ -91,8 +92,8 @@ namespace RecommendationService.Api.Data
                             Amount = measure.unit_amount,
                             IsDeleted = false
                         };
-                        recipeMeasures.Add(rm);
                         recipe.Measures.Add(rm);
+                        recipeMeasuresBag.Add(rm);
                     }
 
                     foreach (var nutrient in nutritionData.Nutrients)
@@ -104,13 +105,17 @@ namespace RecommendationService.Api.Data
                             Amount = nutrient.Value,
                             IsDeleted = false
                         };
-                        nutrientAmounts.Add(na);
                         recipe.NutrientsPerTotalServings.Add(na);
+                        nutrientAmountsBag.Add(na);
                     }
                 }
 
-                recipes.Add(recipe);
-            }
+                recipesBag.Add(recipe);
+            });
+
+            var recipes = recipesBag.ToList();
+            var recipeMeasures = recipeMeasuresBag.ToList();
+            var nutrientAmounts = nutrientAmountsBag.ToList();
 
             return (recipes, recipeMeasures, nutrientAmounts);
         }
