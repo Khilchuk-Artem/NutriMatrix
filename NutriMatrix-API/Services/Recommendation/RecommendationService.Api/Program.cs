@@ -51,7 +51,18 @@ namespace RecommendationService.Api
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            // Example using Kestrel
+            if (builder.Environment.IsProduction())
+            {
+                var portVar = Environment.GetEnvironmentVariable("PORT");
+                if (portVar is { Length: > 0 } && int.TryParse(portVar, out var port))
+                {
+                    builder.WebHost.ConfigureKestrel(options =>
+                    {
+                        options.ListenAnyIP(port); // Listen on all network interfaces
+                    });
+                }
+            }
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<RecipeDbContext>();
@@ -94,7 +105,7 @@ namespace RecommendationService.Api
                 options.AllowAnyMethod();
             });
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
