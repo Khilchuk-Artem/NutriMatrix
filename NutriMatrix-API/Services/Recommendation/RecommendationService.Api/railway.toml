@@ -1,7 +1,6 @@
 [build]
 builder = "dockerfile"
-dockerfilePath = "Dockerfile"
-context = "../../.."
+dockerfilePath = "railway_Dockerfile"
 
 [deploy]
 startCommand = "dotnet RecommendationService.Api.dll"
