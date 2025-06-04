@@ -1,25 +1,24 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
-WORKDIR /app
-EXPOSE 8080
-EXPOSE 8081
-
+# Use full SDK to build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["Services/Recommendation/RecommendationService.Api/RecommendationService.Api.csproj", "Services/Recommendation/RecommendationService.Api/"]
-RUN dotnet restore "./Services/Recommendation/RecommendationService.Api/./RecommendationService.Api.csproj"
-COPY . .
-WORKDIR "/src/Services/Recommendation/RecommendationService.Api"
-RUN dotnet build "./RecommendationService.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./RecommendationService.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
-FROM base AS final
+# Set working directory
 WORKDIR /app
-COPY --from=publish /app/publish .
+
+# Copy everything from repo root (adjust context via railway.toml)
+COPY . .
+
+# Restore and build
+WORKDIR /app/Services/Recommendation/RecommendationService.Api
+RUN dotnet restore "RecommendationService.Api.csproj"
+RUN dotnet build "RecommendationService.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
+# Publish
+RUN dotnet publish "RecommendationService.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+# Runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+
 ENTRYPOINT ["dotnet", "RecommendationService.Api.dll"]
