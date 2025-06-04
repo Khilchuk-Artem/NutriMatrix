@@ -55,7 +55,7 @@ namespace RecommendationService.Api
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<RecipeDbContext>();
-                //db.Database.Migrate();
+                db.Database.Migrate();
                 if (!db.Recipes.Any())
                 {
                     var (recipes, recipeMeasures, nutrientAmounts) = Seeding.GetRecipes();
@@ -66,7 +66,7 @@ namespace RecommendationService.Api
                         var hmmmm = 1;
                     }
 
-                    Parallel.ForEach(recipes, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, recipe =>
+                    /*Parallel.ForEach(recipes, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, recipe =>
                     {
                         recipe.Measures = recipeMeasures
                             .Where(m => m.RecipeId == recipe.Id)
@@ -75,7 +75,7 @@ namespace RecommendationService.Api
                         recipe.NutrientsPerTotalServings = nutrientAmounts
                             .Where(n => n.RecipeId == recipe.Id)
                             .ToList();
-                    });
+                    });*/
 
 
                     foreach (var recipeChunk in recipes.Chunk(100))
