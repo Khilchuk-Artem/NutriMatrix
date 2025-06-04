@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace RecommendationService.Api.Services.RecommendationService
 {
-    public class RecipeRecommendationService : IRecipeRecommendationService
+    public partial class RecipeRecommendationService : IRecipeRecommendationService
     {
         private readonly RedisCollection<RecipeShortcutRedis> _recipesCollection;
         private readonly IQdrantService _qdrant;
@@ -164,18 +164,6 @@ namespace RecommendationService.Api.Services.RecommendationService
                 TotalDistance = totalDistance,
                 Nutrients = aggregated
             };
-        }
-
-        private class Gene
-        {
-            public RecipeShortcutRedis Recipe;
-            public float Amount;
-        }
-
-        private class Individual
-        {
-            public Gene[] Genes;
-            public float Fitness;
         }
 
         private Individual CreateRandomIndividual(
