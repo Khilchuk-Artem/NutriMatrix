@@ -35,7 +35,6 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Models\GeneticAlgorithm\" />
 	  <Folder Include="NewFolder1\" />
 	  <Folder Include="NewFolder\" />
 	</ItemGroup>

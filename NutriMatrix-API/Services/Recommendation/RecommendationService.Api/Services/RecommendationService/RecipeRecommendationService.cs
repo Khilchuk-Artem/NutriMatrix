@@ -101,8 +101,7 @@ namespace RecommendationService.Api.Services.RecommendationService
                 var indiv = CreateRandomIndividual(candidatesList, numSlots);
                 indiv.Fitness = EvaluateFitness(indiv, dto.NutritionalGoals);
                 population.Add(indiv);
-                if (bestIndividual == null || indiv.Fitness < bestIndividual.Fitness)
-                    bestIndividual = indiv;
+                if (bestIndividual == null || indiv.Fitness < bestIndividual.Fitness) bestIndividual = indiv;
             }
 
             while (_searchStopwatch.Elapsed < _timeLimit)
@@ -119,11 +118,9 @@ namespace RecommendationService.Api.Services.RecommendationService
                     child.Fitness = EvaluateFitness(child, dto.NutritionalGoals);
 
                     newPopulation.Add(child);
-                    if (child.Fitness < bestIndividual.Fitness)
-                        bestIndividual = child;
+                    if (child.Fitness < bestIndividual.Fitness) bestIndividual = child;
 
-                    if (_searchStopwatch.Elapsed >= _timeLimit)
-                        break;
+                    if (_searchStopwatch.Elapsed >= _timeLimit) break;
                 }
 
                 population = newPopulation;
@@ -138,9 +135,8 @@ namespace RecommendationService.Api.Services.RecommendationService
             var totalDistance = (float)Math.Sqrt(dto.NutritionalGoals.Keys
                 .Sum(k =>
                 {
-                    float actual = bestCombo
-                        .Sum(rc => rc.Recipe.NutrientAmounts.GetValueOrDefault(k, 0f) * rc.Amount / rc.Recipe.Servings);
-                    var diff = dto.NutritionalGoals[k] - actual;
+                    var diff = dto.NutritionalGoals[k] - bestCombo
+                        .Sum(rc => rc.Recipe.NutrientAmounts.GetValueOrDefault(k, 0f) * rc.Amount / rc.Recipe.Servings); ;
                     return diff * diff / (dto.NutritionalGoals[k] * dto.NutritionalGoals[k]);
                 }));
 
@@ -220,8 +216,7 @@ namespace RecommendationService.Api.Services.RecommendationService
             for (int i = 0; i < tournoiSize; i++)
             {
                 var candidate = population[_rng.Next(population.Count)];
-                if (best == null || candidate.Fitness < best.Fitness)
-                    best = candidate;
+                if (best == null || candidate.Fitness < best.Fitness) best = candidate;
             }
             return best;
         }
