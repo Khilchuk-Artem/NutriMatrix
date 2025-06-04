@@ -10,11 +10,6 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
-	<ItemGroup>
-		<Protobuf Include="..\..\FoodCatalog\FoodCatalog.Api\Protos\nutrients.proto" GrpcServices="Client">
-			<Link>Protos\discount.proto</Link>
-		</Protobuf>
-	</ItemGroup>
   <ItemGroup>
     <PackageReference Include="CsvHelper" Version="33.0.1" />
     <PackageReference Include="Grpc.AspNetCore" Version="2.71.0" />

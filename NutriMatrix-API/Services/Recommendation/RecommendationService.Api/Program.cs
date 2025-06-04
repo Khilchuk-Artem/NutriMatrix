@@ -1,5 +1,3 @@
-
-using FoodCatalog.Grpc;
 using Microsoft.EntityFrameworkCore;
 using Qdrant.Client;
 using RecommendationService.Api.Data;
@@ -43,21 +41,6 @@ namespace RecommendationService.Api
             builder.Services.AddSingleton<QdrantClient>(_ =>
             {
                 return new QdrantClient("qdrant", 6334);
-            });
-
-            builder.Services.AddGrpcClient<FoodService.FoodServiceClient>(options =>
-            {
-                options.Address = new Uri(builder.Configuration["GrpcSettings:FoodServiceUri"]!);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var handler = new HttpClientHandler
-                {
-                    ServerCertificateCustomValidationCallback =
-                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                };
-
-                return handler;
             });
 
             var app = builder.Build();
