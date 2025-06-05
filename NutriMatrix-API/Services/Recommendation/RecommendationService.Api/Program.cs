@@ -34,7 +34,6 @@ namespace RecommendationService.Api
             builder.Services.AddScoped<IQdrantService, QdrantService>();
             builder.Services.AddScoped<RecipeRedisSyncInterceptor>();
 
-            // Example using Kestrel
             if (builder.Environment.IsProduction())
             {
                 var portVar = Environment.GetEnvironmentVariable("PORT");
@@ -42,7 +41,7 @@ namespace RecommendationService.Api
                 {
                     builder.WebHost.ConfigureKestrel(options =>
                     {
-                        options.ListenAnyIP(port); // Listen on all network interfaces
+                        options.ListenAnyIP(port);
                     });
                 }
             }
@@ -77,7 +76,7 @@ namespace RecommendationService.Api
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<RecipeDbContext>();
-                db.Database.Migrate();
+                //db.Database.Migrate();
                 if (!db.Recipes.Any())
                 {
                     var (recipes, recipeMeasures, nutrientAmounts) = Seeding.GetRecipes();

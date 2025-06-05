@@ -2,29 +2,19 @@
 
 namespace FoodRecords.Api.Models.Domain
 {
-    public class FoodPlan
+    public class FoodPlan:IEntity
     {
         public long Id { get; set; }
-        public long UserId { get; set; }
-        public string Name { get; set; }
-
-        public long FoodMeasureId { get; set; }
-        public double Quantity { get; set; }
-
-        public DateTime ScheduledTime { get; set; }
-        public string? RecurringDaysRaw { get; set; }
-        public bool RequireConfirmationOnAdd { get; set; }
-
-
-
-        [NotMapped]
-        public IEnumerable<DayOfWeek> IsRecurring
-        {
-            get => string.IsNullOrEmpty(RecurringDaysRaw)
-                ? new List<DayOfWeek>()
-                : RecurringDaysRaw.Split(',')
-                    .Select(d => Enum.Parse<DayOfWeek>(d));
-            set => RecurringDaysRaw = string.Join(",", value.Select(d => d.ToString()));
-        }
+        public long ConsumableId { get; set; }
+        public int Amount { get; set; }
+        public string UserId { get; set; }
+        public bool RequiresConfirmation { get; set; }
+        public bool IsRecurring { get; set; }
+        public DateTime? RunAtUtc { get; set; }
+        public string? CronExpression { get; set; }
+        public string JobKey { get; set; }
+        public string TriggerKey { get; set; }
+        public ConsumableType ConsumableType { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

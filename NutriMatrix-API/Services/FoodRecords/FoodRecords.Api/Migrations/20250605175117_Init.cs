@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FoodRecords.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -18,13 +18,17 @@ namespace FoodRecords.Api.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    FoodMeasureId = table.Column<long>(type: "bigint", nullable: false),
-                    Quantity = table.Column<double>(type: "double precision", nullable: false),
-                    ScheduledTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RecurringDaysRaw = table.Column<string>(type: "text", nullable: true),
-                    RequireConfirmationOnAdd = table.Column<bool>(type: "boolean", nullable: false)
+                    ConsumableId = table.Column<long>(type: "bigint", nullable: false),
+                    Amount = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    RequiresConfirmation = table.Column<bool>(type: "boolean", nullable: false),
+                    IsRecurring = table.Column<bool>(type: "boolean", nullable: false),
+                    RunAtUtc = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CronExpression = table.Column<string>(type: "text", nullable: true),
+                    JobKey = table.Column<string>(type: "text", nullable: false),
+                    TriggerKey = table.Column<string>(type: "text", nullable: false),
+                    ConsumableType = table.Column<int>(type: "integer", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -49,44 +53,65 @@ namespace FoodRecords.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RecipeRecords",
+                name: "MealRecords",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DateEaten = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<string>(type: "text", nullable: false),
+                    ServingsEaten = table.Column<float>(type: "real", nullable: false),
+                    MealId = table.Column<long>(type: "bigint", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RecipeRecords", x => x.Id);
+                    table.PrimaryKey("PK_MealRecords", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "IngredientSnapshot",
+                name: "PendingRecords",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ConsumableType = table.Column<int>(type: "integer", nullable: false),
+                    ConsumableId = table.Column<long>(type: "bigint", nullable: false),
+                    Amount = table.Column<float>(type: "real", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    DatePending = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PendingRecords", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MealIngredientSnapshots",
                 columns: table => new
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     FoodMeasureId = table.Column<long>(type: "bigint", nullable: false),
                     Amount = table.Column<float>(type: "real", nullable: false),
-                    RecipeRecordId = table.Column<long>(type: "bigint", nullable: true)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    MealRecordId = table.Column<long>(type: "bigint", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IngredientSnapshot", x => x.Id);
+                    table.PrimaryKey("PK_MealIngredientSnapshots", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_IngredientSnapshot_RecipeRecords_RecipeRecordId",
-                        column: x => x.RecipeRecordId,
-                        principalTable: "RecipeRecords",
+                        name: "FK_MealIngredientSnapshots_MealRecords_MealRecordId",
+                        column: x => x.MealRecordId,
+                        principalTable: "MealRecords",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_IngredientSnapshot_RecipeRecordId",
-                table: "IngredientSnapshot",
-                column: "RecipeRecordId");
+                name: "IX_MealIngredientSnapshots_MealRecordId",
+                table: "MealIngredientSnapshots",
+                column: "MealRecordId");
         }
 
         /// <inheritdoc />
@@ -99,10 +124,13 @@ namespace FoodRecords.Api.Migrations
                 name: "FoodRecords");
 
             migrationBuilder.DropTable(
-                name: "IngredientSnapshot");
+                name: "MealIngredientSnapshots");
 
             migrationBuilder.DropTable(
-                name: "RecipeRecords");
+                name: "PendingRecords");
+
+            migrationBuilder.DropTable(
+                name: "MealRecords");
         }
     }
 }

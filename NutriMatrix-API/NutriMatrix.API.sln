@@ -27,7 +27,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Recommendation", "Recommend
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RecommendationService.Api", "Services\Recommendation\RecommendationService.Api\RecommendationService.Api.csproj", "{E1A7B04A-5EE5-4CA6-B403-6ABC04391B18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gateway.API", "Gateway.API\Gateway.API.csproj", "{F85A06B1-C3AE-4904-A564-DC2731C93456}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gateway.API", "Gateway.API\Gateway.API.csproj", "{F85A06B1-C3AE-4904-A564-DC2731C93456}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BuildingBlocks.Messaging", "BuildingBlocks.Messaging\BuildingBlocks.Messaging.csproj", "{0D8EA82B-D2D2-48BB-A6CA-AF95DCEF8F04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{F85A06B1-C3AE-4904-A564-DC2731C93456}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F85A06B1-C3AE-4904-A564-DC2731C93456}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F85A06B1-C3AE-4904-A564-DC2731C93456}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D8EA82B-D2D2-48BB-A6CA-AF95DCEF8F04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D8EA82B-D2D2-48BB-A6CA-AF95DCEF8F04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D8EA82B-D2D2-48BB-A6CA-AF95DCEF8F04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D8EA82B-D2D2-48BB-A6CA-AF95DCEF8F04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{65BFAE19-0628-4BE7-A33A-97F15C6C5359} = {6CDA541A-F565-4B4C-89B3-6BEADCDAE3AA}
 		{3C095BF5-7B4D-4C4A-9542-6A83EBCFAC0A} = {3E0BF15B-2B12-4C8B-9C5F-98818A12FB89}
 		{E1A7B04A-5EE5-4CA6-B403-6ABC04391B18} = {3C095BF5-7B4D-4C4A-9542-6A83EBCFAC0A}
+		{0D8EA82B-D2D2-48BB-A6CA-AF95DCEF8F04} = {F42DFEE7-D389-49A7-B7F1-E1075C29EFE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D88A143A-ECBD-4459-9D34-38D25B38BADB}

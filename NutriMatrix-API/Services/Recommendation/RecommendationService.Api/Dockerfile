@@ -9,5 +9,4 @@ RUN dotnet publish "RecommendationService.Api.csproj" -c $BUILD_CONFIGURATION -o
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-
 ENTRYPOINT ["dotnet", "RecommendationService.Api.dll"]

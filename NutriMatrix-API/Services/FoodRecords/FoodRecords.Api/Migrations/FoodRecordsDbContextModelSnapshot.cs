@@ -30,27 +30,41 @@ namespace FoodRecords.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<long>("FoodMeasureId")
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<long>("ConsumableId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("Name")
+                    b.Property<int>("ConsumableType")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("CronExpression")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("JobKey")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("Quantity")
-                        .HasColumnType("double precision");
-
-                    b.Property<string>("RecurringDaysRaw")
-                        .HasColumnType("text");
-
-                    b.Property<bool>("RequireConfirmationOnAdd")
+                    b.Property<bool>("RequiresConfirmation")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTime>("ScheduledTime")
+                    b.Property<DateTime?>("RunAtUtc")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<long>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<string>("TriggerKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -140,6 +154,38 @@ namespace FoodRecords.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MealRecords");
+                });
+
+            modelBuilder.Entity("FoodRecords.Api.Models.Domain.PendingRecord", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
+
+                    b.Property<long>("ConsumableId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("ConsumableType")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("DatePending")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PendingRecords");
                 });
 
             modelBuilder.Entity("FoodRecords.Api.Models.Domain.MealIngredientSnapshot", b =>

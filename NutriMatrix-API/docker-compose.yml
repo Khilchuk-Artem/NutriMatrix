@@ -1,34 +1,21 @@
 version: '3.4'
 
 services:
-  authdb:
-    image: authdb
-
-  foodcatalogdb:
-    image: foodcatalogdb
-
-  recipedb:
-    image: recipedb
-
+  postgres:
+    image: postgres
   foodcatalogredis:
     image: foodcatalogredis
-
   qdrant:
     image: qdrant
-
-  foodrecordsdb:
-    image: foodrecordsdb
-
-  messagebroker:
-    image: rabbitmq:management
-
+  rabbitmq:
+    image: rabbitmq
   auth.api:
     image: ${DOCKER_REGISTRY-}authapi
     build:
       context: .
       dockerfile: Services/Auth/Auth.API/Dockerfile
     depends_on:
-      - authdb
+      - postgres
 
   foodcatalog.api:
     image: ${DOCKER_REGISTRY-}foodcatalogapi
@@ -36,18 +23,17 @@ services:
       context: .
       dockerfile: Services/FoodCatalog/FoodCatalog.Api/Dockerfile
     depends_on:
-      - foodcatalogdb
+      - postgres
       - foodcatalogredis 
-      - messagebroker
-
-
+      - rabbitmq
   foodrecords.api:
     image: ${DOCKER_REGISTRY-}foodrecordsapi
     build:
       context: .
       dockerfile: Services/FoodRecords/FoodRecords.Api/Dockerfile
     depends_on:
-      - foodrecordsdb
+      - postgres
+      - rabbitmq
 
   recommendationservice.api:
     image: ${DOCKER_REGISTRY-}recommendationserviceapi
@@ -57,9 +43,8 @@ services:
     depends_on:
       - foodcatalogredis 
       - qdrant
-      - recipedb
-      - messagebroker
-
+      - postgres
+ 
 
   gateway.api:
     image: ${DOCKER_REGISTRY-}gatewayapi
@@ -72,12 +57,7 @@ services:
       - foodcatalog.api
       - auth.api
 
-
 volumes:
-  sql_data:
-  postgres_foodcatalog:
   redis_data:
-  postgres_foodrecords:
   qdrant_data:
   postgres_recipes:
-

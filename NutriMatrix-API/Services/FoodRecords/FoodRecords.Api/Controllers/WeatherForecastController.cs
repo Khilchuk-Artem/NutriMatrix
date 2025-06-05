@@ -1,3 +1,5 @@
+using BuildingBlocks.Messaging.Responses;
+using FoodRecords.Api.Services.MealFetcher;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FoodRecords.Api.Controllers
@@ -6,6 +8,7 @@ namespace FoodRecords.Api.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
+        private readonly IMealFetcher _fetcher;
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
@@ -13,21 +16,16 @@ namespace FoodRecords.Api.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IMealFetcher fetcher)
         {
             _logger = logger;
+            _fetcher = fetcher;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<MealResponseDto> GetAsync()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return await _fetcher.FetchMealAsync(1);
         }
     }
 }

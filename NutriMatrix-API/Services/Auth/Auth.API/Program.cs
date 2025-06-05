@@ -24,7 +24,7 @@ namespace Auth.API
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<AuthDbContext>(options =>
             {
-                options.UseSqlServer(connection);
+                options.UseNpgsql(connection);
             });
 
             builder.Services.Configure<EmailSettings>(
@@ -61,6 +61,7 @@ namespace Auth.API
 
             using (var scope = app.Services.CreateScope())
             {
+                DatabaseHelper.CreateDatabaseIfNotExists("AuthDb");
                 var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
                 db.Database.Migrate();
             }

@@ -13,7 +13,7 @@ namespace Auth.API.Data
                 .Build();
 
             var optionsBuilder = new DbContextOptionsBuilder<AuthDbContext>();
-            optionsBuilder.UseSqlServer(config.GetConnectionString("DefaultConnection"));
+            optionsBuilder.UseNpgsql(config.GetConnectionString("DefaultConnection"));
 
             return new AuthDbContext(optionsBuilder.Options);
         }
