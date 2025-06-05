@@ -1,12 +1,25 @@
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+USER app
+WORKDIR /app
+EXPOSE 8080
+EXPOSE 8081
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-WORKDIR /app
+WORKDIR /src
+COPY ["Services/FoodCatalog/FoodCatalog.Api/FoodCatalog.Api.csproj", "Services/FoodCatalog/FoodCatalog.Api/"]
+RUN dotnet restore "./Services/FoodCatalog/FoodCatalog.Api/./FoodCatalog.Api.csproj"
 COPY . .
-RUN dotnet restore "FoodCatalog.Api.csproj"
-RUN dotnet build "FoodCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
-RUN dotnet publish "FoodCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR "/src/Services/FoodCatalog/FoodCatalog.Api"
+RUN dotnet build "./FoodCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "./FoodCatalog.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+
+FROM base AS final
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "FoodCatalog.Api.dll"]
