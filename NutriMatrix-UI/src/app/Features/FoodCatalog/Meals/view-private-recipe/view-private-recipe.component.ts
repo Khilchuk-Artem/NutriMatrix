@@ -32,8 +32,8 @@ export class ViewPrivateRecipeComponent implements OnInit {
   meal: MealDto | null = null;
   ingredients: MeasureWithFoodDto[] = [];
   nutrientMetadata: NutrientInfo[] = [];
-  consumedNutrients: Map<number, number> = new Map(); // nutrientId -> amount per serving
-  userId: string = ''; // From AuthService
+  consumedNutrients: Map<number, number> = new Map();
+  userId: string = '';
   includeIds: number[] = [];
 
   constructor(

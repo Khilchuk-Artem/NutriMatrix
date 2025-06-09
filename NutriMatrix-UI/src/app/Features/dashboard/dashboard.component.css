@@ -82,3 +82,12 @@
   background-color:#E0F7F1;
   border-radius: 4px;
 }
+:host ::ng-deep
+.p-button-text:hover{
+  color: #6A9D8C !important;
+  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
+}
+:host ::ng-deep
+.p-button-text{
+  color: #6A9D8C !important;
+}

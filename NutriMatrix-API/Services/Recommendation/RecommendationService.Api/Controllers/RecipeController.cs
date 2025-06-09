@@ -40,14 +40,19 @@ namespace RecommendationService.Api.Controllers
             [FromQuery] string? category = null,
             [FromQuery] string? query = null,
             [FromQuery] string? nutrientIds = null,
+            [FromQuery] string? includeIngredients = null,
+            [FromQuery] string? excludeIngredients = null,
             int page = 1,
             int pageSize = 10)
         {
+            long[]? include = ParseNutrientIds(includeIngredients);
+            long[]? exclude = ParseNutrientIds(excludeIngredients);
             long[]? nutrientIdsArray = ParseNutrientIds(nutrientIds);
 
             var queryable = _dbContext.Recipes
                 .Include(r => r.NutrientsPerTotalServings)
                 .Include(r => r.Measures)
+                .Where(r=>r.Measures.Count!=0)
                 .Where(r => !r.IsDeleted)
                 .AsQueryable();
 
@@ -57,6 +62,16 @@ namespace RecommendationService.Api.Controllers
             if (!string.IsNullOrWhiteSpace(query))
                 queryable = queryable.Where(r => r.Title.Contains(query));
 
+            if (include is { Length: > 0 })
+            {
+                queryable = queryable.Where(r =>
+                    include.All(ingId => r.Measures.Any(m => m.FoodId == ingId)));
+            }
+
+
+            if (exclude is { Length: > 0 })
+                queryable = queryable.Where(r => r.Measures.All(m => !exclude.Contains(m.FoodId)));
+
             var results = await queryable
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -65,6 +80,47 @@ namespace RecommendationService.Api.Controllers
             var dtos = results.Select(r => ProjectToDto(r, nutrientIdsArray)).ToList();
 
             return Ok(dtos);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeDto dto)
+        {
+            var recipe = new Recipe
+            {
+                Title = dto.Title,
+                Category = dto.Category,
+                Description = dto.Description,
+                Directions = dto.Directions,
+                PhotoUrl = dto.PhotoUrl,
+                Servings = dto.Servings,
+                IsDeleted = false,
+                Measures = dto.Measures.Select(m => new RecipeMeasure
+                {
+                    MeasureId = m.MeasureId,
+                    FoodId = m.FoodId,
+                    Amount = m.Amount
+                }).ToList(),
+                NutrientsPerTotalServings = dto.Nutrients.Select(n => new NutrientAmount
+                {
+                    NutrientId = n.NutrientId,
+                    Amount = n.Amount
+                }).ToList()
+            };
+
+            _dbContext.Recipes.Add(recipe);
+            await _dbContext.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetShortcut), new { id = recipe.Id }, new { recipe.Id });
+        }
+        [HttpDelete("{id:long}")]
+        public async Task<IActionResult> DeleteRecipe(long id)
+        {
+            var recipe = await _dbContext.Recipes.FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+            if (recipe == null)
+                return NotFound();
+
+            recipe.IsDeleted = true;
+            await _dbContext.SaveChangesAsync();
+            return NoContent();
         }
 
         /// <summary>
@@ -87,6 +143,110 @@ namespace RecommendationService.Api.Controllers
             }
 
             return list.Count > 0 ? list.ToArray() : null;
+        }
+        [HttpPut("{id:long}")]
+        public async Task<IActionResult> UpdateRecipe(long id, [FromBody] UpdateRecipeDto dto)
+        {
+            var recipe = await _dbContext.Recipes
+                .Include(r => r.Measures)
+                .Include(r => r.NutrientsPerTotalServings)
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (recipe == null)
+                return NotFound();
+
+            recipe.Title = dto.Title;
+            recipe.Category = dto.Category;
+            recipe.Description = dto.Description;
+            recipe.Directions = dto.Directions;
+            recipe.PhotoUrl = dto.PhotoUrl;
+            recipe.Servings = dto.Servings;
+
+            _dbContext.RecipeMeasure.RemoveRange(recipe.Measures);
+            recipe.Measures = dto.Measures.Select(m => new RecipeMeasure
+            {
+                MeasureId = m.MeasureId,
+                FoodId = m.FoodId,
+                Amount = m.Amount,
+                RecipeId = recipe.Id
+            }).ToList();
+
+            _dbContext.NutrientAmounts.RemoveRange(recipe.NutrientsPerTotalServings);
+            recipe.NutrientsPerTotalServings = dto.Nutrients.Select(n => new NutrientAmount
+            {
+                NutrientId = n.NutrientId,
+                Amount = n.Amount,
+                RecipeId = recipe.Id
+            }).ToList();
+
+            await _dbContext.SaveChangesAsync();
+            return NoContent();
+        }
+        // GET: api/Recipe/5
+        // GET: api/Recipe/5
+        [HttpGet("{id:long}")]
+        public async Task<IActionResult> GetRecipe(
+            long id,
+            [FromQuery] string? nutrientIds = null           // ← new optional param
+        )
+        {
+            // 1. parse
+            long[]? nutrientIdsArray = ParseNutrientIds(nutrientIds);
+
+            // 2. load
+            var recipe = await _dbContext.Recipes
+                .Include(r => r.Measures)
+                .Include(r => r.NutrientsPerTotalServings)
+                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+            if (recipe == null) return NotFound();
+
+            // 3. map
+            var dto = new FullRecipeDto
+            {
+                Id = recipe.Id,
+                Title = recipe.Title,
+                Category = recipe.Category,
+                Servings = recipe.Servings ?? 0,
+                Description = recipe.Description,
+                Directions = recipe.Directions,
+                PhotoUrl = recipe.PhotoUrl,
+                Ingredients = recipe.Measures
+                    .Select(m => new IngredientMeasureDto
+                    {
+                        FoodId = m.FoodId,
+                        MeasureId = m.MeasureId,
+                        Amount = m.Amount
+                    }).ToList(),
+
+                // apply filter if any
+                Nutrients = (nutrientIdsArray?.Length > 0
+                    ? recipe.NutrientsPerTotalServings
+                        .Where(n => nutrientIdsArray.Contains(n.NutrientId))
+                    : recipe.NutrientsPerTotalServings
+                  )
+                  .Select(n => new NutrientAmountDto
+                  {
+                      NutrientId = n.NutrientId,
+                      Amount = n.Amount
+                  }).ToList()
+            };
+
+            return Ok(dto);
+        }
+
+        // add this DTO class below in the controller (or in a shared Models namespace)
+        public class FullRecipeDto
+        {
+            public long Id { get; set; }
+            public string Title { get; set; }
+            public string Category { get; set; }
+            public float Servings { get; set; }
+            public string Description { get; set; }
+            public string Directions { get; set; }
+            public string PhotoUrl { get; set; }
+            public List<IngredientMeasureDto> Ingredients { get; set; }
+            public List<NutrientAmountDto> Nutrients { get; set; }
         }
 
         private static RecipeShortcutDto ProjectToDto(Recipe r, long[]? nutrientIds)
@@ -144,5 +304,28 @@ namespace RecommendationService.Api.Controllers
             public int NutrientId { get; set; }
             public float Amount { get; set; }
         }
+        public class UpdateRecipeDto
+        {
+            public string Title { get; set; }
+            public string Category { get; set; }
+            public float? Servings { get; set; }
+            public string Description { get; set; }
+            public string Directions { get; set; }
+            public string PhotoUrl { get; set; }
+            public List<IngredientMeasureDto> Measures { get; set; }
+            public List<NutrientAmountDto> Nutrients { get; set; }
+        }
+        public class CreateRecipeDto
+        {
+            public string Title { get; set; }
+            public string Category { get; set; }
+            public float? Servings { get; set; }
+            public string Description { get; set; }
+            public string Directions { get; set; }
+            public string PhotoUrl { get; set; }
+            public List<IngredientMeasureDto> Measures { get; set; }
+            public List<NutrientAmountDto> Nutrients { get; set; }
+        }
+
     }
 }

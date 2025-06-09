@@ -13,7 +13,7 @@ namespace FoodCatalog.Api.Models.Redis
             {
                 var connProvider = sp.GetRequiredService<RedisConnectionProvider>();
 
-                connProvider.Connection.CreateIndex(typeof(T));
+                //connProvider.Connection.CreateIndex(typeof(T));
 
                 return (RedisCollection<T>)connProvider.RedisCollection<T>();
             });

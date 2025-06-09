@@ -1,0 +1,68 @@
+:host ::ng-deep
+.p-button-text {
+  background: transparent;
+  border-color: transparent;
+  color: #6A9D8C;
+}
+:host ::ng-deep
+.p-datepicker-day-selected{
+  background-color: #6A9D8C;
+
+}
+.fancy-checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.fancy-checkbox {
+  display: none;
+}
+
+.fancy-checkmark {
+  height: 1.5rem;             /* h-6 */
+  width: 1.5rem;              /* w-6 */
+  border: 2px solid rgba(212, 160, 23, 0.4); /* border-2 + border-[#D4A017]/40 */
+  border-radius: 0.5rem;      /* rounded-lg */
+  background-color: #fff;     /* bg-white */
+  flex-shrink: 0;
+  transition: all 0.3s ease-in-out; /* transition-all duration-300 ease-in-out */
+  position: relative;
+}
+
+.fancy-checkbox:checked + .fancy-checkmark {
+  background: linear-gradient(to right, #FFD580, #F4A017); /* bg-gradient-to-r from-[#FFD580] to-[#F4A017] */
+  border-color: #F4A017;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  transform: scale(1.05); /* scale-105 */
+}
+
+.fancy-checkbox:checked + .fancy-checkmark::after {
+  content: '';
+  position: absolute;
+  left: 0.5rem;              /* left-2 */
+  top: 0.25rem;              /* top-1 */
+  width: 0.625rem;           /* w-2.5 */
+  height: 1rem;              /* h-4 */
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  transform: rotate(45deg);
+}
+
+.fancy-checkbox:focus + .fancy-checkmark {
+  outline: none;
+  box-shadow: 0 0 0 2px #D4A017; /* ring-2 ring-[#D4A017] */
+}
+
+.fancy-checkbox-label:hover .fancy-checkmark {
+  border-color: rgba(212, 160, 23, 0.7); /* border-[#D4A017]/70 */
+  transform: scale(1.05);               /* scale-110 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+}
+
+.fancy-checkbox:checked ~ .fancy-checkbox-text {
+  font-weight: 600;   /* font-semibold */
+}

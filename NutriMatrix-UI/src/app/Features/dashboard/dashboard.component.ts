@@ -26,6 +26,7 @@ import {
   MealRecordsService,
   UpdateMealRecordDto
 } from '../FoodRecords/services/meal-records.service';
+import {ConsumableType, PendingRecordDto, PendingRecordsService} from '../FoodRecords/services/pending-records.service';
 
 export interface FoodRecordViewModel {
   type: 'food';
@@ -128,6 +129,11 @@ export class DashboardComponent  implements OnInit, OnDestroy {
   @ViewChild('mealModal') mealModal!: MealSelectModalComponent;
   @ViewChild('menu') menu!: Menu;
 
+  public pendingRecords: PendingRecordDto[] = [];
+  pendingNames: { [id: number]: string } = {};
+  pendingExpanded: { [id: number]: boolean } = {};
+  pendingIngredientDetails: { [id: number]: { foodName: string; amount: number; measureName: string }[] } = {};
+  pendingMeasures: { [id: number]: string } = {};
   constructor(
     private fb: FormBuilder,
     private foodService: FoodService,
@@ -136,7 +142,8 @@ export class DashboardComponent  implements OnInit, OnDestroy {
     private foodRecordService: FoodRecordsService,
     private measureService: MeasureService,
     private mealRecordService: MealRecordsService,
-    private mealService: MealService
+    private mealService: MealService,
+    private pendingService: PendingRecordsService,
   ) {
     this.addFoodForm = this.fb.group({
       foodName: ['', Validators.required],
@@ -163,7 +170,7 @@ export class DashboardComponent  implements OnInit, OnDestroy {
     const endDate = new Date(this.date);
     endDate.setHours(23, 59, 59, 999);
 
-    this.foodRecordService.getAllRecords(userId, true, this.date).subscribe(foodRecords => {
+    this.foodRecordService.getAllRecords(userId, true, this.date,endDate).subscribe(foodRecords => {
       const foodViewModels: FoodRecordViewModel[] = foodRecords.map(record => ({ type: 'food', record }));
       this.recordViewModels = [...foodViewModels, ...this.recordViewModels.filter(vm => vm.type === 'meal')];
       foodViewModels.forEach(vm => {
@@ -197,6 +204,48 @@ export class DashboardComponent  implements OnInit, OnDestroy {
       });
       this.sortRecords();
     });
+    this.pendingService
+      .getAllRecords(userId, this.date, endDate)
+      .subscribe(pendings => {
+        this.pendingRecords = pendings.filter(p => !p.isDeleted);
+        this.pendingRecords.forEach(p => {
+          if (p.consumableType === ConsumableType.Food) {
+            this.measureService.getMeasureWithFood(p.consumableId).subscribe(f => {
+              this.pendingNames[p.id] = f.food.name;
+              this.pendingMeasures[p.id] = f.name;
+
+            });
+          } else {
+            // Meal
+            this.mealService.getMealById(p.consumableId).subscribe(m => {
+              this.pendingNames[p.id] = m.name;
+              // flatten its ingredients
+              this.pendingIngredientDetails[p.id] = m.foodMeals.map(fm => ({
+                foodName: '…', measureName: '…', amount: fm.quantity
+              }));
+              // then fetch each detail measure:
+              m.foodMeals.forEach((fm, idx) => {
+                this.measureService.getMeasureWithFood(fm.measureId).subscribe(measure => {
+                  const det = this.pendingIngredientDetails[p.id][idx];
+                  det.foodName = measure.food.name;
+                  det.measureName = measure.name;
+                });
+              });
+            });
+          }
+        });
+      });
+
+  }
+  confirmPending(id: number) {
+    this.pendingService.confirmRecord(id).subscribe(() => this.loadRecords());
+  }
+  togglePendingDropdown(pendingId: number) {
+    this.pendingExpanded[pendingId] = !this.pendingExpanded[pendingId];
+  }
+
+  rejectPending(id: number) {
+    this.pendingService.deleteRecord(id).subscribe(() => this.loadRecords());
   }
 
   private sortRecords(): void {
@@ -436,4 +485,5 @@ export class DashboardComponent  implements OnInit, OnDestroy {
 
   protected readonly Math = Math;
   protected readonly console = console;
+  protected readonly ConsumableType = ConsumableType;
 }

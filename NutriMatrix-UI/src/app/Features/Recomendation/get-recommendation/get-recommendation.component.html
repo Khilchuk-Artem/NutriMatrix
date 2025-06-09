@@ -51,31 +51,34 @@
             </div>
             <div class="mb-4">
               <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Included Ingredients</label>
-              <p-autoComplete
-                [(ngModel)]="slot.includedIngredients"
-                [suggestions]="ingredients"
-                (completeMethod)="onIngredientsFilter($event)"
-                [optionLabel]="'name'"
-                [multiple]="true"
-                [disabled]="isLoading"
-                fluid
-                placeholder="Select ingredients"
-                class="w-full"
-              ></p-autoComplete>
+              <div class="w-full px-4 py-3 border border-[#D4A017]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A017] font-['Open_Sans'] text-[#2D2D2D]">
+                <p-autoComplete
+                  [(ngModel)]="slot.includedIngredients"
+                  [suggestions]="ingredients"
+                  (completeMethod)="onIngredientsFilter($event)"
+                  [optionLabel]="'name'"
+                  [multiple]="true"
+                  [disabled]="isLoading"
+                  fluid
+                  placeholder="Select ingredients"
+                ></p-autoComplete>
+              </div>
+
             </div>
             <div class="mb-4">
               <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Excluded Ingredients</label>
-              <p-autoComplete
-                [(ngModel)]="slot.excludedIngredients"
-                [suggestions]="ingredients"
-                (completeMethod)="onIngredientsFilter($event)"
-                [optionLabel]="'name'"
-                [multiple]="true"
-                [disabled]="isLoading"
-                fluid
-                placeholder="Exclude ingredients"
-                class="w-full"
-              ></p-autoComplete>
+              <div class="w-full px-4 py-3 border border-[#D4A017]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A017] font-['Open_Sans'] text-[#2D2D2D]">
+                <p-autoComplete
+                  [(ngModel)]="slot.excludedIngredients"
+                  [suggestions]="ingredients"
+                  (completeMethod)="onIngredientsFilter($event)"
+                  [optionLabel]="'name'"
+                  [multiple]="true"
+                  [disabled]="isLoading"
+                  fluid
+                  placeholder="Exclude ingredients"
+                ></p-autoComplete>
+              </div>
             </div>
           </div>
         </div>

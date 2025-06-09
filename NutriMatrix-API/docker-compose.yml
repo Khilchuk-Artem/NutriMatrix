@@ -46,16 +46,16 @@ services:
       - postgres
  
 
-  gateway.api:
-    image: ${DOCKER_REGISTRY-}gatewayapi
-    build:
-      context: .
-      dockerfile: Gateway.API/Dockerfile
-    depends_on:
-      - recommendationservice.api
-      - foodrecords.api
-      - foodcatalog.api
-      - auth.api
+#  gateway.api:
+#    image: ${DOCKER_REGISTRY-}gatewayapi
+#    build:
+#      context: .
+#      dockerfile: Gateway.API/Dockerfile
+#    depends_on:
+#      - recommendationservice.api
+#      - foodrecords.api
+#      - foodcatalog.api
+#      - auth.api
 
 volumes:
   redis_data:

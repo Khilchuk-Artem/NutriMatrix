@@ -30,8 +30,8 @@ namespace FoodRecords.Api.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("Amount")
-                        .HasColumnType("integer");
+                    b.Property<float>("Amount")
+                        .HasColumnType("real");
 
                     b.Property<long>("ConsumableId")
                         .HasColumnType("bigint");
@@ -49,6 +49,10 @@ namespace FoodRecords.Api.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("JobKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 

@@ -107,17 +107,17 @@ services:
        - postgres
        - rabbitmq
 
-   gateway.api:
-     environment:
-       - ASPNETCORE_ENVIRONMENT=Development
-       - ASPNETCORE_HTTP_PORTS=8080
-       - ASPNETCORE_HTTPS_PORTS=8081
-     ports:
-       - "5004:8080"
-       - "5054:8081"
-     volumes:
-       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
-       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+#   gateway.api:
+#     environment:
+#       - ASPNETCORE_ENVIRONMENT=Development
+#       - ASPNETCORE_HTTP_PORTS=8080
+#       - ASPNETCORE_HTTPS_PORTS=8081
+#     ports:
+#       - "5004:8080"
+#       - "5054:8081"
+#     volumes:
+#       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+#       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
 
 
 volumes:

@@ -347,7 +347,7 @@ export class GetRecommendationComponent implements OnInit {
               const addMealRecordDto: AddMealRecordDto = {
                 userId,
                 mealId: createdMeal.id,
-                dateEaten: new Date('2025-06-01T19:00:00Z').toISOString(),
+                dateEaten: new Date().toISOString(),
                 servingsEaten,
                 ingredientSnapshots
               };

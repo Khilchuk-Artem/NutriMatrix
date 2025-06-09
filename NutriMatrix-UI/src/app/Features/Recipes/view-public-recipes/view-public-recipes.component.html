@@ -1,6 +1,6 @@
 <div class="mt-20 max-w-7xl mx-auto">
   <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4 tracking-tight">
-    My Recipes
+    Public Recipes
   </h1>
   <!-- Add New Button and Search Bar -->
   <div class="mb-8 flex flex-row gap-4 items-center">
@@ -39,6 +39,35 @@
       </button>
     </div>
   </div>
+  <div class="mb-8 flex flex-col md:flex-row gap-4 items-center">
+    <p-autoComplete
+      [(ngModel)]="includedIngredients"
+      [suggestions]="ingredientsSuggestions"
+      (completeMethod)="onIngredientsFilter($event)"
+      [optionLabel]="'name'"
+      [multiple]="true"
+      [disabled]="isLoading"
+      (onSelect)="onSearch()"
+      (onUnselect)="onSearch()"
+      placeholder="Include ingredients"
+      class="w-1/2 px-4 py-3 border border-[#D4A017]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A017] font-['Open_Sans'] text-[#2D2D2D]"
+    ></p-autoComplete>
+
+    <!-- Exclude -->
+    <p-autoComplete
+      [(ngModel)]="excludedIngredients"
+      [suggestions]="ingredientsSuggestions"
+      (completeMethod)="onIngredientsFilter($event)"
+      [optionLabel]="'name'"
+      [multiple]="true"
+      [disabled]="isLoading"
+      (onSelect)="onSearch()"
+      (onUnselect)="onSearch()"
+      placeholder="Exclude ingredients"
+      class="w-1/2 h-auto px-4 py-3 border border-[#D4A017]/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A017] font-['Open_Sans'] text-[#2D2D2D]"
+    ></p-autoComplete>
+  </div>
+
   <!-- Recipe Table -->
   <div class="w-full">
     <table class="w-full border-separate border-spacing-0 rounded-2xl shadow-2xl bg-white border border-[#D4A017]/30">
@@ -64,16 +93,6 @@
               >
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
               </svg>
-              <button
-                (click)="openMenu($event, recipe)"
-                class="rounded-lg px-4 py-2 hover:bg-[#E0F7F1]/50 transition-all duration-300"
-                type="button"
-              >
-                <svg class="h-6 w-6 stroke-[#D4A017]" fill="none" stroke-width="3.5" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v.01M12 12v.01M12 18v.01"></path>
-                </svg>
-              </button>
-              <p-menu #menu [popup]="true" [model]="menuItems"></p-menu>
             </div>
           </td>
         </tr>
@@ -100,6 +119,13 @@
                       *ngIf="filterRecipeNutrientsByCategory(recipe, category.ids).length > 0"
                       class="w-full break-inside-avoid border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30 mb-8"
                     >
+                      <colgroup>
+                        <col style="width: 30%">
+                        <col style="width: 15%">
+                        <col style="width: 5%">
+                        <col style="width: 40%">
+                        <col style="width: 10%">
+                      </colgroup>
                       <tbody>
                       <tr class="bg-gradient-to-r from-[#E0F7F1] to-[#D4A017]/20 border-y border-[#D4A017]/60 shadow-sm">
                         <td colspan="5" class="p-4 text-lg font-semibold text-[#1F1F1F] font-['Playfair_Display'] rounded-t-2xl">
@@ -151,6 +177,9 @@
           </td>
         </tr>
       </ng-container>
+      <tr #anchor>
+        <td colspan="2" class="p-0 bg-transparent border-0"></td>
+      </tr>
       <tr *ngIf="!recipes.length">
         <td colspan="2" class="p-5 text-center text-gray-400 font-['Open_Sans']">
           No recipes found.

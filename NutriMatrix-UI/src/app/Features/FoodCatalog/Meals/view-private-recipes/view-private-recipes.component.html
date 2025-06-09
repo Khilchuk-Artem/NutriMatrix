@@ -93,11 +93,15 @@
           </td>
         </tr>
       </ng-container>
+      <tr #anchor>
+        <td colspan="2" class="p-0 bg-transparent border-0"></td>
+      </tr>
       <tr *ngIf="!meals.length">
         <td colspan="2" class="p-5 text-center text-gray-400 font-['Open_Sans']">
           No recipes found.
         </td>
       </tr>
+
       </tbody>
     </table>
   </div>

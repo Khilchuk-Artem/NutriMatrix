@@ -1,0 +1,287 @@
+<div class="mt-20 min-h-screen max-w-5xl mx-auto bg-gray-50">
+  <div class="p-8" [formGroup]="form">
+    <!-- Header -->
+    <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-8 tracking-tight">
+      Schedule a Meal or Food
+    </h1>
+    <p class="text-base font-['Open_Sans'] text-gray-600 mb-6 leading-relaxed">
+      Plan your meals or foods in advance for better nutrition tracking!
+    </p>
+
+    <!-- Form Fields -->
+    <div class="space-y-6">
+      <!-- Name -->
+      <div>
+        <input
+          formControlName="name"
+          [ngClass]="{
+            'border-gray-200': name?.valid || name?.untouched,
+            'border-[#EF4444]': name?.invalid && !name?.untouched
+          }"
+          class="w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+          placeholder="Enter schedule name"
+        />
+        <div *ngIf="name?.touched && name?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('name')?.errors?.['required']">Schedule name is required.</div>
+        </div>
+      </div>
+
+      <!-- Consumable Type -->
+      <div>
+        <select
+          formControlName="consumableType"
+          class="w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+          [ngClass]="{
+            'border-gray-200': consumableType?.valid || consumableType?.untouched,
+            'border-[#EF4444]': consumableType?.invalid && !consumableType?.untouched
+          }"
+        >
+          <option [value]="ConsumableType.Food">Food</option>
+          <option [value]="ConsumableType.Meal">Meal</option>
+        </select>
+        <div *ngIf="consumableType?.touched && consumableType?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('consumableType')?.errors?.['required']">Consumable type is required.</div>
+        </div>
+      </div>
+
+      <!-- Search and Conditional Inputs -->
+      <div class="flex items-start gap-4 w-full mb-6">
+        <!-- Search Input -->
+        <div class="relative w-1/3" (clickOutside)="onClickOutsideSearch()">
+          <div
+            class="flex items-start w-full border border-[#D4A017]/30 rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus-within:ring-2 focus-within:ring-[#D4A017] transition-all duration-300"
+          >
+            <input
+              [formControl]="searchControl"
+              class="flex-grow p-4 placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none"
+              placeholder="Search by name"
+              (input)="onInputSearch()"
+            />
+            <button
+              *ngIf="searchControl.value?.length || 0 > 0"
+              class="my-auto px-4 cursor-pointer text-red-600"
+              (click)="clearSearch()"
+              type="button"
+            >✕</button>
+          </div>
+          <div *ngIf="searchResults.length > 0 && !selectedItem" class="absolute z-10 top-16 w-full bg-white border border-[#D4A017]/30 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+            <div
+              *ngFor="let item of searchResults"
+              class="p-4 hover:bg-[#E0F7F1]/50 cursor-pointer transition-colors duration-200 font-['Open_Sans'] text-[#2D2D2D] capitalize"
+              (click)="selectItem(item)"
+              (mouseenter)="onHoverItem(item)"
+              (mouseleave)="onLeaveItem()"
+              (mousemove)="onMouseMove($event)"
+            >
+              {{ item.name }}
+            </div>
+            <div
+              *ngIf="hoveredItem && isFood(hoveredItem)"
+              class="nutrient-tooltip fixed z-1000 bg-white border border-[#D4A017]/30 rounded-xl shadow-lg p-4 max-w-xs"
+              [ngStyle]="{ top: tooltipPosition.y + 'px', left: tooltipPosition.x + 'px' }"
+            >
+              <h4 class="text-sm font-semibold text-[#2D2D2D] font-['Open_Sans'] mb-2">
+                {{ form.get('consumableType')?.value == ConsumableType.Food ? 'Nutrients per 100g' : 'Meal Details' }}
+              </h4>
+              <ng-container *ngIf="isFood(hoveredItem)">
+                <ul class="list-none text-sm text-[#2D2D2D] font-['Open_Sans']">
+                  <li *ngFor="let nutrient of hoveredItem.foodNutrients" class="mb-1">
+                    {{ getNutrientLabel(nutrient.nutrientId)[0] }}: {{ nutrient.amount | number:'1.1-2' }} {{ getNutrientLabel(nutrient.nutrientId)[1] }}
+                  </li>
+                </ul>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conditional Inputs for Foods -->
+        <ng-container *ngIf="form.get('consumableType')?.value === String(ConsumableType.Food)">
+          <!-- Measure Select -->
+          <select
+            formControlName="measureId"
+            class="w-1/4 p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+            [ngClass]="{
+              'border-[#D4A017]/30': form.get('measureId')?.enabled,
+              'pointer-events-none opacity-60 border-gray-200': form.get('measureId')?.disabled
+            }"
+          >
+            <option [ngValue]="null" disabled>Select a measure</option>
+            <option *ngFor="let measure of foodMeasures" [ngValue]="measure.id">{{ measure.name }}</option>
+          </select>
+
+          <!-- Quantity Input -->
+          <input
+            formControlName="quantity"
+            type="number"
+            step="0.1"
+            min="0.1"
+            class="w-1/4 p-4 border border-[#D4A017]/30 rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+            [ngClass]="{
+              'border-[#EF4444]': form.get('quantity')?.invalid && !form.get('quantity')?.untouched,
+              'border-gray-200 pointer-events-none opacity-60': form.get('quantity')?.disabled
+            }"
+            placeholder="Quantity"
+          />
+        </ng-container>
+
+        <!-- Conditional Input for Meals -->
+        <ng-container *ngIf="form.get('consumableType')?.value === String(ConsumableType.Meal)">
+          <!-- Amount Input -->
+          <input
+            formControlName="amount"
+            type="number"
+            step="0.1"
+            min="0.1"
+            class="w-1/3 p-4 border border-[#D4A017]/30 rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+            [ngClass]="{
+              'border-[#EF4444]': form.get('amount')?.invalid && !form.get('amount')?.untouched,
+              'border-gray-200 pointer-events-none opacity-60': form.get('amount')?.disabled
+            }"
+            placeholder="Amount (servings)"
+          />
+        </ng-container>
+      </div>
+
+      <!-- Error Messages for Foods -->
+      <div *ngIf="form.get('consumableType')?.value === ConsumableType.Food">
+        <div *ngIf="form.get('measureId')?.touched && form.get('measureId')?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('measureId')?.errors?.['required']">Measure is required.</div>
+        </div>
+        <div *ngIf="form.get('quantity')?.touched && form.get('quantity')?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('quantity')?.errors?.['required']">Quantity is required.</div>
+          <div *ngIf="form.get('quantity')?.errors?.['min']">Quantity must be at least 0.1.</div>
+        </div>
+      </div>
+      <!-- Error Messages for Meals -->
+      <div *ngIf="form.get('consumableType')?.value === ConsumableType.Meal">
+        <div *ngIf="form.get('amount')?.touched && form.get('amount')?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('amount')?.errors?.['required']">Amount is required.</div>
+          <div *ngIf="form.get('amount')?.errors?.['min']">Amount must be at least 0.1.</div>
+        </div>
+      </div>
+
+      <!-- Requires Confirmation -->
+      <div class="flex items-center">
+        <label class="fancy-checkbox-label">
+          <input
+            formControlName="requiresConfirmation"
+            type="checkbox"
+            class="fancy-checkbox h-6 w-6 text-[#F4A017] focus:ring-[#F4A017] border-gray-200 rounded-lg"
+          />
+          <span class="fancy-checkmark"></span>
+          <span class="ml-3 text-sm font-['Open_Sans'] text-[#2D2D2D] fancy-checkbox-text">Requires Confirmation</span>
+        </label>
+      </div>
+
+      <!-- Is Recurring -->
+      <div class="flex items-center">
+        <label class="fancy-checkbox-label">
+          <input
+            formControlName="isRecurring"
+            type="checkbox"
+            class="fancy-checkbox h-6 w-6 text-[#F4A017] focus:ring-[#F4A017] border-gray-200 rounded-lg"
+          />
+          <span class="fancy-checkmark"></span>
+          <span class="ml-3 text-sm font-['Open_Sans'] text-[#2D2D2D] fancy-checkbox-text">Is Recurring</span>
+        </label>
+      </div>
+
+      <!-- Run At UTC (if not recurring) -->
+      <div *ngIf="!form.get('isRecurring')?.value">
+        <h3 class="text-lg font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">Select Date and Time</h3>
+        <p-calendar
+          formControlName="runAtUtc"
+          [showTime]="true"
+          [minDate]="minRunDate"
+          [ngClass]="{
+            'border-gray-200': runAtUtc?.valid || runAtUtc?.untouched,
+            'border-[#EF4444]': runAtUtc?.invalid && !runAtUtc?.untouched
+          }"
+          [inputStyle]="{
+            all: 'unset',
+            display: 'block'
+          }"
+          class="mt-4 w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+        ></p-calendar>
+        <div *ngIf="runAtUtc?.touched && runAtUtc?.invalid" class="mt-4 bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('runAtUtc')?.errors?.['required']">Run time is required for non-recurring schedules.</div>
+        </div>
+      </div>
+
+      <!-- Time of Day (if recurring) -->
+      <div *ngIf="form.get('isRecurring')?.value" class="mb-4">
+        <h3 class="text-lg font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">Select Time of Day</h3>
+        <p-calendar
+          [(ngModel)]="time"
+          [ngModelOptions]="{ standalone: true }"
+          [timeOnly]="true"
+          [hourFormat]="'24'"
+          (onSelect)="generateCronExpression()"
+          [inputStyle]="{
+            all: 'unset',
+            display: 'block'
+          }"
+          [ngClass]="{
+            'border-gray-200': time,
+            'border-[#EF4444]': !time
+          }"
+          class=" w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+        ></p-calendar>
+        <div *ngIf="!time" class="mt-4 text-[#EF4444] text-sm font-['Open_Sans']">
+          Time of day is required for a recurring schedule.
+        </div>
+      </div>
+
+      <!-- Days of Week (if recurring) -->
+      <div *ngIf="form.get('isRecurring')?.value" class="mb-4">
+        <h3 class="text-lg font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-2">Select Days of Week</h3>
+        <div class="flex flex-wrap gap-3">
+          <label
+            *ngFor="let day of daysOfWeek"
+            class="relative cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              [value]="day.value"
+              (change)="onDayChange(day.value, $event)"
+              class="peer sr-only"
+            />
+            <span
+              class="flex items-center justify-center w-10 h-10 rounded-full border border-[#ccc] text-[#2D2D2D] font-['Open_Sans'] text-sm peer-checked:bg-[#F4A017] peer-checked:text-white transition-colors"
+            >
+              {{ day.label }}
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Cron Expression (if recurring) -->
+      <div *ngIf="form.get('isRecurring')?.value">
+        <input
+          formControlName="cronExpression"
+          [ngClass]="{
+            'border-gray-200': cronExpression?.valid || cronExpression?.untouched,
+            'border-[#EF4444]': cronExpression?.invalid && !cronExpression?.untouched
+          }"
+          class="  w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+          placeholder="Cron expression will be generated"
+          readonly
+        />
+        <div *ngIf="cronExpression?.touched && cronExpression?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
+          <div *ngIf="form.get('cronExpression')?.errors?.['required']">Cron expression is required for recurring schedules.</div>
+        </div>
+        <p class="text-sm text-gray-500 font-['Open_Sans'] mt-2">{{ cronDescription }}</p>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="button"
+        (click)="submit()"
+        [disabled]="form.invalid || loading"
+        class="w-full p-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed font-['Open_Sans']"
+      >
+        {{ loading ? 'Submitting...' : 'Submit Schedule' }}
+      </button>
+    </div>
+  </div>
+</div>

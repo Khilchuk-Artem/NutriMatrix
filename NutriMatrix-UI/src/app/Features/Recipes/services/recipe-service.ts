@@ -10,7 +10,7 @@ export interface NutrientAmountDto {
 }
 
 export interface IngredientMeasureDto {
-  amount:number;
+  amount: number;
   foodId: number;
   measureId: number;
 }
@@ -21,7 +21,28 @@ export interface RecipeShortcutDto {
   recipeId: number;
   servings: number;
   category: string;
-  ingredients: IngredientMeasureDto[];  // Зверни увагу, тут список об'єктів
+  ingredients: IngredientMeasureDto[];
+  nutrients: NutrientAmountDto[];
+}
+export interface FullRecipeDto {
+  id: number;
+  title: string;
+  category: string;
+  servings: number;
+  description: string;
+  directions: string;
+  photoUrl: string;
+  ingredients: IngredientMeasureDto[];
+  nutrients: NutrientAmountDto[];
+}
+export interface CreateOrUpdateRecipeDto {
+  title: string;
+  category: string;
+  servings: number;
+  description: string;
+  directions: string;
+  photoUrl: string;
+  measures: IngredientMeasureDto[];
   nutrients: NutrientAmountDto[];
 }
 
@@ -46,6 +67,8 @@ export class RecipeService {
     category?: string,
     query?: string,
     nutrientIds?: number[],
+    includeIngredients?: number[],
+    excludeIngredients?: number[],
     page: number = 1,
     pageSize: number = 10
   ): Observable<RecipeShortcutDto[]> {
@@ -53,17 +76,34 @@ export class RecipeService {
       .set('page', page.toString())
       .set('pageSize', pageSize.toString());
 
-    if (category) {
-      params = params.set('category', category);
-    }
-    if (query) {
-      params = params.set('query', query);
-    }
+    if (category) params = params.set('category', category);
+    if (query) params = params.set('query', query);
     if (nutrientIds && nutrientIds.length) {
       params = params.set('nutrientIds', nutrientIds.join(','));
     }
+    if (includeIngredients && includeIngredients.length) {
+      params = params.set('includeIngredients', includeIngredients.join(','));
+    }
+    if (excludeIngredients && excludeIngredients.length) {
+      params = params.set('excludeIngredients', excludeIngredients.join(','));
+    }
 
     return this.http.get<RecipeShortcutDto[]>(`${this.baseUrl}/shortcuts`, { params })
+      .pipe(catchError(this.handleError));
+  }
+
+  createRecipe(dto: CreateOrUpdateRecipeDto): Observable<{ id: number }> {
+    return this.http.post<{ id: number }>(this.baseUrl, dto)
+      .pipe(catchError(this.handleError));
+  }
+
+  updateRecipe(id: number, dto: CreateOrUpdateRecipeDto): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${id}`, dto)
+      .pipe(catchError(this.handleError));
+  }
+
+  deleteRecipe(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`)
       .pipe(catchError(this.handleError));
   }
 
@@ -77,4 +117,16 @@ export class RecipeService {
     console.error('RecipeService error:', error);
     return throwError(() => new Error(errorMessage));
   }
+  // in recipe-service.ts
+
+  getRecipe(id: number, nutrientIds?: number[]): Observable<FullRecipeDto> {
+    let params = new HttpParams();
+    if (nutrientIds && nutrientIds.length) {
+      params = params.set('nutrientIds', nutrientIds.join(','));
+    }
+    return this.http
+      .get<FullRecipeDto>(`${this.baseUrl}/${id}`, { params })
+      .pipe(catchError(this.handleError));
+  }
+
 }

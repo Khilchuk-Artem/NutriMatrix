@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {RecipeService, RecipeShortcutDto} from '../services/recipe-service';
 import {MenuItem} from 'primeng/api';
 import {NutrientInfo} from '../../../Core/services/nutrient.service';
@@ -12,8 +12,9 @@ import {FormsModule} from '@angular/forms';
 import {NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {Menu} from 'primeng/menu';
 import {forkJoin, Observable} from 'rxjs';
-import {FoodDTO} from '../../FoodCatalog/models/food.models';
+import {FoodDTO, FoodShortcutDTO} from '../../FoodCatalog/models/food.models';
 import {MeasureService, MeasureWithFoodDto} from '../../FoodRecords/services/measure.service';
+import {AutoComplete} from 'primeng/autocomplete';
 
 interface NutrientPerServing {
   nutrientId: number;
@@ -31,13 +32,14 @@ interface NutrientPerServing {
     NgClass,
     Menu,
     NgIf,
-    NgStyle
+    NgStyle,
+    AutoComplete
   ],
   templateUrl: './view-public-recipes.component.html',
   standalone: true,
   styleUrl: './view-public-recipes.component.css'
 })
-export class ViewPublicRecipesComponent  implements OnInit {
+export class ViewPublicRecipesComponent  implements OnInit, AfterViewInit, OnDestroy {
   recipes: RecipeShortcutDto[] = [];
   ingredients: { [key: number]: { foodName: string; quantity: number; measureName: string }[] } = {};
   expandedRows: { [key: number]: boolean } = {};
@@ -46,6 +48,22 @@ export class ViewPublicRecipesComponent  implements OnInit {
   currentRecipeId: number | null = null;
   nutrientMetadata: NutrientInfo[] = [];
   includeIds: number[] = [];
+  includedIngredients: FoodShortcutDTO[] = [];
+  excludedIngredients: FoodShortcutDTO[] = [];
+  ingredientsSuggestions: FoodShortcutDTO[] = [];
+  isLoading: boolean = false;
+  @ViewChild('anchor', { static: false }) anchor!: ElementRef<HTMLElement>;
+  private observer!: IntersectionObserver;
+  private page = 1;
+  private pageSize = 20;
+  private loadingMore = false;
+
+  onIngredientsFilter(event: { query: string }) {
+    this.foodService.getFoodShortcuts(1, 20, [], event.query).subscribe(data => {
+      this.ingredientsSuggestions = data;
+    });
+  }
+
 
   constructor(
     private recipeService: RecipeService,
@@ -74,10 +92,60 @@ export class ViewPublicRecipesComponent  implements OnInit {
     // Load recipes
     this.loadRecipes();
   }
+  ngAfterViewInit() {
+    this.observer = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      if (entry.isIntersecting && !this.loadingMore) {
+        this.loadMore();
+      }
+    }, {
+      root: null,            // viewport
+      threshold: 0.1         // when 10% of sentinel is visible
+    });
 
+    this.observer.observe(this.anchor.nativeElement);
+  }
+  loadMore(): void {
+    this.loadingMore = true;
+    this.page++;
+    this.recipeService.getShortcuts(
+      undefined,
+      this.searchQuery,
+      this.includeIds,
+      this.includedIngredients.map(i => i.id),
+      this.excludedIngredients.map(i => i.id),
+      this.page,
+      this.pageSize,
+    ).subscribe({
+      next: recipes => {
+        this.recipes = [...this.recipes, ...recipes];
+        this.loadingMore = false;
+      },
+      error: () => {
+        this.loadingMore = false;
+      }
+    });
+  }
+  ngOnDestroy() {
+    this.observer.disconnect();
+  }
   loadRecipes(): void {
-    this.recipeService.getShortcuts(undefined, undefined, this.includeIds, 1, 20).subscribe({
-      next: (shortcuts) => this.recipes = shortcuts,
+    const includeIds = this.includedIngredients.map(i => i.id);
+    const excludeIds = this.excludedIngredients.map(i => i.id);
+
+    this.recipeService.getShortcuts(
+      undefined,
+      this.searchQuery,
+      this.includeIds,
+      includeIds,
+      excludeIds,
+      1,
+      20,
+    ).subscribe({
+      next: (recipes) =>{
+        this.recipes = recipes
+        console.log(recipes)
+      } ,
       error: (err) => this.toastr.error(err.message)
     });
   }
@@ -139,7 +207,7 @@ export class ViewPublicRecipesComponent  implements OnInit {
 
 
   onViewMore(id: number): void {
-    this.router.navigate(['/app/recipes', id]);
+    this.router.navigate(['/app/recipes/public', id]);
   }
 
   openMenu(event: Event, recipe: RecipeShortcutDto): void {
@@ -182,7 +250,7 @@ export class ViewPublicRecipesComponent  implements OnInit {
   }
 
   onSearch(): void {
-    // Search functionality left untouched as requested
+    this.loadRecipes()
   }
 
   getNutrientLabel(id: number): string[] {

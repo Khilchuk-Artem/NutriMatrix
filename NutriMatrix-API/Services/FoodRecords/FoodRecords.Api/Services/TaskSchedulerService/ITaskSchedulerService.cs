@@ -6,5 +6,6 @@ namespace FoodRecords.Api.Services.TaskSchedulerService
     {
         Task<FoodPlan> CreateScheduleAsync(ScheduleDto dto);
         Task<FoodPlan> UpdateScheduleAsync(ScheduleDto dto);
+        Task DeleteScheduleAsync(long scheduleId);
     }
 }

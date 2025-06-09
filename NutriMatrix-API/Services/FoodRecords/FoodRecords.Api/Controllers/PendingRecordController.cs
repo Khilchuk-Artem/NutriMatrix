@@ -20,13 +20,28 @@ namespace FoodRecords.Api.Controllers
 
         // GET: api/Planning
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PendingRecord>>> GetPendingAdditions()
+        public async Task<ActionResult<IEnumerable<PendingRecord>>> GetPendingAdditions(
+            [FromQuery] string userId,
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate)
         {
-            var pendingAdditions = await _dbContext.PendingRecords
-                .Where(pa => !pa.IsDeleted)
-                .ToListAsync();
+            var query = _dbContext.PendingRecords
+                .Where(pa => pa.UserId == userId && !pa.IsDeleted);
+
+            if (startDate.HasValue)
+            {
+                query = query.Where(pa => pa.DatePending >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(pa => pa.DatePending <= endDate.Value);
+            }
+
+            var pendingAdditions = await query.ToListAsync();
             return Ok(pendingAdditions);
         }
+
 
         // GET: api/Planning/5
         [HttpGet("{id}")]

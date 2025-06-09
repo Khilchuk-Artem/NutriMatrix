@@ -54,3 +54,26 @@
 ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
   background-color: #E0F7F1;
 }
+
+:host ::ng-deep
+.p-select-option.p-select-option-selected.p-focus{
+  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
+  color: #2D2D2D       !important;  /* your primary text color */
+}
+:host ::ng-deep
+.p-select.p-focus{
+border-color: #5B8A7A;
+}
+:host ::ng-deep
+.p-inputtext:focus{
+  border-color: #5B8A7A;
+}
+:host ::ng-deep
+.p-button-text:hover{
+  color: #6A9D8C;
+  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
+}
+:host ::ng-deep
+.p-button-text{
+  color: #6A9D8C;
+}

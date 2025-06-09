@@ -1,0 +1,20 @@
+:host ::ng-deep
+.p-autocomplete-input-multiple {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 100%;
+  padding: 0 !important;      /* remove any padding if you like */
+}
+:host ::ng-deep
+/* Style the selected autocomplete option to match your UI */
+.p-autocomplete-option-selected {
+  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
+  color: #2D2D2D       !important;  /* your primary text color */
+}
+
+
+:host ::ng-deep
+.p-autocomplete {
+  width: 100%;
+}

@@ -9,8 +9,9 @@ namespace FoodRecords.Api.Services.TaskSchedulerService
     {
         public long? Id { get; set; }
         public long ConsumableId { get; set; }
-        public int Amount { get; set; }
+        public float Amount { get; set; }
         public bool RequiresConfirmation { get; set; }
+        public string Name { get; set; }
         public bool IsRecurring { get; set; }
         public DateTime? RunAtUtc { get; set; }
         public string? CronExpression { get; set; }
@@ -57,7 +58,8 @@ namespace FoodRecords.Api.Services.TaskSchedulerService
                 IsDeleted = false,
                 ConsumableType = dto.ConsumableType,
                 JobKey = jobKeyStr,
-                TriggerKey = triggerKeyStr
+                TriggerKey = triggerKeyStr,
+                Name = dto.Name
             };
 
             _dbContext.FoodPlans.Add(foodPlan);
@@ -77,11 +79,11 @@ namespace FoodRecords.Api.Services.TaskSchedulerService
                 .WithIdentity(jobKey)
                 .UsingJobData(new JobDataMap
                 {
-            { "ObjectId", foodPlan.ConsumableId },
-            { "Amount", (float)foodPlan.Amount },
-            { "RequiresConfirmation", foodPlan.RequiresConfirmation },
-            { "ScheduleId", foodPlan.Id },
-            { "ObjectType", foodPlan.ConsumableType }
+                    { "ObjectId", foodPlan.ConsumableId },
+                    { "Amount", (float)foodPlan.Amount },
+                    { "RequiresConfirmation", foodPlan.RequiresConfirmation },
+                    { "ScheduleId", foodPlan.Id },
+                    { "ObjectType", foodPlan.ConsumableType }
                 })
                 .Build();
 
@@ -158,6 +160,23 @@ namespace FoodRecords.Api.Services.TaskSchedulerService
             await _scheduler.RescheduleJob(triggerKey, newTrigger);
             await _dbContext.SaveChangesAsync();
             return foodPlan;
+        }
+        public async Task DeleteScheduleAsync(long scheduleId)
+        {
+            var plan = await _dbContext.FoodPlans.FindAsync(scheduleId);
+            if (plan == null || plan.IsDeleted)
+                throw new Exception("FoodPlan not found or already deleted");
+
+
+            var jobKey = new JobKey(plan.JobKey);
+            var triggerKey = new TriggerKey(plan.TriggerKey);
+
+            await _scheduler.PauseTrigger(triggerKey);
+            await _scheduler.UnscheduleJob(triggerKey);
+            await _scheduler.DeleteJob(jobKey);
+
+            plan.IsDeleted = true;
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

@@ -22,6 +22,11 @@ import {
 import {GenerateReportComponent} from './Features/FoodRecords/generate-report/generate-report.component';
 import {ViewPublicRecipesComponent} from './Features/Recipes/view-public-recipes/view-public-recipes.component';
 import {GetRecommendationComponent} from './Features/Recomendation/get-recommendation/get-recommendation.component';
+import {ViewSchedulesComponent} from './Features/Scheduling/view-schedules/view-schedules.component';
+import {CreateSchedulingComponent} from './Features/Scheduling/create-scheduling/create-scheduling.component';
+import {ViewPublicRecipeComponent} from './Features/Recipes/view-public-recipe/view-public-recipe.component';
+import {AddPublicRecipeComponent} from './Features/Recipes/add-public-recipe/add-public-recipe.component';
+import {EditPublicRecipeComponent} from './Features/Recipes/edit-public-recipe/edit-public-recipe.component';
 
 export const routes: Routes = [
   {
@@ -61,7 +66,12 @@ export const routes: Routes = [
       { path:'recipes/private/:id/edit', component:EditPrivateRecipeComponent},
       { path:'generate-report', component:GenerateReportComponent},
       { path:'recipes/public', component:ViewPublicRecipesComponent},
+      { path:'recipes/public/add', component:AddPublicRecipeComponent},
+      { path:'recipes/public/:id', component:ViewPublicRecipeComponent},
+      { path:'recipes/public/:id/edit', component:EditPublicRecipeComponent},
       { path:'recommendation', component:GetRecommendationComponent},
+      { path:'scheduling', component:ViewSchedulesComponent},
+      { path:'scheduling/add', component:CreateSchedulingComponent},
 
     ],
   }

@@ -1,89 +1,136 @@
-import {Component, OnInit} from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef
+} from '@angular/core';
 import {FoodMealDto, MealDto, MealService} from '../../Services/meal.service';
 import {MeasureService, MeasureWithFoodDto} from '../../../FoodRecords/services/measure.service';
+import {forkJoin} from 'rxjs';
 import {AuthService} from '../../../Auth/Services/auth.service';
-import {forkJoin, Observable} from 'rxjs';
-import {Panel} from 'primeng/panel';
+import {Router, RouterLink} from '@angular/router';
 import {NgClass, NgForOf, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {Router, RouterLink} from '@angular/router';
+// … other imports …
 
 @Component({
   selector: 'app-view-private-recipes',
+  standalone: true,
   imports: [
-    Panel,
     NgClass,
-    FormsModule,
     NgIf,
     NgForOf,
-    RouterLink
-  ],
+    FormsModule,
+    RouterLink,
+    /* … */],
   templateUrl: './view-private-recipes.component.html',
-  standalone: true,
-  styleUrl: './view-private-recipes.component.css'
+  styleUrls: ['./view-private-recipes.component.css']
 })
-export class ViewPrivateRecipesComponent implements OnInit {
+export class ViewPrivateRecipesComponent
+  implements OnInit, AfterViewInit, OnDestroy {
+
+  @ViewChild('anchor', { static: false }) anchor!: ElementRef<HTMLElement>;
+
   meals: MealDto[] = [];
-  searchQuery: string = '';
-  pageNumber: number = 1;
-  pageSize: number = 20;
-  userId!: string;
-  expandedRows: { [key: number]: boolean } = {};
-  ingredients: { [key: number]: MeasureWithFoodDto[] } = {};
+  searchQuery = '';
+  pageNumber = 1;
+  pageSize = 20;
+  userId = '';
+  expandedRows: Record<number, boolean> = {};
+  ingredients: Record<number, MeasureWithFoodDto[]> = {};
+
+  private observer!: IntersectionObserver;
+  private loadingMore = false;
 
   constructor(
     private mealService: MealService,
     private measureService: MeasureService,
-    private authService:AuthService,
-    private router:Router
+    private authService: AuthService,
+    private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.userId = this.authService.getUser()?.userId||""
+  ngOnInit() {
+    this.userId = this.authService.getUser()?.userId ?? '';
     this.loadMeals();
   }
 
-  loadMeals(): void {
-    this.mealService.getMeals(this.userId, this.pageNumber, this.pageSize, this.searchQuery)
+  ngAfterViewInit() {
+    this.observer = new IntersectionObserver(
+      entries => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !this.loadingMore) {
+          this.loadMore();
+        }
+      },
+      { root: null, threshold: 0.1 }
+    );
+    this.observer.observe(this.anchor.nativeElement);
+  }
+
+  ngOnDestroy() {
+    this.observer.disconnect();
+  }
+
+  loadMeals() {
+    this.pageNumber = 1;
+    this.mealService
+      .getMeals(this.userId, this.pageNumber, this.pageSize, this.searchQuery)
       .subscribe(meals => {
         this.meals = meals;
         this.ingredients = {};
       });
   }
 
-  onSearch(): void {
-    this.pageNumber = 1;
+  loadMore() {
+    this.loadingMore = true;
+    this.pageNumber++;
+    this.mealService
+      .getMeals(this.userId, this.pageNumber, this.pageSize, this.searchQuery)
+      .subscribe({
+        next: more => {
+          this.meals = [...this.meals, ...more];
+          this.loadingMore = false;
+        },
+        error: () => (this.loadingMore = false)
+      });
+  }
+
+  onSearch() {
     this.loadMeals();
   }
 
-  toggleRow(mealId: number): void {
+  toggleRow(mealId: number) {
     this.expandedRows[mealId] = !this.expandedRows[mealId];
     if (this.expandedRows[mealId] && !this.ingredients[mealId]) {
       const meal = this.meals.find(m => m.id === mealId);
-      if (meal) {
-        this.loadIngredients(meal);
-      }
+      if (meal) this.loadIngredients(meal);
     }
   }
 
-  loadIngredients(meal: MealDto): void {
-    const measureObservables: Observable<MeasureWithFoodDto>[] = meal.foodMeals
-      .map((fm: FoodMealDto) => this.measureService.getMeasureWithFood(fm.measureId));
-
-    forkJoin(measureObservables).subscribe(measures => {
+  loadIngredients(meal: MealDto) {
+    const obs = meal.foodMeals.map(fm =>
+      this.measureService.getMeasureWithFood(fm.measureId)
+    );
+    forkJoin(obs).subscribe(measures => {
       this.ingredients[meal.id] = measures;
     });
   }
 
-  getIngredientAmount(measure: MeasureWithFoodDto, foodMeal: FoodMealDto, totalServings: number): number {
+  getIngredientAmount(
+    measure: MeasureWithFoodDto,
+    foodMeal: FoodMealDto,
+    totalServings: number
+  ): number {
     return foodMeal.quantity;
   }
 
-  onAddNew(): void {
-    console.log('Add New clicked'); // Placeholder: Implement navigation or modal
+  onAddNew() {
+    this.router.navigate(['/app/recipes/private/add']);
   }
 
-  onViewMore(mealId: number): void {
-    this.router.navigate(['/app/recipes/private',mealId])
+  onViewMore(mealId: number) {
+    this.router.navigate(['/app/recipes/private', mealId]);
   }
 }

@@ -1,20 +1,19 @@
-import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {FoodRecordDto, FoodRecordsService, NutrientInfo} from '../services/food-records.service';
-import {MealRecordDto, MealRecordsService} from '../services/meal-records.service';
-import {MeasureService, MeasureWithFoodDto} from '../services/measure.service';
-import {MealService} from '../../FoodCatalog/Services/meal.service';
-import {AuthService} from '../../Auth/Services/auth.service';
-import {forkJoin, map, mergeMap, Observable, of, switchMap} from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FoodRecordDto, FoodRecordsService, NutrientInfo } from '../services/food-records.service';
+import { MealRecordDto, MealRecordsService } from '../services/meal-records.service';
+import { MeasureService, MeasureWithFoodDto } from '../services/measure.service';
+import { MealService } from '../../FoodCatalog/Services/meal.service';
+import { AuthService } from '../../Auth/Services/auth.service';
+import { forkJoin, map, mergeMap, Observable, of, switchMap } from 'rxjs';
 import * as Papa from 'papaparse';
 import * as XLSX from 'xlsx';
-import {Calendar} from 'primeng/calendar';
-import {DropdownModule} from 'primeng/dropdown';
-import {NgIf} from '@angular/common';
+import { Calendar } from 'primeng/calendar';
+import { DropdownModule } from 'primeng/dropdown';
+import { NgIf } from '@angular/common';
 import FileSaver, { saveAs } from 'file-saver';
-import {NutrientService} from '../../../Core/services/nutrient.service';
-import {HttpClient} from '@angular/common/http';
-
+import { NutrientService } from '../../../Core/services/nutrient.service';
+import { HttpClient } from '@angular/common/http';
 
 interface TrackedNutrient {
   nutrientId: number;
@@ -26,10 +25,15 @@ interface NutrientMetaData {
   name: string;
   unit: string;
 }
+
 interface ReportRow {
   rowNumber: number;
   dateEaten: string;
   itemName: string;
+
+  numberUnits: number;
+  unitName: string;
+
   nutrients: Record<number, number>;
 }
 
@@ -62,9 +66,9 @@ export class GenerateReportComponent implements OnInit {
     private mealRecordService: MealRecordsService,
     private measureService: MeasureService,
     private authService: AuthService,
-    private mealService:MealService,
-    private nutrientService:NutrientService,
-    private http:HttpClient
+    private mealService: MealService,
+    private nutrientService: NutrientService,
+    private http: HttpClient
   ) {
     this.reportForm = this.fb.group({
       startDate: [null, Validators.required],
@@ -74,10 +78,12 @@ export class GenerateReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Load nutrient metadata from a JSON file
     this.http.get<NutrientMetaData[]>('assets/nutrient_attributes.json')
       .subscribe(data => {
         this.nutrientMetadata = data;
       });
+
     const user = this.authService.getUser();
     if (user && Array.isArray((user as any).nutrientsToTrack)) {
       this.trackedNutrients = (user as any).nutrientsToTrack
@@ -92,7 +98,6 @@ export class GenerateReportComponent implements OnInit {
 
   private getNutrientLabelPair(nutrientId: number): [string, string] {
     const match = this.nutrientMetadata.find(n => n.attr_id === nutrientId);
-    console.log(nutrientId)
     if (match) {
       return [match.name, match.unit];
     }
@@ -106,20 +111,26 @@ export class GenerateReportComponent implements OnInit {
     }
     this.errorMessage = null;
     this.isLoading = true;
+
     const { startDate, endDate, format } = this.reportForm.value as {
       startDate: Date;
       endDate: Date;
       format: 'csv' | 'xlsx';
     };
+
+    // normalize to full‐day range
     const start = new Date(startDate);
     start.setHours(0, 0, 0, 0);
     const end = new Date(endDate);
     end.setHours(23, 59, 59, 999);
+
     const userId = this.authService.getUser()?.userId || '';
 
+    // get all food records and meal records in parallel
     const foodObs: Observable<FoodRecordDto[]> = this.foodRecordService
       .getAllRecords(userId, true, start, end)
       .pipe(map(arr => arr || []));
+
     const mealObs: Observable<MealRecordDto[]> = this.mealRecordService
       .getAllRecords(userId, true, start, end)
       .pipe(map(arr => arr || []));
@@ -127,11 +138,14 @@ export class GenerateReportComponent implements OnInit {
     forkJoin({ foods: foodObs, meals: mealObs })
       .pipe(
         switchMap(({ foods, meals }) => {
+          // --- FOOD ROWS ---
           const foodRows$ = foods.map(fr =>
             this.measureService.getMeasureWithFood(fr.foodMeasureId).pipe(
               map((measure: MeasureWithFoodDto) => {
+                // total grams = weightInGrams * amount (user’s # units)
                 const totalGrams = (measure.weightInGrams || 0) * fr.amount;
                 const nutMap: Record<number, number> = {};
+
                 (measure.food.nutrients || []).forEach(nutr => {
                   if (!this.trackedNutrients.find(tn => tn.nutrientId === nutr.nutrientId)) {
                     return;
@@ -139,15 +153,20 @@ export class GenerateReportComponent implements OnInit {
                   const raw = (nutr.amount * totalGrams) / 100;
                   nutMap[nutr.nutrientId] = Math.round(raw * 100) / 100;
                 });
+
                 return <ReportRow>{
-                  rowNumber: -1,
+                  rowNumber: -1,                     // fill in later
                   dateEaten: fr.dateEaten,
                   itemName: measure.food.name,
+                  numberUnits: fr.amount,           // ← new
+                  unitName: measure.name,           // ← new
                   nutrients: nutMap
                 };
               })
             )
           );
+
+          // --- MEAL ROWS ---
           const mealRows$ = meals.map(mr =>
             forkJoin(
               mr.ingredientSnapshots.map(snap =>
@@ -159,14 +178,15 @@ export class GenerateReportComponent implements OnInit {
               map(ingredients => ({
                 mealId: mr.mealId,
                 dateEaten: mr.dateEaten,
-                ingredients
+                ingredientData: ingredients
               })),
-              switchMap(({ mealId, dateEaten, ingredients }) =>
+              switchMap(({ mealId, dateEaten, ingredientData }) =>
                 this.mealService.getMealById(mealId!).pipe(
                   map(meal => {
-                    return ingredients.map(({ snap, measure }) => {
+                    return ingredientData.map(({ snap, measure }) => {
                       const totalGrams = (measure.weightInGrams || 0) * snap.amount;
                       const nutMap: Record<number, number> = {};
+
                       (measure.food.nutrients || []).forEach(nutr => {
                         if (!this.trackedNutrients.find(tn => tn.nutrientId === nutr.nutrientId)) {
                           return;
@@ -174,11 +194,15 @@ export class GenerateReportComponent implements OnInit {
                         const raw = (nutr.amount * totalGrams) / 100;
                         nutMap[nutr.nutrientId] = Math.round(raw * 100) / 100;
                       });
+
                       const itemName = `${meal.name} → ${measure.food.name}`;
+
                       return <ReportRow>{
                         rowNumber: -1,
                         dateEaten,
                         itemName,
+                        numberUnits: snap.amount,
+                        unitName: measure.name,
                         nutrients: nutMap
                       };
                     });
@@ -187,8 +211,10 @@ export class GenerateReportComponent implements OnInit {
               )
             )
           );
+
           const allFoodRows$ = foodRows$.length ? forkJoin(foodRows$) : of([] as ReportRow[]);
           const allMealRowsNested$ = mealRows$.length ? forkJoin(mealRows$) : of([] as ReportRow[][]);
+
           return forkJoin({ foodRows: allFoodRows$, mealRowsNested: allMealRowsNested$ });
         }),
         map(({ foodRows, mealRowsNested }) => {
@@ -197,8 +223,10 @@ export class GenerateReportComponent implements OnInit {
             r.rowNumber = idx + 1;
             return r;
           });
+
           allRows.sort((a, b) => new Date(a.dateEaten).getTime() - new Date(b.dateEaten).getTime());
           allRows.forEach((r, index) => (r.rowNumber = index + 1));
+
           return allRows;
         })
       )
@@ -220,14 +248,27 @@ export class GenerateReportComponent implements OnInit {
       const [name, unit] = this.getNutrientLabelPair(tn.nutrientId);
       return unit ? `${name} (${unit})` : name;
     });
-    const header = ['#', 'Date', 'Item Name', ...nutrientColumns];
+
+    const header = ['#', 'Date', 'Item Name', 'Units Eaten', 'Unit', ...nutrientColumns];
+
     const dataRows = allRows.map(r => {
       const dateObj = new Date(r.dateEaten);
       const formattedDate = dateObj.toISOString().split('T')[0];
+
       const nutrientValuesInOrder = this.trackedNutrients.map(tn => r.nutrients[tn.nutrientId] ?? 0);
-      return [r.rowNumber, formattedDate, r.itemName, ...nutrientValuesInOrder];
+
+      return [
+        r.rowNumber,
+        formattedDate,
+        r.itemName,
+        r.numberUnits,
+        r.unitName,
+        ...nutrientValuesInOrder
+      ];
     });
+
     const finalArray: any[][] = [header, ...dataRows];
+
     if (format === 'csv') {
       const csvString = Papa.unparse(finalArray);
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });

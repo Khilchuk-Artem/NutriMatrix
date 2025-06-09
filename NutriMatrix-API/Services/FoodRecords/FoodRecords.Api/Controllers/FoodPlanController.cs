@@ -22,15 +22,34 @@ namespace FoodRecords.Api.Controllers
             _mealFetcher = mealFetcher;
         }
 
-        // GET: api/FoodPlan
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<FoodPlan>>> GetFoodPlans()
+        public async Task<ActionResult<IEnumerable<FoodPlan>>> GetFoodPlans(
+            [FromQuery] string userId = null,
+            [FromQuery] bool recurringFirst = true,
+            [FromQuery] string? searchByName = null)
         {
-            var foodPlans = await _dbContext.FoodPlans
-                .Where(fp => !fp.IsDeleted)
-                .ToListAsync();
+            var query = _dbContext.FoodPlans
+                .Where(fp => !fp.IsDeleted);
+
+            if (!string.IsNullOrWhiteSpace(searchByName))
+            {
+                query = query.Where(fp => fp.Name.Contains(searchByName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                query = query.Where(fp => fp.UserId== userId);
+            }
+            if (recurringFirst)
+            {
+                query = query.OrderByDescending(fp => fp.IsRecurring);
+
+            }
+            
+            var foodPlans = await query.ToListAsync();
             return Ok(foodPlans);
         }
+
 
         // GET: api/FoodPlan/5
         [HttpGet("{id}")]
@@ -86,6 +105,22 @@ namespace FoodRecords.Api.Controllers
                     return NotFound();
                 }
                 throw;
+            }
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFoodPlan(long id, [FromQuery] string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+                return BadRequest("UserId cannot be null or empty");
+
+            try
+            {
+                await _taskSchedulerService.DeleteScheduleAsync(id);
+                return NoContent();
+            }
+            catch (Exception ex) when (ex.Message.Contains("not found"))
+            {
+                return NotFound();
             }
         }
     }

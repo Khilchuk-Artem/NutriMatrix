@@ -2,9 +2,7 @@
   <div class="logo text-3xl font-['Playfair_Display'] font-semibold text-[#6A9D8C]">
     NutriMatrix
   </div>
-  <nav class="flex space-x-6">
-    <a *ngIf="user" href="app/dashboard" class="text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] transition-colors duration-300">App</a>
-  </nav>
+
   <div class="flex items-center space-x-4">
     <a
       *ngIf="!user"
@@ -22,7 +20,7 @@
       </a>
       <button
         (click)="logout()"
-        class="rounded-xl px-5 py-2 bg-[#EF4444] text-white font-medium shadow-md hover:bg-[#dc2626] hover:shadow-lg transition-all duration-300"
+        class="rounded-xl px-6 py-3 bg-gradient-to-r from-[#FF6B6B] to-[#C0392B] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out"
       >
         Log out
       </button>
