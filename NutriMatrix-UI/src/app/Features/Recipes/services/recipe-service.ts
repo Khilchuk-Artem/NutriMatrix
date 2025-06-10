@@ -128,5 +128,12 @@ export class RecipeService {
       .get<FullRecipeDto>(`${this.baseUrl}/${id}`, { params })
       .pipe(catchError(this.handleError));
   }
-
+  getCategories(minRecipeCount?: number): Observable<string[]> {
+    let params = new HttpParams();
+    if (minRecipeCount != null) {
+      params = params.set('minRecipeCount', minRecipeCount.toString());
+    }
+    return this.http.get<string[]>(`${this.baseUrl}/categories`, { params })
+      .pipe(catchError(this.handleError));
+  }
 }

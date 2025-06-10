@@ -278,6 +278,26 @@ namespace RecommendationService.Api.Controllers
                 Nutrients = filteredNutrients
             };
         }
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories([FromQuery] int? minRecipeCount = null)
+        {
+            var query = _dbContext.Recipes
+                .Where(r => !r.IsDeleted)
+                .GroupBy(r => r.Category)
+                .Select(g => new { Category = g.Key, RecipeCount = g.Count() });
+
+            if (minRecipeCount.HasValue)
+            {
+                query = query.Where(c => c.RecipeCount >= minRecipeCount.Value);
+            }
+
+            var categories = await query
+                .OrderBy(c => c.Category)
+                .Select(c => c.Category)
+                .ToListAsync();
+
+            return Ok(categories);
+        }
 
         // DTO classes
 

@@ -73,7 +73,7 @@ namespace RecommendationService.Api.Services.RecommendationService
                                 RecipeId = fromDb.Id,
                                 Title = fromDb.Title,
                                 Category = fromDb.Category,
-                                Servings = fromDb.Servings ?? 0,
+                                Servings = fromDb.Servings ?? 1,
                                 IngredientIds = fromDb.Measures
                                     .Where(m => !m.IsDeleted)
                                     .Select(m => m.FoodId)
@@ -85,7 +85,7 @@ namespace RecommendationService.Api.Services.RecommendationService
                             };
                         }
                     }
-                    if (item != null)
+                    if (item != null && item.Servings > 0)
                         candidates.Add(item);
                 }
                 candidatesList.Add(candidates);

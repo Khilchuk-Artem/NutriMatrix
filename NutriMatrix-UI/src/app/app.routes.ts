@@ -27,6 +27,9 @@ import {CreateSchedulingComponent} from './Features/Scheduling/create-scheduling
 import {ViewPublicRecipeComponent} from './Features/Recipes/view-public-recipe/view-public-recipe.component';
 import {AddPublicRecipeComponent} from './Features/Recipes/add-public-recipe/add-public-recipe.component';
 import {EditPublicRecipeComponent} from './Features/Recipes/edit-public-recipe/edit-public-recipe.component';
+import {
+  NutrientConsumptionStatisticsComponent
+} from './Features/FoodRecords/nutrient-consumption-statistics/nutrient-consumption-statistics.component';
 
 export const routes: Routes = [
   {
@@ -72,6 +75,7 @@ export const routes: Routes = [
       { path:'recommendation', component:GetRecommendationComponent},
       { path:'scheduling', component:ViewSchedulesComponent},
       { path:'scheduling/add', component:CreateSchedulingComponent},
+      { path:'consumption-stats', component:NutrientConsumptionStatisticsComponent},
 
     ],
   }

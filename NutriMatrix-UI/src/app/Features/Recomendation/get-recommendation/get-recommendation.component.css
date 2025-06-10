@@ -3,17 +3,91 @@
   border: none !important;
   background: transparent !important;
   box-shadow: none !important;
-  width: 100%;
-  padding: 0 !important;      /* remove any padding if you like */
-}
-:host ::ng-deep
-  /* Style the selected autocomplete option to match your UI */
-.p-autocomplete-option-selected {
-  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
-  color: #2D2D2D       !important;  /* your primary text color */
+  width: 100% !important;
+  padding: 0 !important;
 }
 
 :host ::ng-deep
 .p-autocomplete {
-width: 100%;
+  width: 100% !important;
+}
+
+:host ::ng-deep
+.p-select-label {
+  color: #2d2d2d !important;
+}
+
+:host ::ng-deep
+.p-select-dropdown {
+  color: #D4A017 !important;
+}
+
+:host ::ng-deep
+.p-select-overlay {
+  background-color: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+:host ::ng-deep
+.p-select-option {
+  padding: 1rem !important;
+  color: #2d2d2d !important;
+  transition: background-color 0.3s ease !important;
+}
+
+:host ::ng-deep
+.p-select-option-selected {
+  background-color: rgba(212, 160, 23, 0.33) !important;
+  color: #2d2d2d !important;
+}
+
+:host ::ng-deep
+.p-select-option:hover {
+  background-color: #f3f4f6 !important;
+}
+
+:host ::ng-deep
+.p-dropdown.p-inputwrapper-focus {
+  box-shadow: 0 0 0 2px #FFD580 !important;
+  outline: none !important;
+}
+
+:host ::ng-deep
+.p-dropdown.ng-invalid.ng-touched {
+  border-color: #EF4444 !important;
+}
+
+:host ::ng-deep
+.p-inputtext:focus {
+  border: 1px solid #e5e7eb !important;
+}
+
+:host ::ng-deep
+.p-ripple p-select-option p-select-option-selected {
+  background-color: #D4A017 !important;
+}
+
+:host ::ng-deep
+.p-select.p-focus {
+  border-color: #D4A017 !important;
+}
+
+:host ::ng-deep
+.p-select-option.p-select-option-selected.p-focus {
+  background-color: rgba(212, 160, 23, 0.33) !important;
+  color: #2d2d2d !important;
+}
+
+:host ::ng-deep
+.p-inputtext.p-focus {
+  border-color: #D4A017 !important;
+}
+
+:host ::ng-deep
+.p-select {
+  background-color: transparent !important;
+  border: 1px solid rgba(212, 160, 23, 0.3) !important;
 }

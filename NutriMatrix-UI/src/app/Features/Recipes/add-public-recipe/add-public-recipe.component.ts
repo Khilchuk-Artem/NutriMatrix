@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {MeasureService, MeasureWithFoodDto} from '../../FoodRecords/services/measure.service';
+import {MeasureService, MeasureWithFoodDto, SearchMeasureWithFoodDto} from '../../FoodRecords/services/measure.service';
 import {
   CreateOrUpdateRecipeDto,
   IngredientMeasureDto,
@@ -17,6 +17,7 @@ import {DecimalPipe, NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {NgClickOutsideDirective} from 'ng-click-outside2';
 import {NUTRIENT_CATEGORIES} from '../../../Core/services/nutrient-categories';
 import {HttpClient} from '@angular/common/http';
+import {AutoComplete} from 'primeng/autocomplete';
 
 interface IngredientEntry {
   measure: {
@@ -43,7 +44,8 @@ interface NutrientInfo {
     NgStyle,
     FormsModule,
     DecimalPipe,
-    NgClass
+    NgClass,
+    AutoComplete
   ],
   templateUrl: './add-public-recipe.component.html',
   standalone: true,
@@ -71,6 +73,9 @@ export class AddPublicRecipeComponent implements OnInit {
   tooltipPosition = { x: 0, y: 0 };
   private hoverSubject = new Subject<number | null>();
   private hoverCancel$ = new Subject<void>();
+  ingredientsText: string = '';
+  categories: string[] = ['Work', 'Exercise', 'Study', 'Leisure'];
+  filteredCategories: string[] = [];
 
   constructor(
     private foodService: FoodService,
@@ -88,6 +93,10 @@ export class AddPublicRecipeComponent implements OnInit {
       photoUrl: new FormControl(''),
       ingredients: new FormArray([], Validators.required)
     });
+    this.recipeService.getCategories().subscribe(res=>{
+      this.categories = res;
+      this.filteredCategories = res;
+    })
   }
 
   ngOnInit() {
@@ -127,6 +136,48 @@ export class AddPublicRecipeComponent implements OnInit {
     ).subscribe();
   }
 
+  parseAndAddIngredients() {
+
+    if (!this.ingredientsText.trim()) {
+      this.errorMessage = 'Please enter some text to parse.';
+      return;
+    }
+
+    this.measureService.searchMeasures(this.ingredientsText).subscribe({
+      next: (parsedMeasures: SearchMeasureWithFoodDto[]) => {
+        parsedMeasures.forEach(measure => {
+          const food = measure.food;
+          const ingredient: IngredientEntry = {
+            measure: {
+              id: measure.id,
+              name: measure.name,
+              weightInGrams: measure.weightInGrams,
+              food: food as FoodDTO
+            },
+            quantity: measure.quantity
+          };
+          this.addedIngredients.push(ingredient);
+          this.ingredients.push(
+            new FormGroup({
+              foodId: new FormControl(food.id, [Validators.required]),
+              measureId: new FormControl(measure.id, [Validators.required]),
+              amount: new FormControl(measure.quantity, [Validators.required, Validators.min(0.01)])
+            })
+          );
+        });
+        this.ingredientsText = ''; // Clear the textarea
+        this.errorMessage = null;
+      },
+      error: (err) => {
+        this.errorMessage = 'Failed to parse ingredients. Please try again.';
+      }
+    });
+  }
+  showParsingSection: boolean = false;
+
+  toggleParsingSection() {
+    this.showParsingSection = !this.showParsingSection;
+  }
   private getAllNutrientIds(): number[] {
     const allIds = new Set<number>();
     for (const ids of Object.values(NUTRIENT_CATEGORIES)) {
@@ -134,7 +185,12 @@ export class AddPublicRecipeComponent implements OnInit {
     }
     return Array.from(allIds);
   }
-
+  filterCategories(event: any) {
+    const query = event.query.toLowerCase();
+    this.filteredCategories = this.categories.filter(
+      c => c.toLowerCase().includes(query)
+    );
+  }
   onHoverFood(food: FoodShortcutDTO) {
     this.hoverCancel$.next();
     this.hoveredFood = food;
@@ -332,4 +388,6 @@ export class AddPublicRecipeComponent implements OnInit {
       this.searchControl.setValue(this.selectedFood?.name || '');
     }
   }
+
+  protected readonly console = console;
 }

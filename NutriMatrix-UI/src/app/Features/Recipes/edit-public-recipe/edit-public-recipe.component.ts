@@ -9,6 +9,7 @@ import {FoodService} from '../../FoodCatalog/Services/food.service';
 import {NUTRIENT_CATEGORIES} from '../../../Core/services/nutrient-categories';
 import {DecimalPipe, NgClass, NgForOf, NgIf, NgStyle} from '@angular/common';
 import {NgClickOutsideDirective} from 'ng-click-outside2';
+import {AutoComplete} from 'primeng/autocomplete';
 
 
 interface IngredientEntry {
@@ -31,7 +32,8 @@ interface NutrientInfo {
     NgStyle,
     DecimalPipe,
     FormsModule,
-    NgForOf
+    NgForOf,
+    AutoComplete
   ],
   templateUrl: './edit-public-recipe.component.html',
   standalone: true,
@@ -53,7 +55,7 @@ export class EditPublicRecipeComponent implements OnInit {
   nutrientMetadata: NutrientInfo[] = [];
   private allNutrientIds: number[] = [];
   editingIndex: number | null = null;
-  editQuantityControl = new FormControl('', [Validators.required, Validators.min(0.01)]);
+  editQuantityControl = new FormControl(0, [Validators.required, Validators.min(0.01)]);
   editMeasure: MeasureDto | null = null;
   editMeasures: MeasureDto[] = [];
   hoveredFoodId: number | null = null;
@@ -61,6 +63,9 @@ export class EditPublicRecipeComponent implements OnInit {
   tooltipPosition = { x: 0, y: 0 };
   private hoverSubject = new Subject<number | null>();
   private hoverCancel$ = new Subject<void>();
+  categories: string[] = [];
+  filteredCategories: string[] = [];
+  editMeasureControl = new FormControl<MeasureDto | null>(null, Validators.required);
 
   constructor(
     private route: ActivatedRoute,
@@ -110,6 +115,11 @@ export class EditPublicRecipeComponent implements OnInit {
       })
     ).subscribe();
 
+    this.recipeService.getCategories().subscribe(res => {
+      this.categories = res;
+      this.filteredCategories = res;
+    });
+
     this.recipeService.getRecipe(id).subscribe({
       next: (recipe) => {
         this.recipe = recipe;
@@ -121,6 +131,13 @@ export class EditPublicRecipeComponent implements OnInit {
         this.isLoading = false;
       }
     });
+  }
+
+  filterCategories(event: any) {
+    const query = event.query.toLowerCase();
+    this.filteredCategories = this.categories.filter(
+      c => c.toLowerCase().includes(query)
+    );
   }
 
   private initializeForm(): void {
@@ -140,27 +157,30 @@ export class EditPublicRecipeComponent implements OnInit {
     } else {
       steps.forEach(step => directionsArray.push(new FormControl(step)));
     }
+    const allNutrientIds = this.getAllNutrientIds();
 
     const ingredientsArray = this.ingredients;
     ingredientsArray.clear();
     const foodIds = [...new Set(this.recipe!.ingredients.map(ing => ing.foodId))];
-    const foodObservables = foodIds.map(id => this.foodService.getFoodById(id));
+    const foodObservables = foodIds.map(id => this.foodService.getFoodById(id,allNutrientIds));
     forkJoin(foodObservables).subscribe(foods => {
       const foodMap = new Map(foods.map(food => [food.id, food]));
+      console.log(foodMap)
       this.recipe!.ingredients.forEach(ing => {
-        const food = foodMap.get(ing.foodId);
+        const food = foodMap.get(ing.foodId) as FoodDTO;
+        console.log(food)
         if (food) {
           const measure = food.measures.find(m => m.id === ing.measureId);
           if (measure) {
             const ingredientEntry: IngredientEntry = {
-              measure: { id: measure.id, name: measure.name, weightInGrams: measure.weightInGrams, food },
+              measure: { id: measure.id, name: measure.name, weightInGrams: measure.weightInGrams, food:food },
               quantity: ing.amount
             };
             this.addedIngredients.push(ingredientEntry);
             ingredientsArray.push(new FormGroup({
               foodId: new FormControl(food.id, Validators.required),
               measureId: new FormControl(measure.id, Validators.required),
-              amount: new FormControl(ing.amount, [Validators.required, Validators.min(0.01)])
+              amount: new FormControl(ing.amount, [Validators.required, Validators.min(0.01)]),
             }));
           }
         }
@@ -230,38 +250,43 @@ export class EditPublicRecipeComponent implements OnInit {
   startEditing(index: number) {
     this.editingIndex = index;
     const ingredient = this.addedIngredients[index];
-    this.editQuantityControl.setValue(String(ingredient.quantity));
-    this.editMeasure = { id: ingredient.measure.id, name: ingredient.measure.name, weightInGrams: ingredient.measure.weightInGrams };
+    this.editQuantityControl.setValue(ingredient.quantity);
     this.editMeasures = ingredient.measure.food.measures;
+    this.editMeasureControl.setValue(
+      this.editMeasures.find(m => m.id === ingredient.measure.id) || null
+    );
   }
 
   saveEdit(index: number) {
-    if (this.editMeasure && this.editQuantityControl.valid) {
-      this.foodService.getFoodById(this.addedIngredients[index].measure.food.id, this.allNutrientIds).subscribe(food => {
-        this.addedIngredients[index] = {
-          measure: {
-            id: this.editMeasure!.id,
-            name: this.editMeasure!.name,
-            weightInGrams: this.editMeasure!.weightInGrams,
-            food: food
-          },
-          quantity: Number(this.editQuantityControl.value)
-        };
-        const ingredientGroup = this.ingredients.at(index) as FormGroup;
-        ingredientGroup.patchValue({
-          foodId: food.id,
-          measureId: this.editMeasure!.id,
-          amount: this.editQuantityControl.value
+    if (this.editMeasureControl.valid && this.editQuantityControl.valid) {
+      const selectedMeasure = this.editMeasureControl.value;
+      if (selectedMeasure) {
+        this.foodService.getFoodById(this.addedIngredients[index].measure.food.id, this.allNutrientIds).subscribe(food => {
+          this.addedIngredients[index] = {
+            measure: {
+              id: selectedMeasure.id,
+              name: selectedMeasure.name,
+              weightInGrams: selectedMeasure.weightInGrams,
+              food: food
+            },
+            quantity: Number(this.editQuantityControl.value)
+          };
+          const ingredientGroup = this.ingredients.at(index) as FormGroup;
+          ingredientGroup.patchValue({
+            foodId: food.id,
+            measureId: selectedMeasure.id,
+            amount: this.editQuantityControl.value
+          });
+          this.cancelEdit();
         });
-        this.cancelEdit();
-      });
+      }
     }
   }
 
   cancelEdit() {
     this.editingIndex = null;
     this.editQuantityControl.reset();
-    this.editMeasure = null;
+    this.editMeasureControl.reset();
     this.editMeasures = [];
   }
 
@@ -326,13 +351,18 @@ export class EditPublicRecipeComponent implements OnInit {
     for (const ingredient of this.addedIngredients) {
       const measure = ingredient.measure;
       const amount = ingredient.quantity;
-      if (!measure.food.foodNutrients) continue;
+      if (!measure.food.foodNutrients) {
+        console.log("NOOOOOO")
+        continue
+      }
+
       for (const nutrient of measure.food.foodNutrients) {
         const nutrientAmount = (nutrient.amount * amount * measure.weightInGrams) / 100;
         const currentAmount = totalNutrients.get(nutrient.nutrientId) || 0;
         totalNutrients.set(nutrient.nutrientId, currentAmount + nutrientAmount);
       }
     }
+    console.log(totalNutrients)
     return totalNutrients;
   }
 

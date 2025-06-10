@@ -40,14 +40,15 @@
           <div *ngIf="slot.expanded" class="mt-2 p-4 bg-gray-100 rounded-xl">
             <div class="mb-4">
               <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Category</label>
-              <select
+              <p-dropdown
                 [(ngModel)]="slot.category"
+                [options]="categories"
+                [filter]="true"
                 [disabled]="isLoading"
-                class="w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#FFD580] transition-all duration-300"
-              >
-                <option [ngValue]="null">Select category</option>
-                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
-              </select>
+                placeholder="Select category"
+                class="w-full"
+                [styleClass]="'w-full p-4 border rounded-xl font-[\'Open_Sans\'] text-[#2D2D2D] focus:outline-none focus:ring-2 focus:ring-[#FFD580] transition-all duration-300'"
+              ></p-dropdown>
             </div>
             <div class="mb-4">
               <label class="block font-['Open_Sans'] text-[#2D2D2D] font-medium mb-2">Included Ingredients</label>
@@ -92,8 +93,7 @@
         <button
           (click)="addNutrientGoal()"
           [disabled]="isLoading"
-          class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out font-['Open_Sans']"
-        >
+          class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out font-['Open_Sans']"        >
           + Add Nutrient Goal
         </button>
         <div *ngFor="let goal of nutrientGoals; let i = index" class="mt-4">
@@ -261,6 +261,16 @@
                   {{ ingredient.foodName }}: {{ ingredient.quantity }} {{ ingredient.measureName }}
                 </li>
               </ul>
+              <div class="mt-4">
+                <a
+                  [routerLink]="['/app/recipes/public/',recipe.recipe.id]"
+                  [attr.href]="router.serializeUrl(router.createUrlTree(['/app/recipes/public/',recipe.recipe.id]))"
+                  target="_blank"
+                  rel="noopener"
+                  class="p-2 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white rounded-xl shadow-md hover:shadow-lg hover:scale-102 transition-all duration-300 font-['Open_Sans']"
+                >View More</a>
+              </div>
+
             </div>
           </div>
         </ng-container>

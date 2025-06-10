@@ -246,7 +246,7 @@ export class ViewPublicRecipesComponent  implements OnInit, AfterViewInit, OnDes
   }
 
   onAddNew(): void {
-    this.router.navigate(['/app/recipes/private/add']);
+    this.router.navigate(['/app/recipes/public/add']);
   }
 
   onSearch(): void {

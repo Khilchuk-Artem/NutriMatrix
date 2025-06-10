@@ -1,11 +1,15 @@
-﻿using FoodCatalog.Api.Controllers.FoodCatalog.Api.Models.Dto;
+﻿using BuildingBlocks.Nutrionix.Refit;
+using FoodCatalog.Api.Controllers.FoodCatalog.Api.Models.Dto;
 using FoodCatalog.Api.Data.Context;
+using FoodCatalog.Api.Models.Domain;
 using FoodCatalog.Api.Models.Dto;
 using FoodCatalog.Api.Models.Redis;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
+using static Google.Protobuf.Compiler.CodeGeneratorResponse.Types;
 
 namespace FoodCatalog.Api.Controllers
 {
@@ -20,7 +24,14 @@ namespace FoodCatalog.Api.Controllers
             public FoodShortcutDTO Food { get; set; } = null!;
         }
     }
-
+    public class SearchMeasureWithFoodDto
+    {
+        public long Id { get; set; }
+        public string Name { get; set; } = null!;
+        public double WeightInGrams { get; set; }
+        public double Quantity { get; set; }
+        public FoodDTO Food { get; set; } = null!;
+    }
     [ApiController]
     [Route("api/[controller]")]
     public class MeasureController : ControllerBase
@@ -28,14 +39,18 @@ namespace FoodCatalog.Api.Controllers
         private readonly RedisCollection<MeasureRedis> _measureCollection;
         private readonly RedisCollection<FoodRedis> _foodCollection;
         private readonly FoodCatalogDbContext _dbContext;
+        private readonly INutrionixApi _nutritionixService;
+
         public MeasureController(
             RedisCollection<MeasureRedis> measureCollection,
             RedisCollection<FoodRedis> foodCollection,
-            FoodCatalogDbContext dbContext)
+            FoodCatalogDbContext dbContext,
+            INutrionixApi nutritionixService)
         {
             _measureCollection = measureCollection;
             _foodCollection = foodCollection;
             _dbContext = dbContext;
+            _nutritionixService = nutritionixService;
         }
 
         [HttpGet("{id:long}", Name = "GetMeasureById")]
@@ -81,5 +96,154 @@ namespace FoodCatalog.Api.Controllers
 
             return Ok(dto);
         }
+        [HttpPost("search")]
+        public async Task<IActionResult> Search([FromBody] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return BadRequest("Query cannot be empty.");
+            }
+
+            var nutritionixResponse = await _nutritionixService.GetNutritionFromNaturalInput(new NutritionQueryRequest { Query = query });
+            if (nutritionixResponse?.Foods == null || !nutritionixResponse.Foods.Any())
+            {
+                return NotFound("No foods found for the given query.");
+            }
+
+            var result = new List<SearchMeasureWithFoodDto>();
+            var foodsToAdd = new List<Food>();
+            var measuresToAdd = new List<Measure>();
+
+            // Retrieve maximum IDs from the database
+            long currentMaxFoodId = await _dbContext.Foods.AnyAsync() ? await _dbContext.Foods.MaxAsync(f => f.Id) : 0;
+            long currentMaxMeasureId = await _dbContext.Measures.AnyAsync() ? await _dbContext.Measures.MaxAsync(m => m.Id) : 0;
+            long currentMaxNutrientId = await _dbContext.FoodNutrientIn100Gs.AnyAsync() ? await _dbContext.FoodNutrientIn100Gs.MaxAsync(n => n.Id) : 0;
+
+            foreach (var niFood in nutritionixResponse.Foods)
+            {
+                var food = await _dbContext.Foods
+                    .Include(f => f.Measures)
+                    .Include(f => f.FoodNutrients)
+                    .FirstOrDefaultAsync(f => f.Name.ToLower() == niFood.FoodName.ToLower() && !f.IsDeleted);
+
+                Measure measure;
+                var measureName = niFood.ServingUnit;
+
+                if (food == null)
+                {
+                    currentMaxFoodId++;
+                    food = new Food
+                    {
+                        Id = currentMaxFoodId,
+                        Name = niFood.FoodName,
+                        Photo = niFood.Photo?.Thumb ?? "default.jpg",
+                        Barcode = null,
+                        IsDeleted = false,
+                        Measures = new List<Measure>(),
+                        FoodNutrients = new List<FoodNutrientIn100g>()
+                    };
+
+                    if (niFood.ServingWeightGrams > 0 && niFood.FullNutrients != null)
+                    {
+                        var nutrientsFromApi = niFood.FullNutrients?.ToDictionary(n => n.AttrId, n => n.Value) ?? new Dictionary<int, double>();
+                        var nutrientIds = new List<int> { /* your list of nutrient IDs here */ };
+
+                        foreach (var nutrientId in nutrientIds)
+                        {
+                            nutrientsFromApi.TryGetValue(nutrientId, out var apiValue);
+                            var amountPer100g = niFood.ServingWeightGrams > 0
+                                ? (float)((apiValue / niFood.ServingWeightGrams) * 100)
+                                : 0f;
+
+                            currentMaxNutrientId++;
+                            food.FoodNutrients.Add(new FoodNutrientIn100g
+                            {
+                                Id = currentMaxNutrientId,
+                                NutrientId = nutrientId,
+                                Amount = amountPer100g,
+                                IsDeleted = false
+                            });
+                        }
+                    }
+
+                    currentMaxMeasureId++;
+                    measure = new Measure
+                    {
+                        Id = currentMaxMeasureId,
+                        Name = measureName,
+                        WeightInGrams = (float)niFood.ServingWeightGrams,
+                        Food = food,
+                        IsDeleted = false
+                    };
+                    food.Measures.Add(measure);
+                    measuresToAdd.Add(measure);
+                    foodsToAdd.Add(food);
+                }
+                else
+                {
+                    measure = food.Measures.FirstOrDefault(m => m.Name.ToLower() == measureName.ToLower() && !m.IsDeleted);
+                    if (measure == null)
+                    {
+                        currentMaxMeasureId++;
+                        measure = new Measure
+                        {
+                            Id = currentMaxMeasureId,
+                            Name = measureName,
+                            WeightInGrams = (float)niFood.ServingWeightGrams,
+                            Food = food,
+                            IsDeleted = false
+                        };
+                        food.Measures.Add(measure);
+                        measuresToAdd.Add(measure);
+                    }
+                }
+
+                var dto = new SearchMeasureWithFoodDto
+                {
+                    Id = measure.Id,
+                    Name = measure.Name,
+                    WeightInGrams = measure.WeightInGrams,
+                    Quantity = niFood.ServingQty,
+                    Food = new FoodDTO
+                    {
+                        Id = food.Id,
+                        Name = food.Name,
+                        Photo = food.Photo,
+                        FoodNutrients = food.FoodNutrients?
+                            .Where(n => !n.IsDeleted)
+                            .Select(n => new FoodNutrientIn100gDto
+                            {
+                                NutrientId = n.NutrientId,
+                                Amount = n.Amount
+                            })
+                            .ToList(),
+                        Measures = food.Measures?
+                            .Select(m => new MeasureDto
+                            {
+                                Id = m.Id,
+                                Name = m.Name,
+                                WeightInGrams = m.WeightInGrams
+                            })
+                            .ToList()
+                    }
+                };
+
+                result.Add(dto);
+            }
+
+            // Save new entities
+            if (foodsToAdd.Any())
+            {
+                _dbContext.Foods.AddRange(foodsToAdd);
+            }
+            if (measuresToAdd.Any())
+            {
+                _dbContext.Measures.AddRange(measuresToAdd);
+            }
+            await _dbContext.SaveChangesAsync();
+
+            return Ok(result);
+        }
+
     }
 }

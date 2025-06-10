@@ -10,6 +10,6 @@ namespace Auth.API.Services.AuthService
         public Task<bool> ConfirmEmail(RequestConfirmEmailDTO dto);
         public Task<bool> RequestPasswordReset(string email);
         public Task<bool> ResetPassword(ResetPasswordDTO dto);
-        public Task<string> GoogleLogin(string idToken);
+        public Task<LoginResponseDTO> GoogleLogin(string idToken);
     }
 }

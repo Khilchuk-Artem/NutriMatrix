@@ -19,6 +19,7 @@ namespace BuildingBlocks.Nutrionix.Refit
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            var value = _config["Nutrionix:AppId"];
             request.Headers.Add("x-app-id", _config["Nutrionix:AppId"]);
             request.Headers.Add("x-app-key", _config["Nutrionix:AppKey"]);
 

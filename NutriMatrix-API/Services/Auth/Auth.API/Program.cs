@@ -3,6 +3,8 @@ using Auth.API.Models.Settings;
 using Auth.API.Services.AuthService;
 using Auth.API.Services.EmailService;
 using Auth.API.Services.UserSummaryService;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -43,8 +45,11 @@ namespace Auth.API
                 .AddTokenProvider<DataProtectorTokenProvider<IdentityUser>>("Auth.API")
                 .AddEntityFrameworkStores<AuthDbContext>()
                 .AddDefaultTokenProviders();
-
-
+            var serviceAccountJson = builder.Configuration["Firebase:ServiceAccountKey"];
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromJson(serviceAccountJson)
+            });
 
             builder.Services.Configure<IdentityOptions>(options =>
             {

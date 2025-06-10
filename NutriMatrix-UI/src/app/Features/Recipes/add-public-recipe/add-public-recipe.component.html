@@ -23,15 +23,21 @@
 
     <!-- Category -->
     <div class="mb-4">
-      <input
+      <p-autoComplete
         formControlName="category"
+        [suggestions]="filteredCategories"
+        (completeMethod)="filterCategories($event)"
+        [forceSelection]="false"
+        [dropdown]="true"
         [ngClass]="{
           'border-gray-200': category.valid || category.untouched,
           'border-[#EF4444]': category.invalid && !category.untouched
         }"
-        class="w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+        class="w-full"
+        [inputStyleClass]="'w-full p-4 border rounded-xl font-[Open_Sans] text-[#2D2D2D] placeholder:font-[Open_Sans] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017]'"
         placeholder="Enter category"
-      />
+      ></p-autoComplete>
+
       <div *ngIf="!category.untouched && category.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
         <div *ngIf="category.errors?.['required']">Category is required.</div>
       </div>
@@ -92,10 +98,11 @@
       />
     </div>
 
-    <!-- Ingredient Addition -->
+
+    <!-- Manual Ingredient Addition -->
     <div class="mb-4">
       <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-6">
-        Add Ingredients
+        Add Ingredients Manually
       </h2>
       <div class="flex items-start gap-4 w-full">
         <!-- Search Food -->
@@ -193,6 +200,33 @@
       </div>
     </div>
 
+    <div class="mb-8">
+      <button
+        type="button"
+        (click)="toggleParsingSection()"
+        class="p-2 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white rounded-xl shadow-md hover:shadow-lg hover:scale-102 transition-all duration-300 font-['Open_Sans']"
+      >
+        {{ showParsingSection ? 'Hide' : 'Show' }} Automatic Ingredient Parser
+      </button>
+      <div *ngIf="showParsingSection" class="mt-4">
+        <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
+          Automatically Add Ingredients
+        </h2>
+        <textarea
+          [(ngModel)]="ingredientsText"
+          [ngModelOptions]="{standalone:true}"
+          class="w-full p-4 border border-gray-200 rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
+          placeholder="Enter ingredients text (e.g., '1 cup of flour, 2 eggs')"
+        ></textarea>
+        <button
+          type="button"
+          (click)="parseAndAddIngredients()"
+          class="mt-2 p-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white rounded-xl shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out font-['Open_Sans']"
+        >
+          Parse and Add Ingredients
+        </button>
+      </div>
+    </div>
     <!-- Added Ingredients List -->
     <div *ngIf="addedIngredients.length > 0" class="mb-8">
       <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-6">
@@ -207,7 +241,7 @@
               class="w-6 h-6 rounded-full object-cover"
             />
             <ng-container *ngIf="editingIndex !== i; else editMode">
-              <span>{{ ingredient.measure.food.name }} - {{ ingredient.measure.name }} - {{ ingredient.quantity }}</span>
+              <span>{{ ingredient.measure.food.name }} - {{ ingredient.quantity }} {{ ingredient.measure.name }}</span>
             </ng-container>
             <ng-template #editMode>
               <div class="flex items-center gap-2">
@@ -322,7 +356,7 @@
                 {{ nutrient.amount | number:'1.1-2' }}
               </td>
               <td
-                class="p-4 border-b border-gray-200 font-['Open_Sans']reeze text-[#2D2D2D]"
+                class="p-4 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]"
                 [class.rounded-br-2xl]="last"
               >
                 {{ getNutrientLabel(nutrient.nutrientId)[1] }}

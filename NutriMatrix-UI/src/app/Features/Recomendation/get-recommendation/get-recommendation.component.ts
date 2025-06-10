@@ -21,6 +21,7 @@ import { NUTRIENT_CATEGORIES } from '../../../Core/services/nutrient-categories'
 import {AddMealRecordDto, MealRecordsService} from '../../FoodRecords/services/meal-records.service';
 import {CreateMealDto, FoodMealDto, MealService} from '../../FoodCatalog/Services/meal.service';
 import {AuthService} from '../../Auth/Services/auth.service';
+import {Router, RouterLink} from '@angular/router';
 
 interface NutrientInfo {
   attr_id: number;
@@ -53,14 +54,13 @@ interface NutrientGoal {
 @Component({
   selector: 'app-get-recommendation',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, DropdownModule, MultiSelectModule, NgClickOutsideDirective, AutoComplete],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, DropdownModule, MultiSelectModule, NgClickOutsideDirective, AutoComplete, RouterLink],
   templateUrl: 'get-recommendation.component.html',
   styleUrls: ['get-recommendation.component.css']
 })
 export class GetRecommendationComponent implements OnInit {
   dishSlots: DishSlot[] = [];
   nutrientGoals: NutrientGoal[] = [];
-  categories: string[] = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
   nutrientMetadata: NutrientInfo[] = [];
   nutrientSearchResults: { [key: number]: NutrientInfo[] } = {};
   private searchSubjects: { [key: number]: Subject<string> } = {};
@@ -69,7 +69,7 @@ export class GetRecommendationComponent implements OnInit {
   expandedRecommendedRows: { [key: number]: boolean } = {};
   recipeIngredients: { [key: number]: { foodName: string; quantity: number; measureName: string }[] } = {};
   totalNutrientsData: NutrientPerRecipe[] = [];
-
+  categories:string[]=[];
   // Tooltip-related properties
   hoveredNutrient: NutrientInfo | null = null;
   hoveredNutrientId: number | null = null;
@@ -84,10 +84,15 @@ export class GetRecommendationComponent implements OnInit {
     private toastr: ToastrService,
     private mealService:MealService,
     private mealRecordsService:MealRecordsService,
-    private authService:AuthService
+    private authService:AuthService,
+    protected router:Router
   ) {}
 
   ngOnInit(): void {
+    this.recipeService.getCategories(300).subscribe(res=>{
+      this.categories = res;
+    })
+
     this.http.get<NutrientInfo[]>('assets/nutrient_attributes.json').subscribe({
       next: (data) => {
         this.nutrientMetadata = data;

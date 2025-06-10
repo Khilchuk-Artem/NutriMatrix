@@ -117,7 +117,7 @@ export class ViewPublicRecipeComponent implements OnInit {
 
   onEdit() {
     if (this.recipe) {
-      this.router.navigate(['/app/recipes', this.recipe.id, 'edit']);
+      this.router.navigate(['/app/recipes/public', this.recipe.id, 'edit']);
     }
   }
 

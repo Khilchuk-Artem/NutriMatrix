@@ -59,11 +59,10 @@ namespace RecommendationService.Api.Services.Qdrant
             Filter filterOptions = null;
 
 
-            /*if (category != null)
+            if (category != null)
             {
-                var tmp = MatchKeyword("category", category);
-                filterOptions = tmp;
-            }*/
+                filterOptions = MatchKeyword("category", category);
+            }
             if (excludeIds != null)
             {
                 foreach (var id in excludeIds)

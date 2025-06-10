@@ -44,7 +44,6 @@ namespace FoodCatalog.Api
             builder.Services.AddRedisEntityCollection<MeasureRedis>();
             builder.Services.AddScoped<FoodRedisSyncInterceptor>();
 
-
             builder.Services.AddDbContext<FoodCatalogDbContext>((sp, options) =>
             {
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));

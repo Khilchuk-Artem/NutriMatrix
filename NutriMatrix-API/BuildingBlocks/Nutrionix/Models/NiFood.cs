@@ -46,7 +46,7 @@ namespace BuildingBlocks.Nutrionix.Models
         public double NfDietaryFiber { get; set; }
 
         [JsonPropertyName("nf_sugars")]
-        public double NfSugars { get; set; }
+        public double? NfSugars { get; set; }
 
         [JsonPropertyName("nf_protein")]
         public double NfProtein { get; set; }

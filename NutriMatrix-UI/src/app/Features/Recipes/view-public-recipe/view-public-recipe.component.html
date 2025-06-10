@@ -37,11 +37,15 @@
       class="w-full max-h-100 md:w-1/3 rounded-2xl object-cover shadow-lg border border-[#D4A017]/30"
     />
     <div class="flex-1 space-y-6">
+      <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
+        Category:{{recipe.category}}
+      </h2>
       <p class="font-['Open_Sans'] text-[#2D2D2D] leading-relaxed">
         {{ recipe.description }}
       </p>
 
       <section>
+
         <h2 class="text-2xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-4">
           Ingredients for {{ recipe.servings }} servings
         </h2>
