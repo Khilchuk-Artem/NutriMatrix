@@ -4,7 +4,23 @@ import {HttpClient, HttpParams} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {FoodDTO} from '../models/food.models';
 import {FoodShortcutDTO} from '../models/food.models';
+export interface CreateFoodDto {
+  Name: string;
+  Photo: string;
+  Barcode?: string;
+  Measures: CreateMeasureDto[];
+  Nutrients: CreateFoodNutrientIn100gDto[];
+}
 
+export interface CreateMeasureDto {
+  Name: string;
+  WeightInGrams: number;
+}
+
+export interface CreateFoodNutrientIn100gDto {
+  NutrientId: number;
+  Amount: number;
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -54,5 +70,8 @@ export class FoodService {
       });
     }
     return this.http.get<FoodDTO>(`${this.baseUrl}/by-barcode/${barcode}`, { params });
+  }
+  createFood(dto: CreateFoodDto): Observable<FoodDTO> {
+    return this.http.post<FoodDTO>(this.baseUrl, dto);
   }
 }

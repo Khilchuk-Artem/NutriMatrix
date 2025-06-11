@@ -1,79 +1,79 @@
 :host ::ng-deep .p-calendar .p-inputtext,
 :host ::ng-deep .p-dropdown .p-dropdown-label {
-  font-family: 'Open Sans', sans-serif;
-  color: #2D2D2D;
-  padding: 0.75rem;
+  font-family: 'Open Sans', sans-serif !important;
+  color: #2D2D2D !important;
+  padding: 0.75rem !important;
 }
 ::ng-deep .p-dropdown {
-  border: 1px solid #D4D4D4;
-  border-radius: 0.5rem;
-  transition: border-color 0.2s ease;
+  border: 1px solid #D4D4D4 !important;
+  border-radius: 0.5rem !important;
+  transition: border-color 0.2s ease !important;
 }
 ::ng-deep .p-dropdown:hover {
-  border-color: #D4A017;
+  border-color: #D4A017 !important;
 }
 ::ng-deep .calendar-styled .p-datepicker {
-  color: #27272a;
-  border-radius: 0.75rem;
-  border: 0;
-  box-shadow: none;
+  color: #27272a !important;
+  border-radius: 0.75rem !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 ::ng-deep .calendar-styled .p-datepicker td a {
-  transition: color 0.2s ease;
-  border-radius: 0.375rem;
+  transition: color 0.2s ease !important;
+  border-radius: 0.375rem !important;
 }
 ::ng-deep .calendar-styled .p-datepicker td a:hover {
-  background-color: #E0F7F1;
+  background-color: #E0F7F1 !important;
 }
 ::ng-deep .calendar-styled .p-datepicker .p-datepicker-today a {
-  background-color: rgba(212,160,23,0.125);
-  font-weight: 600;
+  background-color: rgba(212,160,23,0.125) !important;
+  font-weight: 600 !important;
 }
 ::ng-deep .calendar-styled .p-datepicker .p-state-active {
-  background-color: #D4A017;
-  color: white;
-  font-weight: 700;
+  background-color: #D4A017 !important;
+  color: white !important;
+  font-weight: 700 !important;
 }
 ::ng-deep .calendar-styled .p-datepicker-day-selected {
-  background: #6A9D8C;
-  color: #FFFFFF;
-  border-radius: 1rem;
-  box-shadow: 0 0 8px #D4A017AA;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  background: #6A9D8C !important;
+  color: #FFFFFF !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 0 8px #D4A017AA !important;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease !important;
 }
 ::ng-deep .calendar-styled .p-datepicker-day-selected:hover {
-  background: #5B8A7A;
-  box-shadow: 0 0 12px #D4A017DD;
+  background: #5B8A7A !important;
+  box-shadow: 0 0 12px #D4A017DD !important;
 }
 ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
-  font-family: 'Open Sans', sans-serif;
-  color: #2D2D2D;
-  padding: 0.75rem 1rem;
-  transition: background-color 0.2s ease;
+  font-family: 'Open Sans', sans-serif !important;
+  color: #2D2D2D !important;
+  padding: 0.75rem 1rem !important;
+  transition: background-color 0.2s ease !important;
 }
 ::ng-deep .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
-  background-color: #E0F7F1;
+  background-color: #E0F7F1 !important;
 }
 
 :host ::ng-deep
-.p-select-option.p-select-option-selected.p-focus{
-  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
-  color: #2D2D2D       !important;  /* your primary text color */
+.p-select-option.p-select-option-selected.p-focus {
+  background-color: #E0F7F1 !important;
+  color: #2D2D2D !important;
 }
 :host ::ng-deep
-.p-select.p-focus{
-border-color: #5B8A7A;
+.p-select.p-focus {
+  border-color: #5B8A7A !important;
 }
 :host ::ng-deep
-.p-inputtext:focus{
-  border-color: #5B8A7A;
+.p-inputtext:focus {
+  border-color: #5B8A7A !important;
 }
 :host ::ng-deep
-.p-button-text:hover{
-  color: #6A9D8C;
-  background-color: #E0F7F1 !important;  /* your light teal hover/bg color */
+.p-button-text:hover {
+  color: #6A9D8C !important;
+  background-color: #E0F7F1 !important;
 }
 :host ::ng-deep
-.p-button-text{
-  color: #6A9D8C;
+.p-button-text {
+  color: #6A9D8C !important;
 }

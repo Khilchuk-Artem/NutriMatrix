@@ -38,7 +38,9 @@ export class ViewPublicRecipeComponent implements OnInit {
   nutrientCategories = Object.entries(NUTRIENT_CATEGORIES).map(([name, ids]) => ({ name, ids }));
   steps: string[] = [];
 
-  // ← new:
+  isAdmin(){
+    return this.authService.getUser()?.roles.includes('Admin');
+  }
   ingredientDetails: IngredientDetail[] = [];
 
   constructor(

@@ -136,7 +136,7 @@ namespace FoodCatalog.Api.Controllers
                     {
                         Id = currentMaxFoodId,
                         Name = niFood.FoodName,
-                        Photo = niFood.Photo?.Thumb ?? "default.jpg",
+                        Photo = niFood.Photo?.Thumb ?? @"https://d2eawub7utcl6.cloudfront.net/images/nix-apple-grey.png",
                         Barcode = null,
                         IsDeleted = false,
                         Measures = new List<Measure>(),
@@ -146,7 +146,7 @@ namespace FoodCatalog.Api.Controllers
                     if (niFood.ServingWeightGrams > 0 && niFood.FullNutrients != null)
                     {
                         var nutrientsFromApi = niFood.FullNutrients?.ToDictionary(n => n.AttrId, n => n.Value) ?? new Dictionary<int, double>();
-                        var nutrientIds = new List<int> { /* your list of nutrient IDs here */ };
+                        var nutrientIds = new List<int> { 301, 205, 601, 208, 606, 204, 605, 303, 291, 306, 307, 203, 269, 539, 324, 299, 1001, 1006, 1002, 290, 261, 260, 1003, 1004, 1005, 513, 221, 511, 207, 514, 454, 262, 639, 322, 321, 326, 421, 334, 312, 507, 268, 325, 610, 611, 696, 612, 625, 652, 697, 613, 626, 673, 662, 653, 687, 614, 617, 674, 663, 859, 618, 670, 675, 669, 619, 851, 685, 627, 615, 628, 672, 689, 852, 853, 620, 855, 629, 857, 624, 630, 858, 631, 621, 654, 671, 607, 608, 609, 645, 646, 693, 695, 313, 417, 431, 435, 432, 212, 287, 515, 211, 516, 512, 521, 503, 213, 504, 338, 337, 505, 214, 506, 304, 428, 315, 406, 573, 578, 257, 664, 676, 856, 665, 666, 305, 410, 508, 636, 517, 319, 405, 317, 518, 641, 209, 638, 210, 263, 404, 502, 323, 341, 343, 342, 501, 509, 510, 318, 320, 418, 415, 401, 328, 430, 429, 255, 309, 344, 345, 346, 347 };
 
                         foreach (var nutrientId in nutrientIds)
                         {
@@ -195,6 +195,30 @@ namespace FoodCatalog.Api.Controllers
                         };
                         food.Measures.Add(measure);
                         measuresToAdd.Add(measure);
+                    }
+                }
+
+                if (niFood.AltMeasures != null && niFood.AltMeasures.Any())
+                {
+                    var existingMeasureNames = food.Measures.Select(m => m.Name.ToLower()).ToHashSet();
+                    foreach (var altMeasure in niFood.AltMeasures)
+                    {
+                        var altMeasureName = altMeasure.Measure.ToLower();
+                        if (!existingMeasureNames.Contains(altMeasureName))
+                        {
+                            currentMaxMeasureId++;
+                            var newMeasure = new Measure
+                            {
+                                Id = currentMaxMeasureId,
+                                Name = altMeasure.Measure,
+                                WeightInGrams = (float)altMeasure.ServingWeight,
+                                Food = food,
+                                IsDeleted = false
+                            };
+                            food.Measures.Add(newMeasure);
+                            measuresToAdd.Add(newMeasure);
+                            existingMeasureNames.Add(altMeasureName);
+                        }
                     }
                 }
 

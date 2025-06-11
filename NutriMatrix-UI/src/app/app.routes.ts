@@ -30,6 +30,9 @@ import {EditPublicRecipeComponent} from './Features/Recipes/edit-public-recipe/e
 import {
   NutrientConsumptionStatisticsComponent
 } from './Features/FoodRecords/nutrient-consumption-statistics/nutrient-consumption-statistics.component';
+import {AddFoodComponent} from './Features/FoodCatalog/add-food/add-food.component';
+import {ViewFoodsComponent} from './Features/FoodCatalog/view-foods/view-foods.component';
+import {ViewFoodComponent} from './Features/FoodCatalog/view-food/view-food.component';
 
 export const routes: Routes = [
   {
@@ -76,7 +79,9 @@ export const routes: Routes = [
       { path:'scheduling', component:ViewSchedulesComponent},
       { path:'scheduling/add', component:CreateSchedulingComponent},
       { path:'consumption-stats', component:NutrientConsumptionStatisticsComponent},
-
+      { path:'food/add', component:AddFoodComponent},
+      { path:'food', component:ViewFoodsComponent},
+      { path:'food/:id', component:ViewFoodComponent},
     ],
   }
 ];

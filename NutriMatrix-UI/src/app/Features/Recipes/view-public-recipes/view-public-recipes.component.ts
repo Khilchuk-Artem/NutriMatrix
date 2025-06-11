@@ -64,7 +64,9 @@ export class ViewPublicRecipesComponent  implements OnInit, AfterViewInit, OnDes
     });
   }
 
-
+  isAdmin(){
+    return this.authService.getUser()?.roles.includes('Admin');
+  }
   constructor(
     private recipeService: RecipeService,
     private foodService: FoodService, // Assumed

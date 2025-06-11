@@ -256,22 +256,7 @@
       </div>
 
       <!-- Cron Expression (if recurring) -->
-      <div *ngIf="form.get('isRecurring')?.value">
-        <input
-          formControlName="cronExpression"
-          [ngClass]="{
-            'border-gray-200': cronExpression?.valid || cronExpression?.untouched,
-            'border-[#EF4444]': cronExpression?.invalid && !cronExpression?.untouched
-          }"
-          class="  w-full p-4 border rounded-xl font-['Open_Sans'] text-[#2D2D2D] placeholder:font-['Open_Sans'] placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D4A017] transition-all duration-300"
-          placeholder="Cron expression will be generated"
-          readonly
-        />
-        <div *ngIf="cronExpression?.touched && cronExpression?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm mt-2 font-['Open_Sans']">
-          <div *ngIf="form.get('cronExpression')?.errors?.['required']">Cron expression is required for recurring schedules.</div>
-        </div>
-        <p class="text-sm text-gray-500 font-['Open_Sans'] mt-2">{{ cronDescription }}</p>
-      </div>
+
 
       <!-- Submit Button -->
       <button

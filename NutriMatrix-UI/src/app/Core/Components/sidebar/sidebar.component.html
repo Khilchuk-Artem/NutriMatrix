@@ -106,7 +106,8 @@
       </div>
 
       <a
-        routerLink="/app/foods"
+        *ngIf="isAdmin()"
+        routerLink="/app/food"
         routerLinkActive="active"
         class="item block text-base font-medium text-[#2D2D2D] hover:text-[#6A9D8C] hover:bg-[#E0F7F1]/30 py-2 px-4 rounded-xl transition-all duration-300"
       >

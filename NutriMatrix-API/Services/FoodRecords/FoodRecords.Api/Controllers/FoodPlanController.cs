@@ -108,10 +108,8 @@ namespace FoodRecords.Api.Controllers
             }
         }
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteFoodPlan(long id, [FromQuery] string userId)
+        public async Task<IActionResult> DeleteFoodPlan(long id)
         {
-            if (string.IsNullOrEmpty(userId))
-                return BadRequest("UserId cannot be null or empty");
 
             try
             {

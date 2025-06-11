@@ -292,7 +292,7 @@
         Nutrient Breakdown
       </h2>
       <div class="columns-1 md:columns-2 gap-8">
-        <ng-container *ngFor="let category of getNutrientCategories(); let isFirst = first">
+        <ng-container *ngFor="let category of getNutrientCategories().slice(0,2); let isFirst = first">
           <table
             class="w-full break-inside-avoid border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30 mb-8"
             role="table"

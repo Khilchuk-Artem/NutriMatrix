@@ -332,7 +332,11 @@ export class EditPrivateRecipeComponent implements OnInit {
       for (const nutrient of measure.food.foodNutrients) {
         if (!trackedNutrients.some(t => t.nutrientId === nutrient.nutrientId)) continue;
 
-        const nutrientAmount = (nutrient.amount * amount * (measure.weightInGrams || 0)) / 100;
+        var nutrientAmount = (nutrient.amount * amount * (measure.weightInGrams || 0)) / 100;
+
+        if(measure.name=='g'){
+          nutrientAmount = (nutrient.amount * amount * (measure.weightInGrams || 0)) / 10000;
+        }
         const currentAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
         this.consumedNutrients.set(nutrient.nutrientId, currentAmount + nutrientAmount);
       }

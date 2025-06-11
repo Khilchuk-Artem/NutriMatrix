@@ -2,6 +2,7 @@ export interface FoodDTO {
   id: number;
   name: string;
   photo: string;
+  barcode:string;
   foodNutrients: FoodNutrientIn100gDto[];
   measures: MeasureDto[];
 }

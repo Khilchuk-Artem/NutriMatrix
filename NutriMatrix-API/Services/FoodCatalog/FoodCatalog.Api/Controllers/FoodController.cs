@@ -41,6 +41,7 @@ namespace FoodCatalog.Api.Controllers
                 Id = food.Id,
                 Name = food.Name,
                 Photo = food.Photo,
+                Barcode = food.Barcode,
                 FoodNutrients = food.FoodNutrients?
                 .Where(n => !n.IsDeleted)
                 .Select(n => new FoodNutrientIn100gDto
@@ -156,6 +157,7 @@ namespace FoodCatalog.Api.Controllers
                         Id = cachedFood.Id,
                         Name = cachedFood.Name,
                         Photo = cachedFood.Photo,
+                        Barcode = cachedFood.Barcode,
                         FoodNutrients = cachedFood.FoodNutrients
                                         .Where(n => !n.IsDeleted)
                                         .Select(n => new FoodNutrientIn100gDto
@@ -208,6 +210,7 @@ namespace FoodCatalog.Api.Controllers
                 Id = food.Id,
                 Name = food.Name,
                 Photo = food.Photo,
+                Barcode = food.Barcode,
                 FoodNutrients = food.FoodNutrients
                     .Where(n => !n.IsDeleted)
                     .Select(n => new FoodNutrientIn100gDto
@@ -227,6 +230,94 @@ namespace FoodCatalog.Api.Controllers
             };
 
             return Ok(res);
+        }
+        [HttpPost]
+        public async Task<IActionResult> CreateFood([FromBody] CreateFoodDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return BadRequest("Food name cannot be empty.");
+            }
+
+            // Retrieve current maximum IDs from the database
+            long currentMaxFoodId = await _dbCont.Foods.AnyAsync() ? await _dbCont.Foods.MaxAsync(f => f.Id) : 0;
+            long currentMaxMeasureId = await _dbCont.Measures.AnyAsync() ? await _dbCont.Measures.MaxAsync(m => m.Id) : 0;
+            long currentMaxNutrientId = await _dbCont.FoodNutrientIn100Gs.AnyAsync() ? await _dbCont.FoodNutrientIn100Gs.MaxAsync(n => n.Id) : 0;
+
+            // Create new food with incremented ID
+            currentMaxFoodId++;
+            var food = new Food
+            {
+                Id = currentMaxFoodId,
+                Name = dto.Name,
+                Photo = dto.Photo,
+                Barcode = dto.Barcode,
+                IsDeleted = false,
+                Measures = new List<Measure>(),
+                FoodNutrients = new List<FoodNutrientIn100g>()
+            };
+
+            foreach(var measureDto in dto.Measures ?? new List<CreateMeasureDto>())
+            {
+                currentMaxMeasureId++;
+                var measure = new Measure
+                {
+                    Id = currentMaxMeasureId,
+                    Name = measureDto.Name,
+                    WeightInGrams = measureDto.WeightInGrams,
+                    FoodId = food.Id,
+                    IsDeleted = false
+                };
+                food.Measures.Add(measure);
+            }
+
+            foreach (var nutrientDto in dto.Nutrients ?? new List<CreateFoodNutrientIn100gDto>())
+            {
+                currentMaxNutrientId++;
+                var nutrient = new FoodNutrientIn100g
+                {
+                    Id = currentMaxNutrientId,
+                    NutrientId = nutrientDto.NutrientId,
+                    Amount = nutrientDto.Amount,
+                    FoodId = food.Id,
+                    IsDeleted = false
+                };
+                food.FoodNutrients.Add(nutrient);
+            }
+
+            // Add to database and save
+            _dbCont.Foods.Add(food);
+            await _dbCont.SaveChangesAsync();
+
+            // Cache in Redis
+            var foodRedis = new FoodRedis
+            {
+                Id = food.Id,
+                Name = food.Name,
+                Photo = food.Photo,
+                Barcode = food.Barcode,
+                FoodNutrients = food.FoodNutrients.Select(n => new FoodNutrientIn100g
+                {
+                    NutrientId = n.NutrientId,
+                    Amount = n.Amount,
+                    IsDeleted = n.IsDeleted
+                }).ToList()
+            };
+            await _foodCollection.InsertAsync(foodRedis);
+
+            foreach (var measure in food.Measures)
+            {
+                var measureRedis = new MeasureRedis
+                {
+                    Id = measure.Id,
+                    Name = measure.Name,
+                    WeightInGrams = measure.WeightInGrams,
+                    FoodId = food.Id
+                };
+                await _measureCollection.InsertAsync(measureRedis);
+            }
+
+            return CreatedAtAction(nameof(Get), new { id = food.Id }, food);
         }
         private FoodDTO MapFoodRedisToDto(FoodRedis redis, long[]? includeNutrientIds)
         {
@@ -248,7 +339,26 @@ namespace FoodCatalog.Api.Controllers
                 Measures = [],
             };
         }
+        public class CreateFoodDto
+        {
+            public string Name { get; set; }
+            public string Photo { get; set; }
+            public string? Barcode { get; set; }
+            public List<CreateMeasureDto> Measures { get; set; }
+            public List<CreateFoodNutrientIn100gDto> Nutrients { get; set; }
+        }
 
+        public class CreateMeasureDto
+        {
+            public string Name { get; set; }
+            public float WeightInGrams { get; set; }
+        }
+
+        public class CreateFoodNutrientIn100gDto
+        {
+            public long NutrientId { get; set; }
+            public float Amount { get; set; }
+        }
 
     }
 }

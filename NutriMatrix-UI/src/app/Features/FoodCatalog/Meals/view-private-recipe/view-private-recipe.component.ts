@@ -86,11 +86,15 @@ export class ViewPrivateRecipeComponent implements OnInit {
       const measure = this.ingredients[i];
       if (!measure?.food?.nutrients) continue;
 
-      const amountPerServing = foodMeal.quantity;
+      const amountPerServing = foodMeal.quantity/this.meal.totalServings;
       for (const nutrient of measure.food.nutrients) {
         if (!this.includeIds.includes(nutrient.nutrientId)) continue;
 
-        const nutrientAmount = (nutrient.amount * amountPerServing * (measure.weightInGrams || 0)) / 100;
+        var nutrientAmount = (nutrient.amount * amountPerServing * (measure.weightInGrams || 0)) / 100;
+
+        if(measure.name=='g'){
+          nutrientAmount = (nutrient.amount * amountPerServing * (measure.weightInGrams || 0)) / 10000;
+        }
         const currentAmount = this.consumedNutrients.get(nutrient.nutrientId) || 0;
         this.consumedNutrients.set(nutrient.nutrientId, currentAmount + nutrientAmount);
       }
