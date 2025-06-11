@@ -22,7 +22,7 @@ namespace RecommendationService.Api.Services.RecommendationService
         private readonly IQdrantService _qdrant;
         private readonly RecipeDbContext _db;
 
-        private static readonly TimeSpan _timeLimit = TimeSpan.FromSeconds(100);
+        private static readonly TimeSpan _timeLimit = TimeSpan.FromSeconds(7);
         private Stopwatch _searchStopwatch;
 
         private readonly Random _rng = new Random();

@@ -1,4 +1,5 @@
 using Auth.API.Data;
+using Auth.API.Features.Queries;
 using Auth.API.Models.Settings;
 using Auth.API.Services.AuthService;
 using Auth.API.Services.EmailService;
@@ -6,6 +7,7 @@ using Auth.API.Services.UserSummaryService;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -38,6 +40,8 @@ namespace Auth.API
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IUserSummaryService, UserSummaryService>();
+
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GoogleLoginCommand).Assembly));
 
             builder.Services
                 .AddIdentityCore<IdentityUser>()

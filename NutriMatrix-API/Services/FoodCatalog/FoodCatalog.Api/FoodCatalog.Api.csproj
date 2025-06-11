@@ -63,6 +63,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Specifications\" />
+    <Folder Include="Features\Queries\NewFolder\" />
   </ItemGroup>
 
 </Project>
