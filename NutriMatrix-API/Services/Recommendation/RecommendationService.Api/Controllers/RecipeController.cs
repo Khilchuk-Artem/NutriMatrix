@@ -299,8 +299,6 @@ namespace RecommendationService.Api.Controllers
             return Ok(categories);
         }
 
-        // DTO classes
-
         public class RecipeShortcutDto
         {
             public long Id { get; set; }

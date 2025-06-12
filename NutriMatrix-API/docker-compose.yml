@@ -5,17 +5,17 @@ services:
     image: postgres
   foodcatalogredis:
     image: foodcatalogredis
-  qdrant:
-    image: qdrant
+#  qdrant:
+#    image: qdrant
   rabbitmq:
     image: rabbitmq
-  auth.api:
-    image: ${DOCKER_REGISTRY-}authapi
-    build:
-      context: .
-      dockerfile: Services/Auth/Auth.API/Dockerfile
-    depends_on:
-      - postgres
+#  auth.api:
+#    image: ${DOCKER_REGISTRY-}authapi
+#    build:
+#      context: .
+#      dockerfile: Services/Auth/Auth.API/Dockerfile
+#    depends_on:
+#      - postgres
 
   foodcatalog.api:
     image: ${DOCKER_REGISTRY-}foodcatalogapi
@@ -26,25 +26,24 @@ services:
       - postgres
       - foodcatalogredis 
       - rabbitmq
-  foodrecords.api:
-    image: ${DOCKER_REGISTRY-}foodrecordsapi
-    build:
-      context: .
-      dockerfile: Services/FoodRecords/FoodRecords.Api/Dockerfile
-    depends_on:
-      - postgres
-      - rabbitmq
+#  foodrecords.api:
+#    image: ${DOCKER_REGISTRY-}foodrecordsapi
+#    build:
+#      context: .
+#      dockerfile: Services/FoodRecords/FoodRecords.Api/Dockerfile
+#    depends_on:
+#      - postgres
+#      - rabbitmq
 
-  recommendationservice.api:
-    image: ${DOCKER_REGISTRY-}recommendationserviceapi
-    build:
-      context: .
-      dockerfile: Services/Recommendation/RecommendationService.Api/Dockerfile
-    depends_on:
-      - foodcatalogredis 
-      - qdrant
-      - postgres
- 
+#  recommendationservice.api:
+#    image: ${DOCKER_REGISTRY-}recommendationserviceapi
+#    build:
+#      context: .
+#      dockerfile: Services/Recommendation/RecommendationService.Api/Dockerfile
+#    depends_on:
+#      - foodcatalogredis 
+#      - qdrant
+#      - postgres
 
 #  gateway.api:
 #    image: ${DOCKER_REGISTRY-}gatewayapi
@@ -59,5 +58,5 @@ services:
 
 volumes:
   redis_data:
-  qdrant_data:
+#  qdrant_data:
   postgres_recipes:

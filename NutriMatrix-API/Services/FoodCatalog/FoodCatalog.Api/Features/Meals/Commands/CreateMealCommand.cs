@@ -1,10 +1,11 @@
 ﻿using FoodCatalog.Api.Data.Context;
+using FoodCatalog.Api.Data.Repositories.Repository;
 using FoodCatalog.Api.Models.Domain;
 using FoodCatalog.Api.Models.Dto;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace FoodCatalog.Api.Features.Commands
+namespace FoodCatalog.Api.Features.Meals.Commands
 {
     public class CreateMealCommand : IRequest<MealDto>
     {
@@ -13,26 +14,18 @@ namespace FoodCatalog.Api.Features.Commands
 
     public class CreateMealCommandHandler : IRequestHandler<CreateMealCommand, MealDto>
     {
-        private readonly FoodCatalogDbContext _dbContext;
+        private readonly IRepository<Meal> _mealRepository;
+        private readonly IRepository<Measure> _measureRepository;
 
-        public CreateMealCommandHandler(FoodCatalogDbContext dbContext)
+        public CreateMealCommandHandler(IRepository<Meal> mealRepository, IRepository<Measure> measureRepository)
         {
-            _dbContext = dbContext;
+            _mealRepository = mealRepository;
+            _measureRepository = measureRepository;
         }
 
         public async Task<MealDto> Handle(CreateMealCommand request, CancellationToken cancellationToken)
         {
             var createMealDto = request.CreateMealDto;
-
-            foreach (var fm in createMealDto.FoodMeals)
-            {
-                var measure = await _dbContext.Measures
-                    .FirstOrDefaultAsync(ms => ms.Id == fm.MeasureId, cancellationToken);
-                if (measure == null)
-                {
-                    throw new Exception($"Measure with ID {fm.MeasureId} not found.");
-                }
-            }
 
             var meal = new Meal
             {
@@ -49,10 +42,9 @@ namespace FoodCatalog.Api.Features.Commands
                     .ToList()
             };
 
-            _dbContext.Meals.Add(meal);
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            await _mealRepository.Add(meal);
 
-            var mealDto = new MealDto
+            return new MealDto
             {
                 Id = meal.Id,
                 Name = meal.Name,
@@ -66,8 +58,6 @@ namespace FoodCatalog.Api.Features.Commands
                     })
                     .ToList()
             };
-
-            return mealDto;
         }
     }
 }

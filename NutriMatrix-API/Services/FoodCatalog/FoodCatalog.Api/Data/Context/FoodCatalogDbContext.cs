@@ -22,9 +22,6 @@ namespace FoodCatalog.Api.Data.Context
             base.OnModelCreating(builder);
 
             builder.Entity<Nutrient>().HasData(SeedDataHelpers.LoadNutrientsMappings());
-            /*builder.Entity<Food>().HasData(SeedDataHelpers.LoadFoods());
-            builder.Entity<FoodNutrientIn100g>().HasData(SeedDataHelpers.LoadNutrients());
-            builder.Entity<Measure>().HasData(SeedDataHelpers.LoadMeasures());*/
         }
     }
 }

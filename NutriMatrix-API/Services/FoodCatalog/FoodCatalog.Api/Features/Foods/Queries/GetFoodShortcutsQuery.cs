@@ -5,7 +5,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Redis.OM.Searching;
 
-namespace FoodCatalog.Api.Features.Queries
+namespace FoodCatalog.Api.Features.Foods.Queries
 {
     public class GetFoodShortcutsQuery : IRequest<IEnumerable<FoodShortcutDTO>>
     {

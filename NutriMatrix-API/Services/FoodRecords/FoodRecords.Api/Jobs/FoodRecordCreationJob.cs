@@ -10,7 +10,6 @@ namespace FoodRecords.Api.Jobs
     public class FoodRecordCreationJob : IJob
     {
         private readonly FoodRecordsDbContext _dbContext;
-        //private readonly IBusinessObjectService _businessObjectService;
 
         public FoodRecordCreationJob(FoodRecordsDbContext dbContext)
         {

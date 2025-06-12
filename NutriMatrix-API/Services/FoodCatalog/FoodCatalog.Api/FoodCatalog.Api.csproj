@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <None Remove="Data\SeedData\nutrients-mapping.csv" />
-	<Protobuf Include="Protos\nutrients.proto" GrpcServices="Server" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,8 +61,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Specifications\" />
-    <Folder Include="Features\Queries\NewFolder\" />
+    <Folder Include="Data\Specifications\Measures\" />
   </ItemGroup>
 
 </Project>

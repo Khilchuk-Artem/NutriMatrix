@@ -4,10 +4,6 @@ using MassTransit;
 
 namespace FoodRecords.Api.Services.MealFetcher
 {
-    public interface IMealFetcher
-    {
-        Task<MealResponseDto?> FetchMealAsync(long mealId);
-    }
 
     public class MealFetcher : IMealFetcher
     {

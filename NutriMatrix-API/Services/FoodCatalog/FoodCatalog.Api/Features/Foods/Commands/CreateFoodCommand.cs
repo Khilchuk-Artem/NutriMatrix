@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Redis.OM.Searching;
 using static FoodCatalog.Api.Controllers.FoodController;
 
-namespace FoodCatalog.Api.Features.Commands
+namespace FoodCatalog.Api.Features.Foods.Commands
 {
     public class CreateFoodCommand : IRequest<Food>
     {

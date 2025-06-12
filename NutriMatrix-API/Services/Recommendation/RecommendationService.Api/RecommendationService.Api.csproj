@@ -11,7 +11,10 @@
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Ardalis.Specification" Version="9.2.0" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.2.0" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
+    <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
       <PrivateAssets>all</PrivateAssets>
@@ -32,10 +35,6 @@
 		<Content Include="Assets\*.csv">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="NewFolder1\" />
-	  <Folder Include="NewFolder\" />
 	</ItemGroup>
 
 </Project>

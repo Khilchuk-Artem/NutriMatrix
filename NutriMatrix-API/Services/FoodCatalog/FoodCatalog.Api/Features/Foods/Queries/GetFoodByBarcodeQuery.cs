@@ -1,4 +1,6 @@
 ﻿using FoodCatalog.Api.Data.Context;
+using FoodCatalog.Api.Data.Repositories.Repository;
+using FoodCatalog.Api.Data.Specifications.Foods;
 using FoodCatalog.Api.Models.Domain;
 using FoodCatalog.Api.Models.Dto;
 using FoodCatalog.Api.Models.Redis;
@@ -6,7 +8,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Redis.OM.Searching;
 
-namespace FoodCatalog.Api.Features.Queries
+namespace FoodCatalog.Api.Features.Foodss.Queries
 {
     public class GetFoodByBarcodeQuery : IRequest<FoodDTO>
     {
@@ -18,13 +20,16 @@ namespace FoodCatalog.Api.Features.Queries
     {
         private readonly RedisCollection<FoodRedis> _foodCollection;
         private readonly RedisCollection<MeasureRedis> _measureCollection;
-        private readonly FoodCatalogDbContext _dbContext;
+        private readonly IRepository<Food> _foodRepository;
 
-        public GetFoodByBarcodeQueryHandler(RedisCollection<FoodRedis> foodCollection, RedisCollection<MeasureRedis> measureCollection, FoodCatalogDbContext dbContext)
+        public GetFoodByBarcodeQueryHandler(
+            RedisCollection<FoodRedis> foodCollection,
+            RedisCollection<MeasureRedis> measureCollection,
+            IRepository<Food> foodRepository)
         {
             _foodCollection = foodCollection;
             _measureCollection = measureCollection;
-            _dbContext = dbContext;
+            _foodRepository = foodRepository;
         }
 
         public async Task<FoodDTO> Handle(GetFoodByBarcodeQuery request, CancellationToken cancellationToken)
@@ -32,9 +37,7 @@ namespace FoodCatalog.Api.Features.Queries
             var cachedFood = await _foodCollection.FirstOrDefaultAsync(f => f.Barcode == request.Barcode);
             if (cachedFood != null)
             {
-                var m1 = await _measureCollection.Where(m => m.FoodId == cachedFood.Id).ToListAsync();
-                var m2 = new List<Measure>();
-                if (m1.Count == 0) m2 = await _dbContext.Measures.Where(m => m.FoodId == cachedFood.Id).ToListAsync();
+                var measures = await _measureCollection.Where(m => m.FoodId == cachedFood.Id).ToListAsync();
 
                 if (request.IncludeNutrientIds != null)
                 {
@@ -43,7 +46,7 @@ namespace FoodCatalog.Api.Features.Queries
                         .ToList();
                 }
 
-                var res = new FoodDTO
+                return new FoodDTO
                 {
                     Id = cachedFood.Id,
                     Name = cachedFood.Name,
@@ -51,43 +54,17 @@ namespace FoodCatalog.Api.Features.Queries
                     Barcode = cachedFood.Barcode,
                     FoodNutrients = cachedFood.FoodNutrients
                         .Where(n => !n.IsDeleted)
-                        .Select(n => new FoodNutrientIn100gDto
-                        {
-                            NutrientId = n.NutrientId,
-                            Amount = n.Amount
-                        })
+                        .Select(n => new FoodNutrientIn100gDto { NutrientId = n.NutrientId, Amount = n.Amount })
                         .ToList(),
-                    Measures = m1.Count != 0
-                        ? m1.Select(m => new MeasureDto
-                        {
-                            Id = m.Id,
-                            Name = m.Name,
-                            WeightInGrams = m.WeightInGrams
-                        }).ToList()
-                        : m2.Select(m => new MeasureDto
-                        {
-                            Id = m.Id,
-                            Name = m.Name,
-                            WeightInGrams = m.WeightInGrams
-                        }).ToList()
+                    Measures = measures
+                        .Select(m => new MeasureDto { Id = m.Id, Name = m.Name, WeightInGrams = m.WeightInGrams })
+                        .ToList()
                 };
-
-                return res;
             }
 
-            var food = await _dbContext.Foods
-                .Include(f => f.FoodNutrients)
-                .Include(f => f.Measures)
-                .FirstOrDefaultAsync(f => f.Barcode == request.Barcode);
-
+            var spec = new FoodByBarcodeSpecification(request.Barcode);
+            var food = await _foodRepository.Get(0, spec); // ID is not used here, so pass 0
             if (food == null) return null;
-
-            if (food.FoodNutrients == null)
-                food.FoodNutrients = new List<FoodNutrientIn100g>();
-            else if (request.IncludeNutrientIds != null)
-                food.FoodNutrients = food.FoodNutrients
-                    .Where(fn => request.IncludeNutrientIds.Contains(fn.NutrientId))
-                    .ToList();
 
             var foodRedis = new FoodRedis
             {
@@ -95,12 +72,9 @@ namespace FoodCatalog.Api.Features.Queries
                 Name = food.Name,
                 Photo = food.Photo,
                 Barcode = food.Barcode,
-                FoodNutrients = food.FoodNutrients.Select(n => new FoodNutrientIn100g
-                {
-                    NutrientId = n.NutrientId,
-                    Amount = n.Amount,
-                    IsDeleted = n.IsDeleted
-                }).ToList()
+                FoodNutrients = food.FoodNutrients
+                    .Select(n => new FoodNutrientIn100g { NutrientId = n.NutrientId, Amount = n.Amount, IsDeleted = n.IsDeleted })
+                    .ToList()
             };
             await _foodCollection.InsertAsync(foodRedis);
 
@@ -116,7 +90,14 @@ namespace FoodCatalog.Api.Features.Queries
                 await _measureCollection.InsertAsync(measureRedis);
             }
 
-            var resFromDb = new FoodDTO
+            if (request.IncludeNutrientIds != null)
+            {
+                food.FoodNutrients = food.FoodNutrients
+                    .Where(fn => request.IncludeNutrientIds.Contains(fn.NutrientId))
+                    .ToList();
+            }
+
+            return new FoodDTO
             {
                 Id = food.Id,
                 Name = food.Name,
@@ -124,23 +105,12 @@ namespace FoodCatalog.Api.Features.Queries
                 Barcode = food.Barcode,
                 FoodNutrients = food.FoodNutrients
                     .Where(n => !n.IsDeleted)
-                    .Select(n => new FoodNutrientIn100gDto
-                    {
-                        NutrientId = n.NutrientId,
-                        Amount = n.Amount
-                    })
+                    .Select(n => new FoodNutrientIn100gDto { NutrientId = n.NutrientId, Amount = n.Amount })
                     .ToList(),
                 Measures = food.Measures
-                    .Select(m => new MeasureDto
-                    {
-                        Id = m.Id,
-                        Name = m.Name,
-                        WeightInGrams = m.WeightInGrams
-                    })
+                    .Select(m => new MeasureDto { Id = m.Id, Name = m.Name, WeightInGrams = m.WeightInGrams })
                     .ToList()
             };
-
-            return resFromDb;
         }
     }
 }

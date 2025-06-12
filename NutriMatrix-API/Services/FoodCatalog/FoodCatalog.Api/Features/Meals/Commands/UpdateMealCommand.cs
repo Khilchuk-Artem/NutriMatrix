@@ -1,10 +1,12 @@
 ﻿using FoodCatalog.Api.Data.Context;
+using FoodCatalog.Api.Data.Repositories.Repository;
+using FoodCatalog.Api.Data.Specifications.Meals;
 using FoodCatalog.Api.Models.Domain;
 using FoodCatalog.Api.Models.Dto;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace FoodCatalog.Api.Features.Commands
+namespace FoodCatalog.Api.Features.Meals.Commands
 {
     public class UpdateMealCommand : IRequest<Meal>
     {
@@ -14,19 +16,17 @@ namespace FoodCatalog.Api.Features.Commands
 
     public class UpdateMealCommandHandler : IRequestHandler<UpdateMealCommand, Meal>
     {
-        private readonly FoodCatalogDbContext _dbContext;
+        private readonly IRepository<Meal> _mealRepository;
 
-        public UpdateMealCommandHandler(FoodCatalogDbContext dbContext)
+        public UpdateMealCommandHandler(IRepository<Meal> mealRepository)
         {
-            _dbContext = dbContext;
+            _mealRepository = mealRepository;
         }
 
         public async Task<Meal> Handle(UpdateMealCommand request, CancellationToken cancellationToken)
         {
-            var meal = await _dbContext.Meals
-                .Include(m => m.FoodMeals)
-                .FirstOrDefaultAsync(m => m.Id == request.Id && !m.IsDeleted, cancellationToken);
-
+            var spec = new MealWithFoodMealsSpecification();
+            var meal = await _mealRepository.Get(request.Id, spec);
             if (meal == null)
             {
                 return null;
@@ -38,16 +38,20 @@ namespace FoodCatalog.Api.Features.Commands
             meal.AddedBy = updateMealDto.AddedBy;
             meal.TotalServings = updateMealDto.TotalServings;
 
-            _dbContext.FoodMeals.RemoveRange(meal.FoodMeals);
-            meal.FoodMeals = updateMealDto.FoodMeals
+            meal.FoodMeals.Clear();
+            var foodMeals = updateMealDto.FoodMeals
                 .Select(fm => new FoodMeal
                 {
                     MeasureId = fm.MeasureId,
                     Quantity = fm.Quantity
-                })
-                .ToList();
+                });
 
-            await _dbContext.SaveChangesAsync(cancellationToken);
+            foreach(var a in foodMeals)
+            {
+                meal.FoodMeals.Add(a);
+            }
+            
+            await _mealRepository.Update(meal);
 
             return meal;
         }
