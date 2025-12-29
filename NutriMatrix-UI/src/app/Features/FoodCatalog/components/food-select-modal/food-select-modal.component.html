@@ -1,0 +1,243 @@
+<!-- Modal Overlay -->
+<div
+  *ngIf="isOpen"
+  id="addFoodModal"
+  class="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="addFoodModalTitle"
+  style="background-color: rgba(0, 0, 0, 0.2);"
+  [@fadeInOut]
+>
+  <div
+    class="bg-white rounded-2xl shadow-2xl p-8 max-w-3xl w-full relative border border-[#D4A017]/30 max-h-[80vh] overflow-y-auto"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+  >
+    <!-- Modal Title -->
+    <h2
+      id="modalTitle"
+      class="text-3xl font-[Playfair_Display] font-semibold tracking-tight leading-[1.2] text-[#2D2D2D] mb-6"
+    >
+      {{!editedRecordId?'Add':'Edit'}} Food Entry
+    </h2>
+
+    <!-- Search Bar & Barcode Controls -->
+    <div class="flex items-center space-x-3 mb-6" *ngIf="!isBarcodeActive">
+      <input
+        type="search"
+        (input)="updateShortcuts()"
+        [(ngModel)]="searchQuery"
+        placeholder="Search foods..."
+        aria-label="Search foods"
+        class="flex-grow rounded-xl px-5 py-3 bg-[#E0F7F1] placeholder:text-text/60 text-text focus:bg-[#E0F7F1]/80 transition-colors duration-300 ease-in-out shadow-sm"
+      />
+
+      <!-- Barcode Button -->
+      <button
+        type="button"
+        aria-label="Scan barcode"
+        class="p-3 rounded-xl bg-[#6A9D8C] text-white shadow-lg hover:bg-[#6A9D8C]/80 transition transform hover:scale-[1.05]"
+        (click)="onBarcodeClick()"
+      >
+        <svg
+          class="h-6 w-6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+        >
+          <line x1="2" y1="6" x2="2" y2="18"></line>
+          <line x1="6" y1="6" x2="6" y2="18"></line>
+          <line x1="10" y1="6" x2="10" y2="18"></line>
+          <line x1="14" y1="6" x2="14" y2="18"></line>
+          <line x1="18" y1="6" x2="18" y2="18"></line>
+          <line x1="22" y1="6" x2="22" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Shortcuts List -->
+    <div
+      *ngIf="!isBarcodeActive"
+      class="max-h-80 overflow-y-auto rounded-xl border border-[#D4A017]/40 p-4 bg-[#E0F7F1]"
+      aria-live="polite"
+      aria-relevant="additions"
+    >
+      <ul role="list" class="space-y-3">
+        <li
+          *ngFor="let shortcut of allShortcuts"
+          class="cursor-pointer rounded-xl p-3 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 focus:outline-none focus:ring-2 focus:ring-[#D4A017]"
+          tabindex="0"
+          (click)="selectFood(shortcut.id)"
+        >
+          <span class="font-semibold text-[#2D2D2D] capitalize">{{ shortcut.name }}</span>
+        </li>
+        <li *ngIf="allShortcuts.length === 0" class="text-[#2D2D2D]/60 italic text-center py-4">
+          No matches found.
+        </li>
+      </ul>
+    </div>
+
+    <!-- Barcode Scanner View -->
+    <div
+      *ngIf="isBarcodeActive"
+      class="flex flex-col items-center justify-start rounded-xl"
+    >
+      <div class="flex justify-between items-center flex-wrap gap-4 mb-4 w-full mt-4">
+        <button
+          type="button"
+          aria-label="Cancel barcode scanning"
+          class="p-3 rounded-xl bg-red-600 text-white shadow-lg hover:bg-red-700 transition transform hover:scale-[1.05] my-auto"
+          (click)="closeBarcode()"
+        >
+          Cancel
+        </button>
+
+        <div class="flex flex-col gap-2">
+          <label for="deviceSelect" class="text-[#2D2D2D] font-semibold">Choose Camera:</label>
+          <select
+            id="deviceSelect"
+            class="rounded-lg border border-gray-300 px-4 py-2"
+            (change)="onDeviceSelect($event)"
+          >
+            <option *ngFor="let device of videoInputDevices" [value]="device.deviceId">
+              {{ device.label || 'Camera ' + device.deviceId }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col items-center h-full max-w-md mx-auto">
+        <video
+          #video
+          autoplay
+          muted
+          class="w-full h-auto max-h-[35vh] flex-shrink rounded-2xl shadow-2xl border border-[#D4A017]/40 object-contain bg-black mb-4"
+        ></video>
+        <p
+          *ngIf="selectedDeviceId"
+          class="text-sm text-[#6A9D8C] italic mb-2 mr-auto"
+        >
+          *bring the barcode close to the camera
+        </p>
+      </div>
+    </div>
+
+    <!-- Close button top-right -->
+    <button
+      (click)="close()"
+      aria-label="Close Add Food Modal"
+      class="absolute top-4 right-4 text-[#D4A017] hover:text-[#FFB85F] transition-colors duration-300"
+      type="button"
+    >
+      <svg class="h-6 w-6 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Selected food details -->
+    <section
+      *ngIf="selectedFood && !isBarcodeActive"
+      class="mt-10 p-6 bg-white rounded-2xl shadow-lg border border-[#D4A017]/30 grid grid-cols-1 gap-6"
+      aria-labelledby="foodOverviewTitle"
+    >
+      <!-- Food Title -->
+      <div class="lg:col-span-3">
+        <h2
+          id="foodOverviewTitle"
+          class="text-4xl font-heading font-semibold tracking-tight leading-snug text-[#2D2D2D] mb-4 capitalize"
+        >
+          {{ selectedFood.name || 'Select a food…' }}
+        </h2>
+      </div>
+
+      <!-- Amount Input -->
+      <div class="flex justify-between items-end space-x-6">
+        <div class="w-1/3">
+          <label
+            for="amountInput"
+            class="mb-2 text-lg font-heading font-semibold text-primary"
+          >
+            Amount
+          </label>
+          <input
+            id="amountInput"
+            type="number"
+            [(ngModel)]="enteredAmount"
+            [disabled]="!selectedFood"
+            placeholder="e.g. 1"
+            class="rounded-xl px-4 py-2 bg-accent_light text-text text-base font-body focus:outline-none focus:ring-2 focus:ring-primary shadow-sm transition-all duration-300 ease-in-out w-full"
+          />
+        </div>
+
+        <div class="w-1/3">
+          <label
+            for="measuresSelect"
+            class="mb-2 text-lg font-heading font-semibold text-primary"
+          >
+            Measure
+          </label>
+          <select
+            id="measuresSelect"
+            [(ngModel)]="selectedMeasure"
+            [disabled]="!selectedFood"
+            (change)="onSelected()"
+            class="rounded-xl px-4 py-2 bg-accent_light text-text text-base font-body focus:outline-none focus:ring-2 focus:ring-primary shadow-sm transition-all duration-300 ease-in-out w-full"
+          >
+            <option
+              *ngFor="let m of selectedFood?.measures || []"
+              [value]="m.name"
+              class="bg-white text-text"
+            >
+              {{ m.name }} — {{ m.weightInGrams }} g
+            </option>
+          </select>
+        </div>
+
+        <div class="w-1/3 flex justify-center">
+          <button
+            (click)="submitFoodEntry()"
+            [disabled]="!selectedFood || !enteredAmount"
+            class="px-6 py-3 rounded-xl bg-[#D4A017] text-white font-semibold hover:bg-[#FFB85F] transition disabled:opacity-50"
+          >
+            Add to Dashboard
+          </button>
+        </div>
+      </div>
+
+      <div class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6 mt-4" >
+        <div class="flex items-center justify-center">
+          <img
+            *ngIf="selectedFood.photo"
+            [src]="selectedFood.photo"
+            alt="{{ selectedFood.name }}"
+            class="w-full max-w-xs h-auto rounded-xl object-cover shadow-md"
+          />
+        </div>
+        <div>
+          <h3 class="text-2xl font-heading font-semibold text-primary mb-3">
+            Nutritional Details
+          </h3>
+          <ul class="list-disc list-inside space-y-2 text-base font-body text-text">
+            <li *ngFor="let n of selectedFood.foodNutrients">
+                  <span class="font-semibold text-[#D4A017]">
+                    {{ getNutrientLabel(n.nutrientId)[0] }}
+                  </span>
+              :
+              <strong>
+                {{ Math.round((n.amount * enteredAmount / 100 * (selectedMeasureDto?.weightInGrams || 0)) * 100) / 100 }}
+                {{ getNutrientLabel(n.nutrientId)[1] }}
+              </strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

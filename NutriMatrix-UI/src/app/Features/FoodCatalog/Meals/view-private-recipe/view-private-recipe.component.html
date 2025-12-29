@@ -1,0 +1,127 @@
+<div class="mt-20 max-w-5xl mx-auto" *ngIf="meal; else loading">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] tracking-tight">
+      {{ meal.name }}
+    </h1>
+    <div class="flex gap-4">
+      <button
+        (click)="onEdit(meal)"
+        class="rounded-xl px-6 py-3 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out"
+      >
+        Edit Recipe
+      </button>
+      <button
+        (click)="onDelete()"
+        class="rounded-xl px-6 py-3 bg-gradient-to-r from-[#FF6B6B] to-[#C0392B] text-white shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out"
+      >
+        Delete Recipe
+      </button>
+    </div>
+  </div>
+  <div class="flex flex-row gap-8 items-start">
+    <div class="w-full">
+      <!-- Ingredients Section -->
+      <section aria-labelledby="ingredients-heading" class="mb-10">
+        <h2
+          id="ingredients-heading"
+          class="text-2xl font-semibold mb-6 text-[#2D2D2D] font-['Playfair_Display'] leading-[1.2]"
+        >
+          Ingredients for {{meal.totalServings}} Serving
+        </h2>
+        <div class="rounded-2xl shadow-lg bg-white border border-[#D4A017]/30 p-5">
+          <ul class="list-disc list-inside" *ngIf="ingredients.length; else loadingIngredients">
+            <li
+              *ngFor="let ingredient of ingredients; let i = index"
+              class="font-['Open_Sans'] text-[#2D2D2D] mb-2 capitalize"
+            >
+              {{ ingredient.food.name }}: {{ meal.foodMeals[i].quantity }} {{ ingredient.name }}
+            </li>
+          </ul>
+          <ng-template #loadingIngredients>
+            <div class="text-gray-500 font-['Open_Sans']">Loading ingredients...</div>
+          </ng-template>
+        </div>
+      </section>
+      <!-- Nutritional Data Section -->
+      <section aria-labelledby="nutrient-per-serving-heading">
+        <h2
+          id="nutrient-per-serving-heading"
+          class="text-2xl font-semibold mb-6 text-[#2D2D2D] font-['Playfair_Display'] leading-[1.2]"
+        >
+          Nutritional Data per Serving
+        </h2>
+        <div class="columns-1 md:columns-2 gap-8">
+          <ng-container *ngFor="let category of getNutrientCategories(); let isFirst = first">
+            <table
+              class="w-full break-inside-avoid border-separate border-spacing-0 rounded-2xl shadow-lg bg-white border border-[#D4A017]/30 mb-8"
+              role="table"
+              *ngIf="filterNutrientsByCategory(category.ids).length > 0"
+            >
+              <colgroup>
+                <col style="width: 30%">
+                <col style="width: 15%">
+                <col style="width: 5%">
+                <col style="width: 40%">
+                <col style="width: 10%">
+              </colgroup>
+              <tbody>
+              <tr
+                class="bg-gradient-to-r from-[#E0F7F1] to-[#D4A017]/20 border-y border-[#D4A017]/60 shadow-sm"
+              >
+                <td
+                  colspan="5"
+                  class="p-4 text-lg font-semibold text-[#1F1F1F] font-['Playfair_Display'] rounded-t-2xl"
+                >
+                  {{ category.name }}
+                </td>
+              </tr>
+              <tr
+                *ngFor="let nutrient of filterNutrientsByCategory(category.ids); let last = last"
+                class="hover:bg-[#E0F7F1]/40 transition-colors duration-300"
+                [class.bg-[#F9FAFB]="!last"
+                [class.rounded-b-2xl]="last"
+              >
+                <td
+                  class="p-4 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]"
+                  [class.rounded-bl-2xl]="last"
+                >
+                  {{ getNutrientLabel(nutrient.nutrientId)[0] }}
+                </td>
+                <td class="p-4 pr-0 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D] text-right">
+                  {{ nutrient.amount }}
+                </td>
+                <td class="p-4 pl-2 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]">
+                  {{ getNutrientLabel(nutrient.nutrientId)[1] }}
+                </td>
+                <td class="p-4 border-b border-gray-200">
+                  <div class="h-5 w-full rounded-full bg-[#E0F7F1] w-32">
+                    <div
+                      class="h-full rounded-full bg-gradient-to-r from-[#6A9D8C] to-[#D4A017]"
+                      [ngStyle]="{ width: Math.min(nutrient.percentage, 100) + '%' }"
+                    ></div>
+                  </div>
+                </td>
+                <td
+                  class="p-4 border-b border-gray-200 font-['Open_Sans'] text-[#2D2D2D]"
+                  [class.rounded-br-2xl]="last"
+                >
+                  {{ nutrient.targetAmount != 0 ? nutrient.percentage : '—' }}%
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </ng-container>
+        </div>
+        <div
+          *ngIf="!hasNutrients()"
+          class="p-4 text-center text-gray-400 font-['Open_Sans']"
+        >
+          No nutritional data available.
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+<ng-template #loading>
+  <div class="text-gray-500 font-['Open_Sans'] text-center p-5">Loading recipe...</div>
+</ng-template>

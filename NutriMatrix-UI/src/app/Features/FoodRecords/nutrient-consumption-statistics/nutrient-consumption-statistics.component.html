@@ -1,0 +1,94 @@
+<div class="p-6 bg-gray-50 min-h-screen mt-20">
+  <h1 class="text-5xl font-['Playfair_Display'] font-semibold text-[#2D2D2D] mb-8 tracking-tight">
+    Nutrient Consumption Statistics
+  </h1>
+
+  <!-- Date Range Selector -->
+  <div class="mb-8">
+    <!-- Wrap in a formGroup container -->
+    <form [formGroup]="dateRangeForm" class="flex gap-4 items-center bg-white p-4 rounded-xl shadow-md">
+      <p-calendar
+        formControlName="startDate"
+        placeholder="Start Date"
+        [maxDate]="currentDate"
+        class="w-48"
+      ></p-calendar>
+
+      <p-calendar
+        formControlName="endDate"
+      placeholder="End Date"
+      [maxDate]="currentDate"
+      class="w-48"
+      ></p-calendar>
+
+      <button
+        type="button"
+        (click)="onApplyDateRange()"
+        class="rounded-xl px-8 py-4 bg-gradient-to-r from-[#FFD580] to-[#D4A017] text-white shadow-lg hover:shadow-xl transition-all duration-300"
+      >
+        Apply
+      </button>
+    </form>
+  </div>
+
+
+  <!-- Loading/Error State -->
+  <div *ngIf="isLoading" class="text-center text-gray-600 mb-8">
+    Loading statistics...
+  </div>
+  <div *ngIf="errorMessage" class="text-center text-red-600 mb-8">
+    {{ errorMessage }}
+  </div>
+  <!-- Visualizations -->
+  <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+    <div class="p-4 bg-white shadow-lg rounded-2xl">
+      <h2 class="text-xl font-semibold mb-4 text-[#2D2D2D]">Achievement Overview</h2>
+      <p-chart class="w-full" type="bar" [style]="{'height':'300px'}" [data]="barChartData" [options]="barChartOptions"></p-chart>
+    </div>
+    <div class="p-4 bg-white shadow-lg rounded-2xl">
+      <h2 class="text-xl font-semibold mb-4 text-[#2D2D2D]">Daily Trend</h2>
+      <!-- replace existing p-dropdown in “Daily Trend” block with: -->
+      <p-dropdown
+        [options]="dropdownOptions"
+        [(ngModel)]="selectedNutrientId"
+        optionLabel="label"
+        optionValue="value"
+        (onChange)="onNutrientSelect($event.value)"
+        class="mb-4"
+        [style]="{ width: '300px' }"
+      ></p-dropdown>
+
+      <p-chart class="w-full max-h-12" type="line" [data]="lineChartData" [options]="lineChartOptions"></p-chart>
+    </div>
+  </div>
+  <!-- Nutrient Categories -->
+  <div *ngIf="!isLoading && !errorMessage" class="columns-1 md:columns-2 gap-8 mb-12">
+    <div *ngFor="let category of categories | keyvalue" class="break-inside-avoid mb-8">
+      <div *ngIf="getStatisticsByCategory(category.value).length > 0" class="bg-white shadow-lg rounded-2xl border border-[#D4A017]/30">
+        <div class="bg-gradient-to-r from-[#E0F7F1] to-[#D4A017]/20 p-4 rounded-t-2xl">
+          <h2 class="text-lg font-semibold text-[#1F1F1F] font-['Playfair_Display']">{{ category.key }}</h2>
+        </div>
+        <table class="w-full">
+          <thead>
+          <tr>
+            <th class="p-4 text-left">Nutrient</th>
+            <th class="p-4 text-right">Avg Daily</th>
+            <th class="p-4 text-right">Target</th>
+            <th class="p-4 text-right">%</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let stat of getStatisticsByCategory(category.value)" class="hover:bg-[#E0F7F1]/40 transition-colors">
+            <td class="p-4">{{ getNutrientName(stat.nutrientId) }}</td>
+            <td class="p-4 text-right">{{ formatNumber(stat.average, 1) }} {{ getNutrientUnit(stat.nutrientId) }}</td>
+            <td class="p-4 text-right">{{ formatNumber(stat.target, 1) }} {{ getNutrientUnit(stat.nutrientId) }}</td>
+            <td class="p-4 text-right" [ngClass]="getCategoryStyle(stat.percentage)">
+              {{ formatNumber(stat.percentage, 0) }}%
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

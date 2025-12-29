@@ -1,0 +1,105 @@
+<div class="flex items-center justify-center min-h-screen" [formGroup]="registerForm">
+  <div class="relative flex flex-col space-y-10 bg-white shadow-2xl rounded-2xl md:flex-row md:space-y-0 md:space-x-8 p-8 animate-reveal">
+    <div class="flex flex-col space-y-6">
+      <h2 class="font-serif text-4xl font-semibold tracking-tight">Register</h2>
+      <p class="text-base leading-relaxed">
+        Create your account to start your journey into NutriMatrix!
+      </p>
+
+      <input
+        autocomplete="off"
+        type="text"
+        formControlName="name"
+        [ngClass]="{
+          'border-gray-300': name?.valid || name?.untouched,
+          'border-[#EF4444]': name?.invalid && !name?.untouched
+        }"
+        class="w-full p-3 border rounded-xl placeholder:font-sans placeholder:font-light focus:ring-2 focus:ring-[#6A9D8C] transition-all duration-200"
+        placeholder="Enter your name"
+      />
+      <div *ngIf="name?.touched && name?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm -mt-2">
+        <div *ngIf="name?.errors?.['required']">Name is required.</div>
+        <div *ngIf="name?.errors?.['minlength']">Name must be at least 2 characters.</div>
+      </div>
+
+      <input
+        autocomplete="off"
+        type="email"
+        formControlName="email"
+        [ngClass]="{
+          'border-gray-300': email?.valid || email?.untouched,
+          'border-[#EF4444]': email?.invalid && !email?.untouched
+        }"
+        class="w-full p-3 border rounded-xl placeholder:font-sans placeholder:font-light focus:ring-2 focus:ring-[#6A9D8C] transition-all duration-200"
+        placeholder="Enter your email address"
+      />
+      <div *ngIf="email?.touched && email?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm -mt-2">
+        <div *ngIf="email?.errors?.['required']">Email is required.</div>
+        <div *ngIf="email?.errors?.['email']">Enter a valid email address.</div>
+      </div>
+
+      <input
+        autocomplete="off"
+        type="password"
+        formControlName="password"
+        [ngClass]="{
+          'border-gray-300': password?.valid || password?.untouched,
+          'border-[#EF4444]': password?.invalid && !password?.untouched
+        }"
+        class="w-full p-3 border rounded-xl placeholder:font-sans placeholder:font-light focus:ring-2 focus:ring-[#6A9D8C] transition-all duration-200"
+        placeholder="Enter your password"
+      />
+      <div *ngIf="password?.touched && password?.invalid" class="bg-[#FFF5F5] border-l-4 border-[#EF4444] text-[#EF4444] p-4 rounded-lg shadow-sm text-sm -mt-2">
+        <div *ngIf="password?.errors?.['required']">Password is required.</div>
+        <div *ngIf="password?.errors?.['minlength']">Password must be at least 6 characters.</div>
+      </div>
+
+
+      <div class="flex flex-col items-center justify-between space-y-6 md:flex-row md:space-y-0 md:space-x-4">
+        <button
+          (click)="onSubmit()"
+          [disabled]="registerForm.invalid"
+          class="w-full md:w-auto cursor-pointer flex justify-center items-center p-4 space-x-2 font-sans font-medium text-white rounded-xl bg-[#6A9D8C] shadow-lg hover:shadow-xl hover:scale-102 transition-all duration-300 ease-in-out disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          <span>Register</span>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <line x1="13" y1="18" x2="19" y2="12"></line>
+            <line x1="13" y1="6" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div *ngIf="errorMessage" class="text-sm text-error font-medium -mt-4">
+        {{ errorMessage }}
+      </div>
+
+      <div class="border-b border-gray-300"></div>
+
+      <p class="text-sm text-center text-gray-400">or register with</p>
+
+      <div class="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
+        <button class="flex w-full items-center justify-center p-3 space-x-2 border border-[#FFA07A] text-[#FFA07A] rounded-xl hover:bg-[#E0F7F1]/30 transition-all duration-300 cursor-pointer">
+          <img src="assets/google.png" alt="Google logo" class="h-6" />
+          <span class="text-sm font-medium">Google</span>
+        </button>
+      </div>
+
+      <p class="text-sm text-center text-gray-600">
+        Already have an account?
+        <a href="/auth/login" class="text-[#6A9D8C] hover:underline">Login here!</a>
+      </p>
+    </div>
+
+    <img src="/assets/login-register-img.jpg" alt="Tracktopus with a bowl" class="w-[430px] mx-auto hidden md:block rounded-2xl" />
+
+    <a href="/" class="absolute top-4 right-4 flex items-center justify-center h-10 w-10 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-300" aria-label="Close modal">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 stroke-[#D4A017]" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </a>
+  </div>
+</div>

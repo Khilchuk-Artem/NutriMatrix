@@ -1,0 +1,110 @@
+:host ::ng-deep
+.p-autocomplete-input-multiple {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 100%;
+  padding: 0 !important;      /* remove any padding if you like */
+}
+
+
+:host ::ng-deep
+.p-autocomplete {
+  width: 100%;
+}
+
+
+:host ::ng-deep
+.p-select-label {
+  color: #2d2d2d; /* Match text color */
+}
+
+:host ::ng-deep
+.p-select-dropdown {
+  color: #D4A017; /* Accent color from form */
+}
+
+:host ::ng-deep
+.p-select-overlay {
+  background-color: #ffffff; /* White background */
+  border: 1px solid #e5e7eb; /* Light gray border */
+  border-radius: 0.75rem; /* Rounded-xl */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Subtle shadow */
+}
+
+:host ::ng-deep
+.p-select-option {
+  padding: 1rem; /* p-4 */
+  color: #2d2d2d; /* Text color */
+  transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+:host ::ng-deep
+.p-select-option-selected {
+  background-color: rgba(212, 160, 23, 0.33); /* Light green for selected item */
+  color: #2d2d2d; /* Text color */
+}
+
+:host ::ng-deep
+.p-select-option:hover {
+  background-color: #f3f4f6; /* Light gray hover, matching gray-100 */
+}
+
+:host ::ng-deep
+.p-dropdown.p-inputwrapper-focus {
+  box-shadow: 0 0 0 2px #FFD580; /* Focus ring matching focus:ring-[#FFD580] */
+  outline: none; /* Remove default outline */
+}
+
+:host ::ng-deep
+.p-dropdown.ng-invalid.ng-touched {
+  border-color: #EF4444; /* Red border when invalid */
+}
+
+:host ::ng-deep
+.p-inputtext:focus {
+  border: 1px solid #e5e7eb; /* Light gray border */
+}
+:host ::ng-deep
+.p-ripple p-select-option p-select-option-selected{
+  background-color: #D4A017;
+}
+:host ::ng-deep
+.p-select.p-focus{
+  border-color: #D4A017;
+}
+:host ::ng-deep
+.p-select-option.p-select-option-selected.p-focus{
+  background-color: rgba(212, 160, 23, 0.33); /* Light green for selected item */
+  color: #2d2d2d; /* Text color */
+}
+:host ::ng-deep
+.p-inputtext.p-focus{
+  border-color: #D4A017;
+}
+:host ::ng-deep
+p-autocomplete.p-component.p-inputwrapper.p-inputwrapper-filled.p-focus{
+  border-color: #D4A017;
+}
+:host ::ng-deep
+p-autocomplete-input.p-focus{
+  border-color: #D4A017;
+}
+:host ::ng-deep
+.p-inputtext.p-focus{
+  border-color: #D4A017;
+}
+:host::ng-deep
+.p-autocomplete-option-selected.p-focus{
+  background-color: rgba(212, 160, 23, 0.33); /* Light green for selected item */
+  color: #2d2d2d; /* Text color */
+}
+:host::ng-deep
+.p-autocomplete-option-selected{
+  background-color: rgba(212, 160, 23, 0.33); /* Light green for selected item */
+  color: #2d2d2d; /* Text color */
+}
+:host ::ng-deep
+.p-inputtext:focus{
+  border-color: #D4A017;
+}
