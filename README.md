@@ -106,7 +106,7 @@ To ensure maintainability and testability, every individual microservice follows
 ![User Management ERD](docs/images/recipes-er.png)
 </details>
 
-## Getting Started (Docker)
+## Getting Started
 
 The entire system (Databases, RabbitMQ, API Services, and Frontend) is containerized. You can launch the full environment with a single command.
 
@@ -124,7 +124,6 @@ The entire system (Databases, RabbitMQ, API Services, and Frontend) is container
 
 2.  **Set up Environment Variables:**
     ```bash
-    # Example .env configuration
     POSTGRES_PASSWORD=your_password
     RABBITMQ_USER=guest
     RABBITMQ_PASS=guest
