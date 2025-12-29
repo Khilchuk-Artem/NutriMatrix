@@ -67,7 +67,7 @@ To ensure maintainability and testability, every individual microservice follows
 <details>
 <summary><b>Click to view Context Level</b></summary>
 
-![Context](docs/images/C4-context.png)
+![Context](docs/images/C4-Context.png)
 </details>
 
 <details>
