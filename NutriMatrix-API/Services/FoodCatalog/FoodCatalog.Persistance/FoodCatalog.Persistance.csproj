@@ -1,0 +1,64 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Ardalis.Specification" Version="9.0.1" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.0.1" />
+		<PackageReference Include="CsvHelper" Version="33.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.4" />
+		<PackageReference Include="Redis.OM" Version="0.8.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+		
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\FoodCatalog.Domain\FoodCatalog.Domain.csproj" />
+	</ItemGroup>
+		  
+	<ItemGroup><Folder Include="Redis\" />
+	<Folder Include="Specifications\Measures\" />
+	</ItemGroup>
+
+	
+	  <ItemGroup>
+    <None Remove="Data\SeedData\nutrients-mapping.csv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\nutrients-mapping.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+	  <Content Include="Assets\foods.csv">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\measures.csv">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\nutrients.csv">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+  </ItemGroup>	<ItemGroup>
+		<None Remove="Data\SeedData\nutrients-mapping.csv" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Assets\nutrients-mapping.csv">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\foods.csv">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\measures.csv">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="Assets\nutrients.csv">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup></Project>

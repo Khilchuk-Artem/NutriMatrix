@@ -1,26 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using RecommendationService.Api.Models.Dto;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using RecommendationService.Api.Services.RecommendationService;
+using RecommendationService.Application.Features.Recommendations.Queries;
+using RecommendationService.Application.Models.Dto;
 
 namespace RecommendationService.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class RecommendationController: ControllerBase
+    public class RecommendationController : ControllerBase
     {
-        private readonly IRecipeRecommendationService _recipeRecommendationService;
+        private readonly IMediator _mediator;
 
-        public RecommendationController(IRecipeRecommendationService recipeRecommendationService)
+        public RecommendationController(IMediator mediator)
         {
-            _recipeRecommendationService = recipeRecommendationService;
+            _mediator = mediator;
         }
 
         [HttpPost("get-recommendation")]
         public async Task<IActionResult> Recommendation(RecommendationRequestDto dto)
         {
-            var data = await _recipeRecommendationService.GetRecommendationAsync(dto);
-
-            return Ok(data);
+            var query = new GetRecommendationQuery { Dto = dto };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
     }
 }

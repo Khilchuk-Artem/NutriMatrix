@@ -2,12 +2,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Qdrant.Client;
-using RecommendationService.Api.Data;
-using RecommendationService.Api.Models.Dto;
-using RecommendationService.Api.Models.Redis;
-using RecommendationService.Api.Services.NutrientsAnalysisService;
-using RecommendationService.Api.Services.Qdrant;
 using RecommendationService.Api.Services.RecommendationService;
+using RecommendationService.Application.Features.Recipes.Queries;
+using RecommendationService.Domain.Contracts;
+using RecommendationService.Persistance.Context;
+using RecommendationService.Persistance.Context.Interceptors;
+using RecommendationService.Persistance.Data.Repository;
+using RecommendationService.Persistance.Helpers;
+using RecommendationService.Persistance.Qdrant;
+using RecommendationService.Persistance.Redis.DependencyInjection;
+using RecommendationService.Persistance.Redis.Entities;
+using RecommendationService.Persistance.Redis.Services;
 using Redis.OM;
 
 namespace RecommendationService.Api
@@ -27,12 +32,11 @@ namespace RecommendationService.Api
 
             builder.Services.AddSingleton<RedisConnectionProvider>(new RedisConnectionProvider(builder.Configuration.GetConnectionString("Redis")));
             builder.Services.AddRedisEntityCollection<RecipeShortcutRedis>();
-            builder.Services.AddRedisEntityCollection<CategoryAverageNutrientsRedis>();
 
-            builder.Services.AddScoped<INutrientsAnalysisService, NutrientsAnalysisService>();
             builder.Services.AddScoped<IRecipeRecommendationService, RecipeRecommendationService>();
             builder.Services.AddScoped<IQdrantService, QdrantService>();
             builder.Services.AddScoped<RecipeRedisSyncInterceptor>();
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
             if (builder.Environment.IsProduction())
             {
@@ -45,11 +49,11 @@ namespace RecommendationService.Api
                     });
                 }
             }
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetRecipeShortcutsQuery).Assembly));
 
             builder.Services.AddDbContext<RecipeDbContext>((sp, options) =>
             {
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("RecommendationService.Persistance"));
                 options.AddInterceptors(sp.GetRequiredService<RecipeRedisSyncInterceptor>());
             });
 
@@ -83,21 +87,6 @@ namespace RecommendationService.Api
                     var (recipes, recipeMeasures, nutrientAmounts) = Seeding.GetRecipes();
 
                     var non161Nutrients = recipes.Where(r => nutrientAmounts.Where(na => na.RecipeId == r.Id).Count() != 161).ToList();
-                    if (non161Nutrients.Count > 0)
-                    {
-                        var hmmmm = 1;
-                    }
-
-                    /*Parallel.ForEach(recipes, new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount }, recipe =>
-                    {
-                        recipe.Measures = recipeMeasures
-                            .Where(m => m.RecipeId == recipe.Id)
-                            .ToList();
-
-                        recipe.NutrientsPerTotalServings = nutrientAmounts
-                            .Where(n => n.RecipeId == recipe.Id)
-                            .ToList();
-                    });*/
 
 
                     foreach (var recipeChunk in recipes.Chunk(100))

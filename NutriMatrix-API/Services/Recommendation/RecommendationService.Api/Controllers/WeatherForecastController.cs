@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RecommendationService.Api.Data;
-using RecommendationService.Api.Models.Dto;
-using RecommendationService.Api.Models.Redis;
 using RecommendationService.Api.Services.RecommendationService;
 using Redis.OM.Searching;
 using System.Runtime.InteropServices;
 using Redis.OM;
 using Redis.OM.Contracts;
-using RecommendationService.Api.Services.Qdrant;
+using RecommendationService.Persistance.Redis.Entities;
+using RecommendationService.Persistance.Qdrant;
+using RecommendationService.Persistance.Context;
+using RecommendationService.Application.Models.Dto;
 
 namespace RecommendationService.Api.Controllers
 {
@@ -94,17 +94,6 @@ namespace RecommendationService.Api.Controllers
 
 
             return Ok(res);
-        }
-
-        [HttpPost("Checking")]
-        public async Task<IActionResult> Checking()
-        {
-            var nutrition = RecipeParser.ParseRecipes(
-                Path.Combine(AppContext.BaseDirectory, "Assets", "recipe_nutrition_data.csv"),
-                Path.Combine(AppContext.BaseDirectory, "Assets", "my_recipes.csv"));
-
-
-            return Ok(nutrition);
         }
     }
 }

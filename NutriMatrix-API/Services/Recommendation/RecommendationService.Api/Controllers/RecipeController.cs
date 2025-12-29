@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using RecommendationService.Api.Data;
-using RecommendationService.Api.Models;
-using RecommendationService.Api.Models.Redis;
+using RecommendationService.Application.Features.Recipes.Commands;
+using RecommendationService.Application.Features.Recipes.Queries;
+using RecommendationService.Application.Models.Dto;
 using Redis.OM.Searching;
 
 namespace RecommendationService.Api.Controllers
@@ -11,28 +12,19 @@ namespace RecommendationService.Api.Controllers
     [Route("api/[controller]")]
     public class RecipeController : ControllerBase
     {
-        private readonly RecipeDbContext _dbContext;
+        private readonly IMediator _mediator;
 
-        public RecipeController(RecipeDbContext dbContext)
+        public RecipeController(IMediator mediator)
         {
-            _dbContext = dbContext;
+            _mediator = mediator;
         }
 
         [HttpGet("shortcuts/{id:long}")]
-        public async Task<IActionResult> GetShortcut(long id, [FromQuery] string? nutrientIds = null)
+        public async Task<IActionResult> GetShortcut(long id, [FromQuery] string? nutrientIds)
         {
-            long[]? nutrientIdsArray = ParseNutrientIds(nutrientIds);
-
-            var recipe = await _dbContext.Recipes
-                .Include(r => r.NutrientsPerTotalServings)
-                .Include(r => r.Measures)
-                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
-
-            if (recipe == null)
-                return NotFound();
-
-            var dto = ProjectToDto(recipe, nutrientIdsArray);
-            return Ok(dto);
+            var query = new GetRecipeShortcutByIdQuery { Id = id, NutrientIds = nutrientIds };
+            var result = await _mediator.Send(query);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpGet("shortcuts")]
@@ -45,305 +37,72 @@ namespace RecommendationService.Api.Controllers
             int page = 1,
             int pageSize = 10)
         {
-            long[]? include = ParseNutrientIds(includeIngredients);
-            long[]? exclude = ParseNutrientIds(excludeIngredients);
-            long[]? nutrientIdsArray = ParseNutrientIds(nutrientIds);
-
-            var queryable = _dbContext.Recipes
-                .Include(r => r.NutrientsPerTotalServings)
-                .Include(r => r.Measures)
-                .Where(r=>r.Measures.Count!=0)
-                .Where(r => !r.IsDeleted)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(category))
-                queryable = queryable.Where(r => r.Category == category);
-
-            if (!string.IsNullOrWhiteSpace(query))
-                queryable = queryable.Where(r => r.Title.Contains(query));
-
-            if (include is { Length: > 0 })
+            var request = new GetRecipeShortcutsQuery
             {
-                queryable = queryable.Where(r =>
-                    include.All(ingId => r.Measures.Any(m => m.FoodId == ingId)));
-            }
-
-
-            if (exclude is { Length: > 0 })
-                queryable = queryable.Where(r => r.Measures.All(m => !exclude.Contains(m.FoodId)));
-
-            var results = await queryable
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            var dtos = results.Select(r => ProjectToDto(r, nutrientIdsArray)).ToList();
-
-            return Ok(dtos);
+                Category = category,
+                Query = query,
+                NutrientIds = nutrientIds,
+                IncludeIngredients = includeIngredients,
+                ExcludeIngredients = excludeIngredients,
+                Page = page,
+                PageSize = pageSize
+            };
+            var result = await _mediator.Send(request);
+            return Ok(result);
         }
+
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] CreateRecipeDto dto)
         {
-            var recipe = new Recipe
-            {
-                Title = dto.Title,
-                Category = dto.Category,
-                Description = dto.Description,
-                Directions = dto.Directions,
-                PhotoUrl = dto.PhotoUrl,
-                Servings = dto.Servings,
-                IsDeleted = false,
-                Measures = dto.Measures.Select(m => new RecipeMeasure
-                {
-                    MeasureId = m.MeasureId,
-                    FoodId = m.FoodId,
-                    Amount = m.Amount
-                }).ToList(),
-                NutrientsPerTotalServings = dto.Nutrients.Select(n => new NutrientAmount
-                {
-                    NutrientId = n.NutrientId,
-                    Amount = n.Amount
-                }).ToList()
-            };
-
-            _dbContext.Recipes.Add(recipe);
-            await _dbContext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetShortcut), new { id = recipe.Id }, new { recipe.Id });
+            var command = new CreateRecipeCommand { Dto = dto };
+            var id = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetShortcut), new { id }, new { id });
         }
+
         [HttpDelete("{id:long}")]
         public async Task<IActionResult> DeleteRecipe(long id)
         {
-            var recipe = await _dbContext.Recipes.FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
-            if (recipe == null)
-                return NotFound();
-
-            recipe.IsDeleted = true;
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
-        }
-
-        /// <summary>
-        /// Parses a comma-separated string of nutrient IDs into a long array.
-        /// Returns null if the input is null or empty.
-        /// Invalid entries are ignored.
-        /// </summary>
-        private static long[]? ParseNutrientIds(string? nutrientIds)
-        {
-            if (string.IsNullOrWhiteSpace(nutrientIds))
-                return null;
-
-            var parts = nutrientIds.Split(',', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries);
-            var list = new List<long>();
-
-            foreach (var part in parts)
+            try
             {
-                if (long.TryParse(part, out var val))
-                    list.Add(val);
+                var command = new DeleteRecipeCommand { Id = id };
+                await _mediator.Send(command);
+                return NoContent();
             }
-
-            return list.Count > 0 ? list.ToArray() : null;
+            catch (Exception ex) when (ex.Message.Contains("not found"))
+            {
+                return NotFound();
+            }
         }
+
         [HttpPut("{id:long}")]
         public async Task<IActionResult> UpdateRecipe(long id, [FromBody] UpdateRecipeDto dto)
         {
-            var recipe = await _dbContext.Recipes
-                .Include(r => r.Measures)
-                .Include(r => r.NutrientsPerTotalServings)
-                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
-
-            if (recipe == null)
-                return NotFound();
-
-            recipe.Title = dto.Title;
-            recipe.Category = dto.Category;
-            recipe.Description = dto.Description;
-            recipe.Directions = dto.Directions;
-            recipe.PhotoUrl = dto.PhotoUrl;
-            recipe.Servings = dto.Servings;
-
-            _dbContext.RecipeMeasure.RemoveRange(recipe.Measures);
-            recipe.Measures = dto.Measures.Select(m => new RecipeMeasure
+            try
             {
-                MeasureId = m.MeasureId,
-                FoodId = m.FoodId,
-                Amount = m.Amount,
-                RecipeId = recipe.Id
-            }).ToList();
-
-            _dbContext.NutrientAmounts.RemoveRange(recipe.NutrientsPerTotalServings);
-            recipe.NutrientsPerTotalServings = dto.Nutrients.Select(n => new NutrientAmount
-            {
-                NutrientId = n.NutrientId,
-                Amount = n.Amount,
-                RecipeId = recipe.Id
-            }).ToList();
-
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
-        }
-        // GET: api/Recipe/5
-        // GET: api/Recipe/5
-        [HttpGet("{id:long}")]
-        public async Task<IActionResult> GetRecipe(
-            long id,
-            [FromQuery] string? nutrientIds = null           // ← new optional param
-        )
-        {
-            // 1. parse
-            long[]? nutrientIdsArray = ParseNutrientIds(nutrientIds);
-
-            // 2. load
-            var recipe = await _dbContext.Recipes
-                .Include(r => r.Measures)
-                .Include(r => r.NutrientsPerTotalServings)
-                .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
-
-            if (recipe == null) return NotFound();
-
-            // 3. map
-            var dto = new FullRecipeDto
-            {
-                Id = recipe.Id,
-                Title = recipe.Title,
-                Category = recipe.Category,
-                Servings = recipe.Servings ?? 0,
-                Description = recipe.Description,
-                Directions = recipe.Directions,
-                PhotoUrl = recipe.PhotoUrl,
-                Ingredients = recipe.Measures
-                    .Select(m => new IngredientMeasureDto
-                    {
-                        FoodId = m.FoodId,
-                        MeasureId = m.MeasureId,
-                        Amount = m.Amount
-                    }).ToList(),
-
-                // apply filter if any
-                Nutrients = (nutrientIdsArray?.Length > 0
-                    ? recipe.NutrientsPerTotalServings
-                        .Where(n => nutrientIdsArray.Contains(n.NutrientId))
-                    : recipe.NutrientsPerTotalServings
-                  )
-                  .Select(n => new NutrientAmountDto
-                  {
-                      NutrientId = n.NutrientId,
-                      Amount = n.Amount
-                  }).ToList()
-            };
-
-            return Ok(dto);
-        }
-
-        // add this DTO class below in the controller (or in a shared Models namespace)
-        public class FullRecipeDto
-        {
-            public long Id { get; set; }
-            public string Title { get; set; }
-            public string Category { get; set; }
-            public float Servings { get; set; }
-            public string Description { get; set; }
-            public string Directions { get; set; }
-            public string PhotoUrl { get; set; }
-            public List<IngredientMeasureDto> Ingredients { get; set; }
-            public List<NutrientAmountDto> Nutrients { get; set; }
-        }
-
-        private static RecipeShortcutDto ProjectToDto(Recipe r, long[]? nutrientIds)
-        {
-            var filteredNutrients = nutrientIds?.Length > 0
-                ? r.NutrientsPerTotalServings
-                    .Where(n => nutrientIds.Contains(n.NutrientId))
-                    .Select(n => new NutrientAmountDto { NutrientId = n.NutrientId, Amount = n.Amount })
-                    .ToList()
-                : r.NutrientsPerTotalServings
-                    .Select(n => new NutrientAmountDto { NutrientId = n.NutrientId, Amount = n.Amount })
-                    .ToList();
-
-            var ingredients = r.Measures.Select(m => new IngredientMeasureDto
-            {
-                Amount = m.Amount,
-                FoodId = m.FoodId,
-                MeasureId = m.MeasureId,
-            }).ToList();
-
-            return new RecipeShortcutDto
-            {
-                Id = r.Id,
-                Title = r.Title,
-                RecipeId = r.Id,
-                Servings = r.Servings ?? 0,
-                Category = r.Category,
-                Ingredients = ingredients,
-                Nutrients = filteredNutrients
-            };
-        }
-        [HttpGet("categories")]
-        public async Task<IActionResult> GetCategories([FromQuery] int? minRecipeCount = null)
-        {
-            var query = _dbContext.Recipes
-                .Where(r => !r.IsDeleted)
-                .GroupBy(r => r.Category)
-                .Select(g => new { Category = g.Key, RecipeCount = g.Count() });
-
-            if (minRecipeCount.HasValue)
-            {
-                query = query.Where(c => c.RecipeCount >= minRecipeCount.Value);
+                var command = new UpdateRecipeCommand { Id = id, Dto = dto };
+                await _mediator.Send(command);
+                return NoContent();
             }
-
-            var categories = await query
-                .OrderBy(c => c.Category)
-                .Select(c => c.Category)
-                .ToListAsync();
-
-            return Ok(categories);
+            catch (Exception ex) when (ex.Message.Contains("not found"))
+            {
+                return NotFound();
+            }
         }
 
-        public class RecipeShortcutDto
+        [HttpGet("{id:long}")]
+        public async Task<IActionResult> GetRecipe(long id, [FromQuery] string? nutrientIds)
         {
-            public long Id { get; set; }
-            public string Title { get; set; }
-            public long RecipeId { get; set; }
-            public float Servings { get; set; }
-            public string Category { get; set; }
-            public List<IngredientMeasureDto> Ingredients { get; set; }
-            public List<NutrientAmountDto> Nutrients { get; set; }
+            var query = new GetFullRecipeByIdQuery { Id = id, NutrientIds = nutrientIds };
+            var result = await _mediator.Send(query);
+            return result == null ? NotFound() : Ok(result);
         }
 
-        public class IngredientMeasureDto
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetCategories([FromQuery] int? minRecipeCount)
         {
-            public float Amount { get; set; }
-            public long FoodId { get; set; }
-            public long MeasureId { get; set; }
+            var query = new GetRecipeCategoriesQuery { MinRecipeCount = minRecipeCount };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
-
-        public class NutrientAmountDto
-        {
-            public int NutrientId { get; set; }
-            public float Amount { get; set; }
-        }
-        public class UpdateRecipeDto
-        {
-            public string Title { get; set; }
-            public string Category { get; set; }
-            public float? Servings { get; set; }
-            public string Description { get; set; }
-            public string Directions { get; set; }
-            public string PhotoUrl { get; set; }
-            public List<IngredientMeasureDto> Measures { get; set; }
-            public List<NutrientAmountDto> Nutrients { get; set; }
-        }
-        public class CreateRecipeDto
-        {
-            public string Title { get; set; }
-            public string Category { get; set; }
-            public float? Servings { get; set; }
-            public string Description { get; set; }
-            public string Directions { get; set; }
-            public string PhotoUrl { get; set; }
-            public List<IngredientMeasureDto> Measures { get; set; }
-            public List<NutrientAmountDto> Nutrients { get; set; }
-        }
-
     }
 }

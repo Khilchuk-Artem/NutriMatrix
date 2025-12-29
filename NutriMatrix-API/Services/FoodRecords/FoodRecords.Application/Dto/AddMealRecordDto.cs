@@ -1,0 +1,11 @@
+﻿namespace FoodRecords.Application.Models.Dto
+{
+    public class AddMealRecordDto
+    {
+        public long MealId { get; set; }
+        public string UserId { get; set; }
+        public DateTime DateEaten { get; set; }
+        public float ServingsEaten { get; set; }
+        public IEnumerable<MealIngredientSnapshotDto> IngredientSnapshots { get; set; }
+    }
+}

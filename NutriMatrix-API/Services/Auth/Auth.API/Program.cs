@@ -1,9 +1,9 @@
-using Auth.API.Data;
-using Auth.API.Features.Queries;
-using Auth.API.Models.Settings;
-using Auth.API.Services.AuthService;
-using Auth.API.Services.EmailService;
-using Auth.API.Services.UserSummaryService;
+using Auth.Application.Features.Auth.Queries;
+using Auth.Application.Services.EmailService;
+using Auth.Application.Settings;
+using Auth.Domain.Contracts;
+using Auth.Persistance.Context;
+using Auth.Persistance.Repository.Implementations;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,7 +28,7 @@ namespace Auth.API
             var connection = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<AuthDbContext>(options =>
             {
-                options.UseNpgsql(connection);
+                options.UseNpgsql(connection, b => b.MigrationsAssembly("Auth.Persistance"));
             });
 
             builder.Services.Configure<EmailSettings>(
@@ -37,9 +37,8 @@ namespace Auth.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
-            builder.Services.AddScoped<IUserSummaryService, UserSummaryService>();
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GoogleLoginCommand).Assembly));
 
@@ -72,10 +71,9 @@ namespace Auth.API
             {
                 DatabaseHelper.CreateDatabaseIfNotExists("AuthDb");
                 var db = scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-                db.Database.Migrate();
+                //db.Database.Migrate();
             }
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();

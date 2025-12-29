@@ -10,27 +10,7 @@
     <DockerfileContext>..\..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Data\SeedData\nutrients-mapping.csv" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\nutrients-mapping.csv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-	  <Content Include="Assets\foods.csv">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="Assets\measures.csv">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="Assets\nutrients.csv">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-  </ItemGroup>
-
-  <ItemGroup>
+	<ItemGroup>
     <PackageReference Include="Ardalis.Specification" Version="9.0.1" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.0.1" />
     <PackageReference Include="CsvHelper" Version="33.0.1" />
@@ -58,10 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks.Messaging\BuildingBlocks.Messaging.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\BuildingBlocks.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data\Specifications\Measures\" />
+    <ProjectReference Include="..\FoodCatalog.Application\FoodCatalog.Application.csproj" />
   </ItemGroup>
 
 </Project>

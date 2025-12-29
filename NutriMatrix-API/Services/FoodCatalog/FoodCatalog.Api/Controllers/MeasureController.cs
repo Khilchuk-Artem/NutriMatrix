@@ -1,9 +1,5 @@
 ﻿using BuildingBlocks.Nutrionix.Refit;
-using FoodCatalog.Api.Controllers.FoodCatalog.Api.Models.Dto;
-using FoodCatalog.Api.Data.Context;
 using FoodCatalog.Api.Features.Measures.Queries;
-using FoodCatalog.Api.Models.Domain;
-using FoodCatalog.Api.Models.Redis;
 using MassTransit;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Redis.OM.Modeling;
 using Redis.OM.Searching;
 using static Google.Protobuf.Compiler.CodeGeneratorResponse.Types;
+using FoodCatalog.Application.Dto;
 
 namespace FoodCatalog.Api.Controllers
 {

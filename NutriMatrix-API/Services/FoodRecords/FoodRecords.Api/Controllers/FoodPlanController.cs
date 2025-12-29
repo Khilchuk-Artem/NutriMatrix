@@ -1,7 +1,8 @@
-﻿using FoodRecords.Api.Data;
-using FoodRecords.Api.Models.Domain;
-using FoodRecords.Api.Services.MealFetcher;
-using FoodRecords.Api.Services.TaskSchedulerService;
+﻿using FoodRecords.Application.Features.FoodPlans.Commands;
+using FoodRecords.Application.Features.FoodPlans.Queries;
+using FoodRecords.Application.Services.TaskSchedulerService;
+using FoodRecords.Domain.Entities;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,109 +12,80 @@ namespace FoodRecords.Api.Controllers
     [Route("api/[controller]")]
     public class FoodPlanController : ControllerBase
     {
-        private readonly ITaskSchedulerService _taskSchedulerService;
-        private readonly FoodRecordsDbContext _dbContext;
-        private readonly IMealFetcher _mealFetcher;
+        private readonly IMediator _mediator;
 
-        public FoodPlanController(ITaskSchedulerService taskSchedulerService, FoodRecordsDbContext dbContext, IMealFetcher mealFetcher)
+        public FoodPlanController(IMediator mediator)
         {
-            _taskSchedulerService = taskSchedulerService;
-            _dbContext = dbContext;
-            _mealFetcher = mealFetcher;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FoodPlan>>> GetFoodPlans(
             [FromQuery] string userId = null,
             [FromQuery] bool recurringFirst = true,
-            [FromQuery] string? searchByName = null)
+            [FromQuery] string searchByName = null)
         {
-            var query = _dbContext.FoodPlans
-                .Where(fp => !fp.IsDeleted);
-
-            if (!string.IsNullOrWhiteSpace(searchByName))
+            var query = new GetFoodPlansQuery
             {
-                query = query.Where(fp => fp.Name.Contains(searchByName));
-            }
-
-            if (!string.IsNullOrWhiteSpace(userId))
-            {
-                query = query.Where(fp => fp.UserId== userId);
-            }
-            if (recurringFirst)
-            {
-                query = query.OrderByDescending(fp => fp.IsRecurring);
-
-            }
-            
-            var foodPlans = await query.ToListAsync();
-            return Ok(foodPlans);
+                UserId = userId,
+                RecurringFirst = recurringFirst,
+                SearchByName = searchByName
+            };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
-
-        // GET: api/FoodPlan/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FoodPlan>> GetFoodPlan(long id)
         {
-            var foodPlan = await _dbContext.FoodPlans
-                .FirstOrDefaultAsync(fp => fp.Id == id && !fp.IsDeleted);
-
-            if (foodPlan == null)
-            {
+            var query = new GetFoodPlanByIdQuery { Id = id };
+            var result = await _mediator.Send(query);
+            if (result == null)
                 return NotFound();
-            }
-
-            return Ok(foodPlan);
+            return Ok(result);
         }
 
-        // POST: api/FoodPlan
         [HttpPost]
         public async Task<ActionResult<FoodPlan>> CreateFoodPlan(ScheduleDto dto)
         {
             if (!ModelState.IsValid || !Enum.IsDefined(typeof(ConsumableType), dto.ConsumableType))
-            {
                 return BadRequest("Invalid ConsumableType or model state");
-            }
 
-            var foodPlan = await _taskSchedulerService.CreateScheduleAsync(dto);
-            return CreatedAtAction(nameof(GetFoodPlan), new { id = foodPlan.Id }, foodPlan);
+            var command = new CreateFoodPlanCommand { Dto = dto };
+            var result = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetFoodPlan), new { id = result.Id }, result);
         }
 
-        // PUT: api/FoodPlan/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateFoodPlan(long id, ScheduleDto dto)
         {
             if (!ModelState.IsValid || !Enum.IsDefined(typeof(ConsumableType), dto.ConsumableType))
-            {
                 return BadRequest("Invalid ConsumableType or model state");
-            }
 
             if (dto.Id != id)
-            {
                 return BadRequest("ID mismatch");
-            }
 
             try
             {
-                var foodPlan = await _taskSchedulerService.UpdateScheduleAsync(dto);
-                return Ok(foodPlan);
+                var command = new UpdateFoodPlanCommand { Id = id, Dto = dto };
+                var result = await _mediator.Send(command);
+                return Ok(result);
             }
             catch (Exception ex)
             {
                 if (ex.Message.Contains("not found"))
-                {
                     return NotFound();
-                }
                 throw;
             }
         }
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFoodPlan(long id)
         {
-
             try
             {
-                await _taskSchedulerService.DeleteScheduleAsync(id);
+                var command = new DeleteFoodPlanCommand { Id = id };
+                await _mediator.Send(command);
                 return NoContent();
             }
             catch (Exception ex) when (ex.Message.Contains("not found"))

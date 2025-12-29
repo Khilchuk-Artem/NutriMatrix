@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Ardalis.Specification" Version="9.2.0" />
+		<PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.2.0" />
+		<PackageReference Include="CsvHelper" Version="33.0.1" />
+		<PackageReference Include="MediatR" Version="12.5.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+		<PackageReference Include="Qdrant.Client" Version="1.14.0" />
+		<PackageReference Include="Redis.OM" Version="1.0.0" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.31" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+	</ItemGroup>
+	
+
+	<ItemGroup>
+		<Content Include="Assets\*.csv">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	
+
+	<ItemGroup>
+	  <ProjectReference Include="..\RecommendationService.Domain\RecommendationService.Domain.csproj" />
+	</ItemGroup>
+
+</Project>

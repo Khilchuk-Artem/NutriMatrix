@@ -1,16 +1,16 @@
 using MassTransit;
 using BuildingBlocks.Messaging.Events;
 using BuildingBlocks.Messaging.Extensions;
-using FoodCatalog.Grpc;
-using FoodRecords.Api.Data;
-using FoodRecords.Api.Data.Repositories;
-using FoodRecords.Api.Services.FoodRecords;
-using FoodRecords.Api.Services.MealFetcher;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Quartz;
-using FoodRecords.Api.Services.TaskSchedulerService;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using FoodRecords.Application.Features.MealRecords.Queries;
+using FoodRecords.Domain.Contracts;
+using FoodRecords.Persistance.Repository.Implementations;
+using FoodRecords.Persistance.Data;
+using FoodRecords.Persistance.Services.MealFetcher;
 
 namespace FoodRecords.Api
 {
@@ -27,15 +27,15 @@ namespace FoodRecords.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-            builder.Services.AddScoped<IFoodRecordService, FoodRecordService>();
             builder.Services.AddDbContext<FoodRecordsDbContext>(options =>
             {
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("FoodRecords.Persistance"));
             });
 
-            //builder.Services.AddMessageBroker(builder.Configuration, Assembly.GetExecutingAssembly());
-            //builder.Services.AddMassTransitHostedService();
-            // Add this after AddQuartz
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetMealRecordByIdQuery).Assembly));
+
             builder.Services.AddSingleton(provider =>
             {
                 var factory = provider.GetRequiredService<ISchedulerFactory>();
@@ -47,7 +47,6 @@ namespace FoodRecords.Api
                 q.UseMicrosoftDependencyInjectionJobFactory();
             });
             builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-            builder.Services.AddScoped<ITaskSchedulerService, TaskSchedulerService>();
 
             builder.Services.AddMassTransit(x =>
             {
@@ -68,25 +67,9 @@ namespace FoodRecords.Api
             builder.Services.AddMassTransitHostedService();
 
             builder.Services.AddScoped<IMealFetcher, MealFetcher>();
-            /*builder.Services.AddGrpcClient<FoodService.FoodServiceClient>(options =>
-            {
-                options.Address = new Uri(builder.Configuration["GrpcSettings:FoodServiceUri"]!);
-            })
-            .ConfigurePrimaryHttpMessageHandler(() =>
-            {
-                var handler = new HttpClientHandler
-                {
-                    ServerCertificateCustomValidationCallback =
-                    HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-                };
-
-                return handler;
-            });*/
-
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
@@ -97,7 +80,7 @@ namespace FoodRecords.Api
             {
                 DatabaseHelper.CreateDatabaseIfNotExists("foodrecordsdb");
                 var db = scope.ServiceProvider.GetRequiredService<FoodRecordsDbContext>();
-                db.Database.Migrate();
+                //db.Database.Migrate();
             }
 
             app.UseCors(options =>

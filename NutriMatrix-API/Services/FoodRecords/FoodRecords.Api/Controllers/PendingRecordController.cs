@@ -1,190 +1,102 @@
-﻿using FoodRecords.Api.Data;
-using FoodRecords.Api.Models.Domain;
-using FoodRecords.Api.Services.MealFetcher;
+﻿using FoodRecords.Application.Dto;
+using FoodRecords.Application.Features.PendingRecords.Commands;
+using FoodRecords.Application.Features.PendingRecords.Queries;
+using FoodRecords.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MediatR;
 
 namespace FoodRecords.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PendingRecordController:ControllerBase
+    public class PendingRecordController : ControllerBase
     {
-        private readonly FoodRecordsDbContext _dbContext;
-        private readonly IMealFetcher _mealFetcher;
-        public PendingRecordController(FoodRecordsDbContext dbContext, IMealFetcher mealFetcher)
+        private readonly IMediator _mediator;
+
+        public PendingRecordController(IMediator mediator)
         {
-            _dbContext = dbContext;
-            _mealFetcher = mealFetcher;
+            _mediator = mediator;
         }
 
-        // GET: api/Planning
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PendingRecord>>> GetPendingAdditions(
             [FromQuery] string userId,
             [FromQuery] DateTime? startDate,
             [FromQuery] DateTime? endDate)
         {
-            var query = _dbContext.PendingRecords
-                .Where(pa => pa.UserId == userId && !pa.IsDeleted);
-
-            if (startDate.HasValue)
-            {
-                query = query.Where(pa => pa.DatePending >= startDate.Value);
-            }
-
-            if (endDate.HasValue)
-            {
-                query = query.Where(pa => pa.DatePending <= endDate.Value);
-            }
-
-            var pendingAdditions = await query.ToListAsync();
-            return Ok(pendingAdditions);
+            var query = new GetPendingRecordsQuery { UserId = userId, StartDate = startDate, EndDate = endDate };
+            var result = await _mediator.Send(query);
+            return Ok(result);
         }
 
-
-        // GET: api/Planning/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PendingRecord>> GetPendingAddition(long id)
         {
-            var pendingAddition = await _dbContext.PendingRecords
-                .FirstOrDefaultAsync(pa => pa.Id == id && !pa.IsDeleted);
-
-            if (pendingAddition == null)
-            {
+            var query = new GetPendingRecordByIdQuery { Id = id };
+            var result = await _mediator.Send(query);
+            if (result == null)
                 return NotFound();
-            }
-
-            return Ok(pendingAddition);
+            return Ok(result);
         }
 
-        // POST: api/Planning
         [HttpPost]
         public async Task<ActionResult<PendingRecord>> CreatePendingAddition(PendingAdditionDto dto)
         {
             if (!ModelState.IsValid || !Enum.IsDefined(typeof(ConsumableType), dto.ConsumableType))
-            {
                 return BadRequest("Invalid ConsumableType or model state");
-            }
 
-            var pendingAddition = new PendingRecord
-            {
-                ConsumableType = dto.ConsumableType,
-                Amount = dto.Amount,
-                UserId = dto.UserId,
-                ConsumableId = dto.ConsumableId,
-                DatePending = dto.DatePending,
-                IsDeleted = false
-            };
-
-            _dbContext.PendingRecords.Add(pendingAddition);
-            await _dbContext.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetPendingAddition), new { id = pendingAddition.Id }, pendingAddition);
+            var command = new CreatePendingRecordCommand { Dto = dto };
+            var result = await _mediator.Send(command);
+            return CreatedAtAction(nameof(GetPendingAddition), new { id = result.Id }, result);
         }
 
-        // PUT: api/Planning/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePendingAddition(long id, PendingAdditionDto dto)
         {
             if (!ModelState.IsValid || !Enum.IsDefined(typeof(ConsumableType), dto.ConsumableType))
-            {
                 return BadRequest("Invalid ConsumableType or model state");
+
+            try
+            {
+                var command = new UpdatePendingRecordCommand { Id = id, Dto = dto };
+                await _mediator.Send(command);
+                return NoContent();
             }
-
-            var pendingAddition = await _dbContext.PendingRecords
-                .FirstOrDefaultAsync(pa => pa.Id == id && !pa.IsDeleted);
-
-            if (pendingAddition == null)
+            catch (Exception ex) when (ex.Message.Contains("not found"))
             {
                 return NotFound();
             }
-
-            pendingAddition.ConsumableType = dto.ConsumableType;
-            pendingAddition.Amount = dto.Amount;
-            pendingAddition.UserId = dto.UserId;
-            pendingAddition.DatePending = dto.DatePending;
-            pendingAddition.ConsumableId = dto.ConsumableId;
-
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
         }
 
-        // DELETE: api/Planning/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePendingAddition(long id)
         {
-            var pendingAddition = await _dbContext.PendingRecords
-                .FirstOrDefaultAsync(pa => pa.Id == id && !pa.IsDeleted);
-
-            if (pendingAddition == null)
+            try
+            {
+                var command = new DeletePendingRecordCommand { Id = id };
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (Exception ex) when (ex.Message.Contains("not found"))
             {
                 return NotFound();
             }
-
-            pendingAddition.IsDeleted = true;
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
         }
-        // DELETE: api/Planning/5
+
         [HttpPut("{id}/confirm")]
         public async Task<IActionResult> ConfirmAddition(long id)
         {
-            var pendingAddition = await _dbContext.PendingRecords
-                .FirstOrDefaultAsync(pa => pa.Id == id && !pa.IsDeleted);
-
-            if (pendingAddition == null)
+            try
+            {
+                var command = new ConfirmPendingRecordCommand { Id = id };
+                await _mediator.Send(command);
+                return NoContent();
+            }
+            catch (Exception ex) when (ex.Message.Contains("not found"))
             {
                 return NotFound();
             }
-
-            pendingAddition.IsDeleted = true;
-
-            if (pendingAddition.ConsumableType == ConsumableType.Food)
-            {
-                var foodRecord = new FoodRecord()
-                {
-                    DateEaten = pendingAddition.DatePending,
-                    UserId = pendingAddition.UserId,
-                    FoodMeasureId = pendingAddition.ConsumableId,
-                    Amount = pendingAddition.Amount
-                };
-
-                _dbContext.FoodRecords.Add(foodRecord);
-            }
-            else
-            {
-                var dto = await _mealFetcher.FetchMealAsync(pendingAddition.ConsumableId);
-
-                var mealRecord = new MealRecord
-                {
-                    MealId = dto.Id,
-                    DateEaten = pendingAddition.DatePending,
-                    UserId = pendingAddition.UserId,
-                    ServingsEaten = pendingAddition.Amount,
-                    IsDeleted = false,
-                    IngredientSnapshots = dto.FoodMeals
-                    .Select(fm => new MealIngredientSnapshot
-                    {
-                        FoodMeasureId = fm.MeasureId,
-                        Amount = fm.Quantity*pendingAddition.Amount/dto.TotalServings
-                    })
-                    .ToList()
-                };
-
-                _dbContext.MealRecords.Add(mealRecord);
-            }
-
-            await _dbContext.SaveChangesAsync();
-            return NoContent();
         }
-    }
-    public class PendingAdditionDto
-    {
-        public ConsumableType ConsumableType { get; set; }
-        public float Amount { get; set; }
-        public string UserId { get; set; }
-        public long ConsumableId { get; set; }
-        public DateTime DatePending { get; set; }
     }
 }

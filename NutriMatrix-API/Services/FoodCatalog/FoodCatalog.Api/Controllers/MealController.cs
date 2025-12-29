@@ -1,8 +1,6 @@
-﻿using FoodCatalog.Api.Data.Context;
-using FoodCatalog.Api.Features.Meals.Commands;
+﻿using FoodCatalog.Api.Features.Meals.Commands;
 using FoodCatalog.Api.Features.Meals.Queries;
-using FoodCatalog.Api.Models.Domain;
-using FoodCatalog.Api.Models.Dto;
+using FoodCatalog.Application.Dto;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

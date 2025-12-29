@@ -1,7 +1,7 @@
-﻿using Auth.API.Models.DTO;
-using Auth.API.Services.AuthService;
-using Auth.API.Services.EmailService;
-using Microsoft.AspNetCore.Identity;
+﻿using Auth.Application.DTO;
+using Auth.Application.Features.Auth.Commands;
+using Auth.Application.Features.Auth.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.API.Controllers
@@ -10,18 +10,20 @@ namespace Auth.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : Controller
     {
-        private readonly IAuthService _authService;
-        public AuthController(IAuthService authService)
+        private readonly IMediator _mediator;
+
+        public AuthController(IMediator mediator)
         {
-            _authService = authService;
+            _mediator = mediator;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterUserDTO dto)
         {
-            var result = await _authService.Register(dto);
+            var command = new RegisterCommand { RegisterUserDTO = dto };
+            var result = await _mediator.Send(command);
 
-            if (result == null) return BadRequest(new { Message = "Couldn't register user" });
+            if (!result.Succeeded) return BadRequest(new { Message = "Couldn't register user", Errors = result.Errors });
 
             return Ok(new { Message = "User successfully created" });
         }
@@ -29,7 +31,8 @@ namespace Auth.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginUserDTO dto)
         {
-            var result = await _authService.Login(dto);
+            var query = new LoginQuery { LoginUserDTO = dto };
+            var result = await _mediator.Send(query);
 
             if (result == null) return BadRequest("Couldn't login user");
 
@@ -39,9 +42,10 @@ namespace Auth.API.Controllers
         [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(RequestConfirmEmailDTO dto)
         {
-            var result = await _authService.ConfirmEmail(dto);
+            var command = new ConfirmEmailCommand { RequestConfirmEmailDTO = dto };
+            var result = await _mediator.Send(command);
 
-            if (!result) return BadRequest("Couldn't confirm email"); 
+            if (!result) return BadRequest("Couldn't confirm email");
 
             return Ok("Email confirmed successfully");
         }
@@ -49,7 +53,8 @@ namespace Auth.API.Controllers
         [HttpPost("request-reset-password")]
         public async Task<IActionResult> RequestResetPassword(string email)
         {
-            var result = await _authService.RequestPasswordReset(email);
+            var command = new RequestPasswordResetCommand { Email = email };
+            var result = await _mediator.Send(command);
 
             if (!result) return BadRequest("Couldn't send password reset request");
 
@@ -59,9 +64,10 @@ namespace Auth.API.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordDTO dto)
         {
-            var result = await _authService.ResetPassword(dto);
+            var command = new ResetPasswordCommand { ResetPasswordDTO = dto };
+            var result = await _mediator.Send(command);
 
-            if (!result) return BadRequest("Couldn't reset password"); 
+            if (!result) return BadRequest("Couldn't reset password");
 
             return Ok("Password reset successfully");
         }
@@ -69,7 +75,8 @@ namespace Auth.API.Controllers
         [HttpPost("login/google")]
         public async Task<IActionResult> LoginViaGoogle(string idToken)
         {
-            var result = await _authService.GoogleLogin(idToken);
+            var command = new GoogleLoginCommand { IdToken = idToken };
+            var result = await _mediator.Send(command);
 
             if (result == null) return BadRequest("Oops, something went wrong");
 

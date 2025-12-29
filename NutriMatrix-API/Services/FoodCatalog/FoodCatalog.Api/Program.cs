@@ -1,21 +1,21 @@
-
 using BuildingBlocks.Nutrionix.Refit;
 using BuildingBlocks.Nutrionix.DI;
 using Microsoft.EntityFrameworkCore;
 using Redis.OM.Contracts;
 using Redis.OM;
-using FoodCatalog.Api.Models.Redis;
-using FoodCatalog.Api.Data.Interceptors;
-using FoodCatalog.Api.Data.Context;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using FoodCatalog.Api.Data.SeedData;
 using System.Text.Json.Serialization;
-using FoodCatalog.Api.Models.Domain;
 using BuildingBlocks.Messaging.Extensions;
-using FoodCatalog.Api.Integration;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
-using FoodCatalog.Api.Data.Repositories.Repository;
+using FoodCatalog.Persistance.Interceptors;
+using FoodCatalog.Domain.Contracts;
+using FoodCatalog.Persistance.Context;
+using FoodCatalog.Persistance.Repository.Implementations;
+using FoodCatalog.Persistance.Helpers;
+using FoodCatalog.Persistance.Redis;
+using FoodCatalog.Application.Integration;
+using FoodCatalog.Api.Features.Foods.Queries;
 
 namespace FoodCatalog.Api
 {
@@ -46,13 +46,13 @@ namespace FoodCatalog.Api
 
             builder.Services.AddDbContext<FoodCatalogDbContext>((sp, options) =>
             {
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), b => b.MigrationsAssembly("FoodCatalog.Persistance"));
                 options.AddInterceptors(sp.GetRequiredService<FoodRedisSyncInterceptor>());
                 options.ConfigureWarnings(w =>
                     w.Ignore(RelationalEventId.PendingModelChangesWarning));
             });
 
-            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+            builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(GetFoodByIdQuery).Assembly));
 
             builder.Services.AddMassTransit(x =>
             {
@@ -81,7 +81,7 @@ namespace FoodCatalog.Api
 
                 var db = scope.ServiceProvider.GetRequiredService<FoodCatalogDbContext>();
 
-                db.Database.Migrate();
+                //db.Database.Migrate();
 
                 if (!db.Foods.Any())
                 {
