@@ -139,10 +139,11 @@ The entire system (Databases, RabbitMQ, API Services, and Frontend) is container
     | Service | URL | Description |
     | :--- | :--- | :--- |
     | **Frontend UI** | `http://localhost:4200` | Angular Application |
-    | **Auth API** | `http://localhost:5000` | Identity Service |
-    | **Catalog API** | `http://localhost:5001` | Food Search & Barcode |
-    | **Diary API** | `http://localhost:5002` | Food Records & History |
-    | **Planner API** | `http://localhost:5003` | Recommendation Engine |
+    | **API Gateway** | `http://localhost:5004` | Main Entry Point (YARP) |
+    | **Auth API** | `http://localhost:5000` | Identity Service (direct access) |
+    | **Catalog API** | `http://localhost:5001` | Food Search & Barcode (direct access) |
+    | **Diary API** | `http://localhost:5002` | Food Records & History (direct access) |
+    | **Planner API** | `http://localhost:5003` | Recommendation Engine (direct access) |
     | **RabbitMQ** | `http://localhost:15672` | Management Dashboard (u: guest/guest) |
     | **Qdrant** | `http://localhost:6333` | Vector DB Dashboard |
     | **Redis UI** | `http://localhost:8001` | Redis Insight/Stack |
